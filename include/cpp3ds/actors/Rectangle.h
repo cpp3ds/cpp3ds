@@ -1,7 +1,7 @@
 #ifndef RECTANGLE_ACTOR_H
 #define RECTANGLE_ACTOR_H
 
-#include <<cpp3ds/actors/Actor.h>
+#include <cpp3ds/actors/Actor.h>
 #include <cpp3ds/Color.h>
 #include <cpp3ds/Screen.h>
 
