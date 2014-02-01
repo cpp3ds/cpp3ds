@@ -30,10 +30,12 @@ namespace cpp3ds {
 
 			int width = screen.getWidth();
 
-			for (i = 0; i <strlen(text); i++){
-				if (tmp_x+8 > width) {
+			for (i = 0; i < strlen(text); i++){
+				if (tmp_x+8 > width || text[i] == '\n') {
 					line++;
 					tmp_x = this->x + x;
+					if (text[i] == '\n')
+						continue;
 				}
 				drawChar(screen, text[i], tmp_x, this->y+y+(line*8));
 				tmp_x = tmp_x+8;
