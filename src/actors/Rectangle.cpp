@@ -5,7 +5,7 @@
 namespace cpp3ds {
 	namespace Actors {
 
-		void Rectangle::draw(Screen& screen, int x, int y) {
+		void Rectangle::draw(Screen& screen, float x, float y) {
 			//
 		}
 

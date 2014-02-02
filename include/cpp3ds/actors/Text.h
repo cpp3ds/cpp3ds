@@ -14,9 +14,9 @@ namespace cpp3ds {
 		public:
 			char* text;
 			Color color;
-			Text(char* text, Color color, int x = 0, int y = 0, int depth3d = 0):
+			Text(char* text, Color color, float x = 0, float y = 0, float depth3d = 0):
 			        text(text), color(color), Actor(x, y, depth3d) {}
-			virtual void draw(Screen& screen, int x = 0, int y = 0);
+			virtual void draw(Screen& screen, float x = 0, float y = 0);
 		};
 
 	}

@@ -20,7 +20,7 @@ namespace cpp3ds {
 		void setPixelAddress(int addr, Color color);
 		void setPixel(int x, int y, Color color);
 		void clear(Color color);
-		void draw(Drawable& obj, int x = 0, int y = 0);
+		void draw(Drawable& obj, float x = 0, float y = 0);
 	};
 }
 

@@ -23,7 +23,7 @@ namespace cpp3ds {
 			right_screen(TOP_RIGHT_FRAME1, TOP_RIGHT_FRAME2, TOP_WIDTH, TOP_HEIGHT)
 			{};
 		void clear(Color color);
-		void draw(Drawable& obj, int x = 0, int y = 0);
+		void draw(Drawable& obj, float x = 0, float y = 0);
 	};
 }
 

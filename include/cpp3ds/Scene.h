@@ -14,7 +14,7 @@ namespace cpp3ds {
 		BottomScreen bottomScreen;
 		TopScreen topScreen;
 		Input input;
-		virtual int render(int deltaTime) = 0;
+		virtual int render(float deltaTime) = 0;
 		int run();
 	};
 

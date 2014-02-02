@@ -7,7 +7,7 @@ CPP3DS = ../..
 
 INCLUDES = -I$(CPP3DS)/include
 CXXFLAGS = -g -Wall -pedantic $(INCLUDES) -std=c++11 -march=armv5te -fno-rtti -fno-exceptions
-LDFLAGS = -T ../cpp3ds.ld -L/usr/arm-none-eabi/lib -L$(CPP3DS)/lib -lcpp3ds -lc -lcpp3ds
+LDFLAGS = -T ../cpp3ds.ld -L/usr/arm-none-eabi/lib -L$(CPP3DS)/lib -lcpp3ds -lc -lgcc -lcpp3ds
 
 SOURCES = $(wildcard src/*.cpp)
 OBJECTS = $(SOURCES:src/%.cpp=build/%.o)

@@ -16,10 +16,10 @@ namespace cpp3ds {
 
 		class Actor: public Drawable {
 		protected:
-			int x, y;
+			float x, y;
 			StageNode *stageHead, *stageTail;
 		public:
-			Actor(int x = 0, int y = 0, int depth3d = 0);
+			Actor(float x = 0, float y = 0, float depth3d = 0);
 			void addStage(Stage& stage);
 			void detach();
 			~Actor();

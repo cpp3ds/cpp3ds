@@ -6,10 +6,10 @@ namespace cpp3ds {
 	
 	int Scene::run(){
 		int ret = 0;
-		uint64_t deltaTime;
+		float deltaTime;
 		lastTime = GetSystemTick();
 		while (ret == 0) {
-			deltaTime = GetSystemTick() - lastTime;
+			deltaTime = (GetSystemTick() - lastTime) / TICKS_PER_SEC;
 			lastTime = GetSystemTick();
 			ret = render(deltaTime);
 		}

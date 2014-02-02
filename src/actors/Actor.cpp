@@ -5,7 +5,7 @@
 namespace cpp3ds {
 	namespace Actors {
 
-		Actor::Actor(int x, int y, int depth3d) {
+		Actor::Actor(float x, float y, float depth3d) {
 			stageHead = NULL;
 			stageTail = NULL;
 			this->x = x;

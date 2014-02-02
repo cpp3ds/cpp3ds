@@ -39,7 +39,7 @@ namespace cpp3ds {
 		}
 	}
 
-	void Stage::draw(Screen& screen, int x, int y) {
+	void Stage::draw(Screen& screen, float x, float y) {
 		// Loop through and draw all actors on the stage
 		ActorNode* cur = actorTail;
 		while (cur != NULL) {

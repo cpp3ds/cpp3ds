@@ -23,14 +23,14 @@ namespace cpp3ds {
 			}
 		}
 
-		void Text::draw(Screen& screen, int x, int y) {
-			int tmp_x = this->x + x;
+		void Text::draw(Screen& screen, float x, float y) {
+			float tmp_x = this->x + x;
 			int i;
 			int line = 0;
 
 			int width = screen.getWidth();
 
-			for (i = 0; i < strlen(text); i++){
+			for (i = 0; i < strlen(text); ++i){
 				if (tmp_x+8 > width || text[i] == '\n') {
 					line++;
 					tmp_x = this->x + x;
@@ -38,7 +38,7 @@ namespace cpp3ds {
 						continue;
 				}
 				drawChar(screen, text[i], tmp_x, this->y+y+(line*8));
-				tmp_x = tmp_x+8;
+				tmp_x += 8;
 			}
 		}
 

@@ -9,9 +9,9 @@ namespace cpp3ds {
 		right_screen.clear(color);
 	}
 
-	void TopScreen::draw(Drawable& obj, int x, int y) {
+	void TopScreen::draw(Drawable& obj, float x, float y) {
 		// TODO: Get real 3D Slider State
-		int slider = 1;
+		float slider = 1.0f;
 		obj.draw(*this, x - slider * obj.depth3d, y);
 		obj.draw(right_screen, x + slider * obj.depth3d, y);
 	}

@@ -14,13 +14,13 @@ namespace cpp3ds {
 
 	class Stage: public Actors::Actor {
 	protected:
-		int width, height;
+		float width, height;
 		ActorNode *actorHead, *actorTail;
 	public:
 		Stage();
 		void addActor(Actor& actor);
 		void removeActor(Actor& actor);
-		virtual void draw(Screen& screen, int x = 0, int y = 0);
+		virtual void draw(Screen& screen, float x = 0, float y = 0);
 	};
 }
 

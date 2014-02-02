@@ -33,7 +33,7 @@ namespace cpp3ds {
 		}
 	}
 
-	void Screen::draw(Drawable& obj, int x, int y) {
+	void Screen::draw(Drawable& obj, float x, float y) {
 		obj.draw(*this, x, y);
 	}
 

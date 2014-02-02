@@ -7,9 +7,9 @@ namespace cpp3ds {
 
 	class  Drawable {
 	public:
-		int depth3d;
+		float depth3d;
 		Drawable(){ depth3d = 0; }
-		virtual void draw(Screen& screen, int x, int y) = 0;
+		virtual void draw(Screen& screen, float x, float y) = 0;
 	};
 }
 
