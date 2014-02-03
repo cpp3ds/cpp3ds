@@ -9,9 +9,10 @@ namespace cpp3ds {
 		float deltaTime;
 		lastTime = GetSystemTick();
 		while (ret == 0) {
+			render();
 			deltaTime = (GetSystemTick() - lastTime) / TICKS_PER_SEC;
 			lastTime = GetSystemTick();
-			ret = render(deltaTime);
+			ret = update(deltaTime);
 		}
 		return ret;
 	}
