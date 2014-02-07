@@ -1,0 +1,16 @@
+language: cpp
+compiler:
+ - gcc
+before_install:
+ - sudo apt-get update
+ - sudo apt-get install libgtest-dev
+ - "cd /usr/src/gtest && sudo cmake . && sudo cmake --build . && sudo mv libg* /usr/local/lib/ ; cd -"
+script: "cd test && ./run.sh"
+notifications:
+  recipients:
+    - machin3@gmail.com
+  email:
+    on_success: change
+    on_failure: always
+rvm:
+  - 1.00
