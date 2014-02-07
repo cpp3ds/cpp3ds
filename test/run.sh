@@ -1,5 +1,5 @@
 echo "Compiling unit tests..."
-g++ main.cpp -lgtest -o test
+g++ main.cpp -lgtest -lpthread -o test
 echo "Running unit tests..."
 ./test -v
 result=$?
