@@ -9,7 +9,7 @@ namespace cpp3ds {
 	}
 
 	bool Input::isDown(Button button) {
-		return (!(read_word(HID) & button));
+		return (~read_word(HID) & button);
 	}
 
 }
