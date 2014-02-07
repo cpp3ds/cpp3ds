@@ -1,4 +1,4 @@
-cpp3ds [![Build Status](https://travis-ci.org/Cruel/cpp3ds.png)](https://travis-ci.org/Cruel/cpp3ds)
+cpp3ds [![Build Status](https://travis-ci.org/Cruel/cpp3ds.png?branch=master)](https://travis-ci.org/Cruel/cpp3ds)
 ======
 
 Basic C++ gaming framework and library for Nintendo 3DS

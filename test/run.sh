@@ -1,5 +1,5 @@
 echo "Compiling unit tests..."
-g++ main.cpp -lgtest -std=c++11 -o test
+g++ main.cpp -lgtest -o test
 echo "Running unit tests..."
 ./test -v
 result=$?
