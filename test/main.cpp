@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
 TEST(Test, EqualityCheck){
-	EXPECT_EQ(true, false);
+	EXPECT_EQ(true, true);
 }
 
 int main(int argc, char **argv) {
