@@ -19,8 +19,8 @@ namespace cpp3ds {
 		int getHeight(){ return height; }
 		void setPixelAddress(int addr, Color color);
 		void setPixel(int x, int y, Color color);
-		void clear(Color color);
-		void draw(Drawable& obj, float x = 0, float y = 0);
+		void clear(Color color = {0,0,0});
+		virtual void draw(Drawable& obj, float x = 0, float y = 0, bool use3D = false);
 	};
 }
 

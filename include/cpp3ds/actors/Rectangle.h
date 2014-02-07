@@ -14,7 +14,7 @@ namespace cpp3ds {
 		public:
 			Color color;
 			Rectangle(int w, int h, Color color, float x = 0, float y = 0, float depth3d = 0):
-			        width(w), height(h), color(color), Actor(x, y, depth3d) {}
+			        Actor(x, y, depth3d), width(w), height(h), color(color) {}
 			virtual void draw(Screen& screen, float x = 0, float y = 0);
 		};
 

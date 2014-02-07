@@ -20,21 +20,24 @@ namespace cpp3ds {
 	}
 
 	void Screen::clear(Color color){
-		// Just clear to black
-		// memset((char*)frame1, 0, width*height*3);
-		// memset((char*)frame2, 0, width*height*3);
-		// TODO: Too slow, maybe try memcpy?
-		char* frameptr1 = (char*)frame1;
-		char* frameptr2 = (char*)frame2;
-		for (int i = 0; i < width*height; ++i){
-			*frameptr1++ = *frameptr2++ = color.b;
-			*frameptr1++ = *frameptr2++ = color.g;
-			*frameptr1++ = *frameptr2++ = color.r;
+		if (color.r == color.g && color.g == color.b){
+			memset((char*)frame1, color.r, width*height*3);
+			memset((char*)frame2, color.r, width*height*3);
+		} else {
+			// TODO: Too slow, maybe try memcpy?
+			char* frameptr1 = (char*)frame1;
+			char* frameptr2 = (char*)frame2;
+			for (int i = 0; i < width*height; ++i){
+				*frameptr1++ = *frameptr2++ = color.b;
+				*frameptr1++ = *frameptr2++ = color.g;
+				*frameptr1++ = *frameptr2++ = color.r;
+			}
 		}
 	}
 
-	void Screen::draw(Drawable& obj, float x, float y) {
-		obj.draw(*this, x, y);
+	void Screen::draw(Drawable& obj, float x, float y, bool use3D) {
+		// TODO: Check bounds and don't draw objects outside screen
+		obj.draw(*this, x, y, use3D, true);
 	}
 
 }

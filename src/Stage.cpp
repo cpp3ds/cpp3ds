@@ -5,11 +5,6 @@
 
 namespace cpp3ds {
 
-	Stage::Stage(){
-		actorHead = NULL;
-		actorTail = NULL;
-	}
-
 	void Stage::addActor(Actors::Actor& actor){
 		if (this == &actor)
 			return; // Avoid infinite recursion
@@ -39,11 +34,16 @@ namespace cpp3ds {
 		}
 	}
 
-	void Stage::draw(Screen& screen, float x, float y) {
+	void Stage::draw(Screen& screen, float x, float y, bool use3D, bool isLeftside) {
 		// Loop through and draw all actors on the stage
 		ActorNode* cur = actorTail;
 		while (cur != NULL) {
-			cur->actor->draw(screen, this->x + x, this->y + y);
+			Actors::Actor& actor = *cur->actor;
+			if (use3D) {
+				float slider = 1.0f * actor.depth3d;
+				x = (isLeftside) ? x - slider : x + slider;
+			}
+			actor.draw(screen, this->x + x, this->y + y, use3D, isLeftside);
 			cur = cur->prev;
 		}
 	}

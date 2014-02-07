@@ -23,7 +23,7 @@ namespace cpp3ds {
 			}
 		}
 
-		void Text::draw(Screen& screen, float x, float y) {
+		void Text::draw(Screen& screen, float x, float y, bool use3D, bool isLeftside) {
 			float tmp_x = this->x + x;
 			int i;
 			int line = 0;

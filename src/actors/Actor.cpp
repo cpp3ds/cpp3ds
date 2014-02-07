@@ -4,14 +4,6 @@
 
 namespace cpp3ds {
 	namespace Actors {
-
-		Actor::Actor(float x, float y, float depth3d) {
-			stageHead = NULL;
-			stageTail = NULL;
-			this->x = x;
-			this->y = y;
-			this->depth3d = depth3d;
-		}
 		
 		void Actor::addStage(Stage& stage){
 			StageNode *node = new StageNode();

@@ -1,6 +1,7 @@
 #ifndef TEXT_ACTOR_H
 #define TEXT_ACTOR_H
 
+#include <stddef.h>
 #include <cpp3ds/actors/Actor.h>
 #include <cpp3ds/Color.h>
 #include <cpp3ds/Screen.h>
@@ -14,9 +15,9 @@ namespace cpp3ds {
 		public:
 			char* text;
 			Color color;
-			Text(char* text, Color color, float x = 0, float y = 0, float depth3d = 0):
-			        text(text), color(color), Actor(x, y, depth3d) {}
-			virtual void draw(Screen& screen, float x = 0, float y = 0);
+			Text(char* text, Color color = {0,0,0}, float x = 0, float y = 0, float depth3d = 0):
+				Actor(x, y, depth3d), text(text), color(color) {}
+			virtual void draw(Screen& screen, float x = 0, float y = 0, bool use3D = true, bool isLeftside = true);
 		};
 
 	}

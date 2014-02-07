@@ -17,10 +17,10 @@ namespace cpp3ds {
 		float width, height;
 		ActorNode *actorHead, *actorTail;
 	public:
-		Stage();
-		void addActor(Actor& actor);
-		void removeActor(Actor& actor);
-		virtual void draw(Screen& screen, float x = 0, float y = 0);
+		Stage(): Actors::Actor(0,0,0), actorHead(NULL), actorTail(NULL) {}
+		void addActor(Actors::Actor& actor);
+		void removeActor(Actors::Actor& actor);
+		virtual void draw(Screen& screen, float x = 0, float y = 0, bool use3D = true, bool isLeftside = true);
 	};
 }
 

@@ -11,19 +11,21 @@
 #define TOP_LEFT_FRAME2 0x201CB370
 #define TOP_RIGHT_FRAME1 0x20282160  
 #define TOP_RIGHT_FRAME2 0x202C8670
+#define SLIDER_STATE 0x10144000
 
 namespace cpp3ds {
 	class TopScreen: public Screen {
 	protected:
-		Screen right_screen;
+		Screen left_screen, right_screen;
 		int width, height;
 	public:
 		TopScreen():
-			Screen(TOP_LEFT_FRAME1, TOP_LEFT_FRAME2, TOP_WIDTH, TOP_HEIGHT),
+			Screen(0, 0, TOP_WIDTH, TOP_HEIGHT),
+			left_screen(TOP_LEFT_FRAME1, TOP_LEFT_FRAME2, TOP_WIDTH, TOP_HEIGHT),
 			right_screen(TOP_RIGHT_FRAME1, TOP_RIGHT_FRAME2, TOP_WIDTH, TOP_HEIGHT)
 			{};
-		void clear(Color color);
-		void draw(Drawable& obj, float x = 0, float y = 0);
+		void clear(Color color = {0,0,0});
+		virtual void draw(Drawable& obj, float x = 0, float y = 0, bool use3D = true);
 	};
 }
 
