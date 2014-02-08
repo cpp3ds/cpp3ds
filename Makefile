@@ -1,11 +1,15 @@
 PROJECT = libcpp3ds.a
 CXX = arm-none-eabi-g++
 AR = arm-none-eabi-ar
-INCLUDES = -Iinclude/
 CXXFLAGS = -g -Wall -pedantic -std=c++11 -march=armv5te -fno-rtti -fno-exceptions
 
-SOURCES = $(wildcard src/*.cpp) $(wildcard src/*/*.cpp) $(wildcard src/*.s)
-OBJECTS = $(SOURCES:src/%.cpp=build/%.o) $(SOURCES:src/%.s=build/%.o)
+TEST_CXX = g++
+TEST_AR = ar
+TEST_CXXFLAGS = -g -Wall -pedantic -fno-rtti -fno-exceptions -DTESTING
+
+INCLUDES = -Iinclude/
+SOURCES = $(wildcard src/*.cpp) $(wildcard src/*/*.cpp) $(wildcard src/*.S)
+OBJECTS = $(SOURCES:src/%.cpp=build/%.o) $(SOURCES:src/%.S=build/%.o)
 
 .PHONY: all dir clean
 
@@ -27,6 +31,13 @@ build/%.o: src/%.cpp
 	$(CXX) $(INCLUDES) $(CXXFLAGS) -c $< -o $@
 	$(CXX) -MM $< > build/$*.d
 
-build/%.o: src/%.s
+build/%.o: src/%.S
 	$(CXX) $(INCLUDES) $(CXXFLAGS) -c $< -o $@
 	$(CXX) -MM $< > build/$*.d
+
+testvars:
+	$(eval CXX := $(TEST_CXX))
+	$(eval AR := $(TEST_AR))
+	$(eval CXXFLAGS := $(TEST_CXXFLAGS))
+
+test: clean testvars all

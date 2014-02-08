@@ -35,17 +35,23 @@ int read_word(int address){
 }
 
 uint64_t GetSystemTick() {
-	register unsigned long lo64 asm ("r0");
-	register unsigned long hi64 asm ("r1");
-	asm volatile ( "SVC 0x28" : "=r"(lo64), "=r"(hi64) );
-	return ((uint64_t)hi64<<32) | (uint64_t)lo64;
+	#ifndef TESTING
+		register unsigned long lo64 asm ("r0");
+		register unsigned long hi64 asm ("r1");
+		asm volatile ( "SVC 0x28" : "=r"(lo64), "=r"(hi64) );
+		return ((uint64_t)hi64<<32) | (uint64_t)lo64;
+	#else
+		return 0;
+	#endif
 }
 
 void SleepThread(uint64_t ms) {
-	ms *= 1000000;
-	unsigned long hi32 = (ms >> 32);
-	unsigned long lo32 = (ms & 0xffffffff);
-	asm volatile ( "SVC 0x0A" : : "r"(lo32), "r"(hi32) );
+	#ifndef TESTING
+		ms *= 1000000;
+		unsigned long hi32 = (ms >> 32);
+		unsigned long lo32 = (ms & 0xffffffff);
+		asm volatile ( "SVC 0x0A" : : "r"(lo32), "r"(hi32) );
+	#endif
 }
 
 void sleep(uint64_t ms) {

@@ -1,3 +1,5 @@
+#ifndef TESTING
+
 /* for caddr_t (typedef char * caddr_t;) */
 #include <sys/types.h>
 #include <stddef.h>
@@ -22,3 +24,5 @@ extern "C" caddr_t _sbrk ( int incr ){
 extern "C" void __cxa_pure_virtual() {
 	// Error handling here
 }
+
+#endif
