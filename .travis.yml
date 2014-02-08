@@ -2,8 +2,10 @@ language: cpp
 compiler:
  - gcc
 before_install:
- - sudo apt-get update
- - sudo apt-get install libgtest-dev
+ - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+ - sudo apt-get -qq update
+ - sudo apt-get -qq install libgtest-dev g++-4.8
+ - update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
  - "cd /usr/src/gtest && sudo cmake . && sudo cmake --build . && sudo mv libg* /usr/local/lib/ ; cd -"
 script: "make test && cd test && ./run.sh"
 notifications:
