@@ -21,6 +21,12 @@ import os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
 
+# hack for readthedocs to cause it to run doxygen first
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+if on_rtd:
+	from subprocess import call 
+	call('doxygen')
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -32,7 +38,12 @@ import os
 extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
+    'breathe',
 ]
+
+# Breathe extension variables
+breathe_projects = { "cpp3ds": "doxyxml/" }
+breathe_default_project = "cpp3ds"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
