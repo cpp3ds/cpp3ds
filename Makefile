@@ -5,7 +5,7 @@ CXXFLAGS = -g -Wall -pedantic -std=c++11 -march=armv5te -fno-rtti -fno-exception
 
 TEST_CXX = g++
 TEST_AR = ar
-TEST_CXXFLAGS = -g -Wall -pedantic -fno-rtti -fno-exceptions -DTESTING
+TEST_CXXFLAGS = -g -Wall -pedantic -std=c++11 -fno-rtti -fno-exceptions -DTESTING
 
 INCLUDES = -Iinclude/
 SOURCES = $(wildcard src/*.cpp) $(wildcard src/*/*.cpp) $(wildcard src/*.S)
