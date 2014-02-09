@@ -3,6 +3,8 @@
 
 #define HID 0x10146000
 
+#define SLIDERSTATE 0x10144000
+
 namespace cpp3ds {
 
 	enum Button {
@@ -34,7 +36,10 @@ namespace cpp3ds {
 		int getHID();
 		int last_hid;
 	public:
+		static float slider;
 		static bool isDown(Button button);
+		static void update3DSlider();
+		static float get3DSlider(){ return Input::slider; }
 		// int bind(Button button, Event event);
 		// void unbind(int binding);
 		// void unbindAll();

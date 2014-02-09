@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <cpp3ds/Stage.h>
+#include <cpp3ds/Input.h>
 #include <cpp3ds/utils.h>
 #include <cpp3ds/actors/Actor.h>
 
@@ -37,13 +38,16 @@ namespace cpp3ds {
 	void Stage::draw(Screen& screen, float x, float y, bool use3D, bool isLeftside) {
 		// Loop through and draw all actors on the stage
 		ActorNode* cur = actorTail;
+		x += this->x;
+		y += this->y;
 		while (cur != NULL) {
 			Actors::Actor& actor = *cur->actor;
 			if (use3D) {
-				float slider = 1.0f * actor.depth3d;
-				x = (isLeftside) ? x - slider : x + slider;
+				float slider = Input::get3DSlider() * actor.depth3d;
+				actor.draw(screen, (isLeftside) ? x-slider : x+slider, y, use3D, isLeftside);
+			} else {
+				actor.draw(screen, x, y, use3D, isLeftside);
 			}
-			actor.draw(screen, this->x + x, this->y + y, use3D, isLeftside);
 			cur = cur->prev;
 		}
 	}
