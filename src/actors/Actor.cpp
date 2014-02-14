@@ -29,5 +29,29 @@ namespace cpp3ds {
 			detach();
 		}
 
+		int Actor::getValues(int tweenType, float *returnValues){
+			switch (tweenType) {
+				case POSITION_X: returnValues[0] = getX(); return 1;
+				case POSITION_Y: returnValues[0] = getY(); return 1;
+				case POSITION_XY:
+					returnValues[0] = getX();
+					returnValues[1] = getY();
+					return 2;
+				default: return -1;
+			}
+		}
+
+		void Actor::setValues(int tweenType, float *newValues){
+			switch (tweenType) {
+				case POSITION_X: setX(newValues[0]); break;
+				case POSITION_Y: setY(newValues[0]); break;
+				case POSITION_XY:
+					setX(newValues[0]);
+					setY(newValues[1]);
+					break;
+				default: break;
+			}
+		}
+
 	}
 }

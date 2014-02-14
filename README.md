@@ -1,7 +1,7 @@
 cpp3ds [![Build Status](https://travis-ci.org/cpp3ds/cpp3ds.png?branch=master)](https://travis-ci.org/cpp3ds/cpp3ds)
 ======
 
-Basic C++ gaming framework and library for Nintendo 3DS.
+Basic C++ gaming framework and library for Nintendo 3DS. http://cpp3ds.github.io/
 
 Documentation
 -------------
@@ -12,12 +12,10 @@ Requirements
  
 - GNU Binutils
 - GCC 4.8 (arm-none-eabi)
-- *[Universal Tween Engine port](https://github.com/cpp3ds/universal-tween-engine-cpp) (optional)*
+- [Universal Tween Engine port](https://github.com/cpp3ds/universal-tween-engine-cpp)
 
-For unit tests:
+Just for unit tests:
 
-- GNU Binutils
-- GCC 4.8
 - [Google Test](https://code.google.com/p/googletest/)
 
 Credit and Thanks

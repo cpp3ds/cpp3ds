@@ -1,5 +1,5 @@
-docs/_build/
 docs/doxyxml/
+docs/github.io/
 build/
 lib/
 *.bin
