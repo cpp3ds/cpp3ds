@@ -7,7 +7,7 @@ TEST_CXX = g++
 TEST_AR = ar
 TEST_CXXFLAGS = -g -Wall -pedantic -std=c++11 -fno-rtti -fno-exceptions -DTESTING
 
-INCLUDES = -Iinclude/
+INCLUDES = -Iinclude/ -I../tween-engine/include
 SOURCES = $(wildcard src/*.cpp) $(wildcard src/*/*.cpp) $(wildcard src/*.S)
 OBJECTS = $(SOURCES:src/%.cpp=build/%.o) $(SOURCES:src/%.S=build/%.o)
 
