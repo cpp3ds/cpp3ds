@@ -2,6 +2,8 @@ language: cpp
 compiler:
  - gcc
 before_install:
+ - git clone https://github.com/cpp3ds/universal-tween-engine-cpp.git tween
+ - "cd tween && make ; cd -"
  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
  - sudo apt-get -qq update
  - sudo apt-get -qq install libgtest-dev g++-4.8
