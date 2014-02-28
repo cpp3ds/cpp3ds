@@ -1,3 +1,7 @@
+#ifdef SIMULATION
+#include <sim3ds/BottomScreen.h>
+#endif
+
 #ifndef BOTTOM_SCREEN_H
 #define BOTTOM_SCREEN_H
 

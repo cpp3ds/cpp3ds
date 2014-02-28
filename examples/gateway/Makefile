@@ -5,32 +5,50 @@ OBJCOPY = arm-none-eabi-objcopy
 
 CPP3DS = ../..
 
-INCLUDES = -I$(CPP3DS)/include
-CXXFLAGS = -g -Wall -pedantic $(INCLUDES) -std=c++11 -march=armv5te -fno-rtti -fno-exceptions
-LDFLAGS = -T ../cpp3ds.ld -L/usr/arm-none-eabi/lib -L$(CPP3DS)/lib -lcpp3ds -lc -lgcc -lcpp3ds
-
 SOURCES = $(wildcard src/*.cpp)
-OBJECTS = $(SOURCES:src/%.cpp=build/%.o)
+INCLUDES = -I$(CPP3DS)/include -I$(CPP3DS)/../tween-engine/include -L$(CPP3DS)/lib -L$(CPP3DS)/../tween-engine/lib
 
-.PHONY: all dir clean
+CXXFLAGS = -g -Wall -pedantic $(INCLUDES) -std=c++11 -march=armv5te -fno-rtti -fno-exceptions
+LIBS = --start-group -ltween -lc -lgcc -lcpp3ds --end-group
+LDFLAGS = -T ../cpp3ds.ld -L/usr/arm-none-eabi/lib $(INCLUDES)
+OBJECTS = $(SOURCES:src/%.cpp=build/arm/%.o)
 
-all: dir $(PROJECT).bin
+SIM_CXX = g++
+SIM_CXXFLAGS = -g -Wall -pedantic -std=c++11 -DSIMULATION `pkg-config gtkmm-3.0 gmodule-2.0 --cflags --libs`
+SIM_LIBS = -Wl,--start-group -lc -lgcc -lcpp3ds-sim -ltween-test -lsfml-graphics -lsfml-window -lsfml-system -Wl,--end-group
+SIM_LDFLAGS = -DSIMULATION -Wl,--wrap,main `pkg-config gtkmm-3.0 gmodule-2.0 --cflags --libs`
+SIM_OBJECTS = $(SOURCES:src/%.cpp=build/sim/%.o)
+
+.PHONY: all dir clean sim
+
+all: dir $(PROJECT).bin $(PROJECT)
+
+sim: dir $(PROJECT)
 
 dir:
-	@mkdir -p build
+	@mkdir -p build/arm
+	@mkdir -p build/sim
 
 $(PROJECT).bin: $(PROJECT).elf
 	$(OBJCOPY) -O binary $< $@
 	@rm $<
 
 $(PROJECT).elf: $(OBJECTS)
-	$(LD) $< -o $@ $(LDFLAGS)
+	$(LD) $< -o $@ $(LDFLAGS) $(LIBS)
 
 clean:
 	@rm -rf build
 	@rm -f $(PROJECT).bin
+	@rm -f $(PROJECT)
 	@echo "Successfully cleaned."
 
-build/%.o: src/%.cpp
+build/arm/%.o: src/%.cpp
 	$(CXX) $(INCLUDES) -c $< -o $@ $(CXXFLAGS)
-	$(CXX) -MM $< > build/$*.d
+	$(CXX) -MM $< > build/arm/$*.d
+
+build/sim/%.o: src/%.cpp
+	$(SIM_CXX) $(INCLUDES) -c $< -o $@ $(SIM_CXXFLAGS)
+	$(SIM_CXX) -MM $< > build/sim/$*.d
+
+$(PROJECT): $(SIM_OBJECTS)
+	$(SIM_CXX) $< -o $@ $(INCLUDES) $(SIM_LIBS) $(SIM_LDFLAGS)

@@ -3,3 +3,6 @@ docs/github.io/
 build/
 lib/
 *.bin
+
+include/sim3ds/res.h
+sim/res.cpp

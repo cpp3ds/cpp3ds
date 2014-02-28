@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+ <gresource prefix="/org/cpp3ds/ui">
+  <file compressed="true">simulator.glade</file>
+  <file>logo.png</file>
+ </gresource>
+</gresources>

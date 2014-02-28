@@ -16,7 +16,12 @@ Requirements
 - GCC 4.8 (arm-none-eabi)
 - [Universal Tween Engine port](https://github.com/cpp3ds/universal-tween-engine-cpp)
 
-Just for unit tests:
+For simulator:
+
+- [SFML 2.1](http://www.sfml-dev.org/index.php)
+- [gtkmm 3](http://www.gtkmm.org/)
+
+For unit tests:
 
 - [Google Test](https://code.google.com/p/googletest/)
 

@@ -31,5 +31,8 @@ extern "C" int main() {
 	bottom_screen.draw(stage);
 	top_screen.draw(stage);
 
+	bottom_screen.display();
+	top_screen.display();
+
 	return 0;
 }

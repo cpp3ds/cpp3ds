@@ -10,7 +10,7 @@ namespace cpp3ds {
 		lastTime = GetSystemTick();
 		while (ret == 0) {
 			render();
-			deltaTime = (GetSystemTick() - lastTime) / TICKS_PER_SEC;
+			deltaTime = (float)(GetSystemTick() - lastTime) / TICKS_PER_SEC;
 			lastTime = GetSystemTick();
 			ret = update(deltaTime);
 		}

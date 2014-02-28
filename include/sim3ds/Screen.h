@@ -1,10 +1,8 @@
-#ifdef SIMULATION
-#include <sim3ds/Screen.h>
-#endif
-
 #ifndef SCREEN_H
 #define SCREEN_H
 
+#include <SFML/Graphics.hpp>
+#include <sim3ds/sim/Simulator.h>
 #include <cpp3ds/Color.h>
 
 namespace cpp3ds {
@@ -15,12 +13,12 @@ namespace cpp3ds {
 	private:
 		void setPixelAddress(int addr, Color color);
 	protected:
-		bool buffer;
-		int frame1, frame2;
-		int width, height;
+		sf::Image pixelImage;
+		int x, y, width, height;
 	public:
-		Screen(int addr1, int addr2, int w, int h):
-			frame1(addr1), frame2(addr2), width(w), height(h) {}
+		Screen(int x, int y, int width, int height): x(x), y(y), width(width), height(height) {
+			pixelImage.create(width, height, sf::Color::Transparent);
+		}
 		int getWidth(){ return width; }
 		int getHeight(){ return height; }
 		void setPixel(int x, int y, Color color);

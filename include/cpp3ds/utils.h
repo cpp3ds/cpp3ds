@@ -1,3 +1,7 @@
+#ifdef SIMULATION
+#include <sim3ds/utils.h>
+#endif
+
 #ifndef UTILS_H
 #define UTILS_H
 

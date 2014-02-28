@@ -1,13 +1,5 @@
-#ifdef SIMULATION
-#include <sim3ds/Input.h>
-#endif
-
 #ifndef INPUT_H
 #define INPUT_H
-
-#define HID 0x10146000
-
-#define SLIDERSTATE 0x10144000
 
 namespace cpp3ds {
 

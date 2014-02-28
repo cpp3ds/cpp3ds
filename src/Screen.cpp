@@ -40,4 +40,8 @@ namespace cpp3ds {
 		obj.draw(*this, x, y, use3D, true);
 	}
 
+	void Screen::display(){
+		buffer = !buffer;
+	}
+
 }

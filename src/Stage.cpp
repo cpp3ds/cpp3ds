@@ -26,8 +26,14 @@ namespace cpp3ds {
 		ActorNode* cur = actorHead;
 		while (cur != NULL) {
 			if (cur->actor == &actor) {
-				cur->prev->next = cur->next;
-				cur->next->prev = cur->prev;
+				if (cur == actorHead)
+					actorHead = cur->next;
+				if (cur == actorTail)
+					actorTail = cur->prev;
+				if (cur->prev != NULL)
+					cur->prev->next = cur->next;
+				if (cur->next != NULL)
+					cur->next->prev = cur->prev;
 				delete cur;
 				break;
 			}
