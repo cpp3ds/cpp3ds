@@ -14,9 +14,12 @@ namespace cpp3ds {
 	}
 
 	void Screen::clear(Color color){
+		sf::RectangleShape box(sf::Vector2f(width, height));
 		sf::Color c(color.r, color.g, color.b);
+		box.setFillColor(c);
+		box.setPosition(x,y);
 		// Should only clear the relevant screen area
-		_simulator->screen->renderWindow.clear(c);
+		_simulator->screen->renderWindow.draw(box);
 	}
 
 	void Screen::draw(Drawable& obj, float x, float y, bool use3D) {
