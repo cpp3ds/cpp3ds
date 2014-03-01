@@ -30,8 +30,9 @@ namespace cpp3ds {
 		void checkThreadState();
 		void saveScreenshot();
 
+		void drawPausedFrame();
+
 		void on_sfml_size_allocate(Gtk::Allocation& allocation);
-		void on_window_show();
 		void on_playpause_clicked();
 		void on_stop_clicked();
 		void on_toggle3d_clicked();

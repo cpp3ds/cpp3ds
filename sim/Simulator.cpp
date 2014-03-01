@@ -19,8 +19,8 @@ namespace cpp3ds {
 		// Glib::RefPtr<Gdk::Pixbuf> logo = Gdk::Pixbuf::create_from_resource("/org/cpp3ds/ui/logo.png");
 		// aboutDialog->set_logo(logo);
 
-		// Make pausedFrame the cpp3ds logo
-
+		// TODO: Make pausedFrame the cpp3ds logo?
+		pausedFrameTexture.create(800,480);
 		pausedFrame.setTexture(pausedFrameTexture);
 
 		builder->get_widget("saveDialog", saveDialog);
@@ -42,13 +42,8 @@ namespace cpp3ds {
 
 		menuAbout->signal_activate().connect(sigc::mem_fun(*this,
 			&Simulator::on_about_clicked ));
-
-		window->signal_show().connect(sigc::mem_fun(*this,
-			&Simulator::on_window_show ));
-
 		screen->signal_size_allocate().connect(sigc::mem_fun(*this,
 			&Simulator::on_sfml_size_allocate ));
-
 		buttonScreenshot->signal_clicked().connect(sigc::mem_fun(*this,
 			&Simulator::saveScreenshot ));
 		buttonPlayPause->signal_clicked().connect(sigc::mem_fun(*this,
@@ -103,7 +98,9 @@ namespace cpp3ds {
 		triggerStop = true;
 		thread->wait();
 		triggerStop = false;
+		screen->renderWindow.setActive(true);
 		pausedFrameTexture.update(screen->renderWindow);
+		pausedFrame.setTexture(pausedFrameTexture, true);
 	}
 
 	float Simulator::get_slider3d(){
@@ -119,19 +116,21 @@ namespace cpp3ds {
 		screenie.saveToFile("test.png");
 	}
 
+	void Simulator::drawPausedFrame(){
+		screen->renderWindow.clear();
+		screen->renderWindow.draw(pausedFrame);
+		// If paused, redraw paused frame
+		screen->display();
+	}
 
 	/***********************
 	  UI Events
 	 ***********************/
-	void Simulator::on_window_show(){
-		std::cout << "shown" << std::endl;
-	}
 
 	void Simulator::on_sfml_size_allocate(Gtk::Allocation& allocation){
-		std::cout << "test" << std::endl;
-		screen->renderWindow.draw(pausedFrame);
-		// If paused, redraw paused frame
-		screen->display();
+		// Dirty hack to trigger event AFTER resize
+		Glib::signal_timeout().connect_once(sigc::mem_fun(*this,
+			&Simulator::drawPausedFrame ),10);
 	}
 
 	void Simulator::on_playpause_clicked(){
