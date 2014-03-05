@@ -67,7 +67,7 @@ void SFMLWidget::on_realize(){
 		//Set initial position and size of the Gdk::Window:
 		attributes.x = allocation.get_x();
 		attributes.y = allocation.get_y();
-		attributes.width = allocation.get_width()*2;
+		attributes.width = 800;
 		attributes.height = allocation.get_height();
 
 		attributes.event_mask = get_events () | Gdk::EXPOSURE_MASK;
@@ -81,10 +81,8 @@ void SFMLWidget::on_realize(){
 
 		// transparent background
 		this->unset_background_color();
-
 		this->set_double_buffered(false);
-
-		this->set_redraw_on_allocate(false);
+		this->set_can_focus(true);
 
 		//make the widget receive expose events
 		m_refGdkWindow->set_user_data(gobj());

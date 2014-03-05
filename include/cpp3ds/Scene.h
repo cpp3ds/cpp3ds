@@ -8,6 +8,9 @@
 
 namespace cpp3ds {
 
+	/**
+	 * Handles the main game loop for you.
+	 */
 	class Scene {
 	protected:
 		uint64_t lastTime;
@@ -15,9 +18,10 @@ namespace cpp3ds {
 		BottomScreen bottomScreen;
 		TopScreen topScreen;
 		Input input;
+		void display();
 		virtual int update(float deltaTime) = 0;
 		virtual void render() = 0;
-		int run();
+		int run(bool useDisplay = true);
 	};
 
 }

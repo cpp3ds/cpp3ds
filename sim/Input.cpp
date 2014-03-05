@@ -1,3 +1,4 @@
+#include <SFML/Graphics.hpp>
 #include <cpp3ds/Input.h>
 #include <cpp3ds/utils.h>
 
@@ -13,7 +14,7 @@ namespace cpp3ds {
 
 	bool Input::isDown(Button button) {
 		// return (~read_word(HID) & button);
-		return false;
+		return sf::Keyboard::isKeyPressed(button);
 	}
 
 	void Input::update3DSlider(){

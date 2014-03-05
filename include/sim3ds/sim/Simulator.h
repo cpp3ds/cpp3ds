@@ -5,6 +5,8 @@
 #include <sim3ds/sim/Simulator.h>
 #include <sim3ds/sim/SFMLWidget.h>
 
+#define SIM_OUTLINE_THICKNESS 1
+
 namespace cpp3ds {
 
 	class Simulator{
@@ -21,7 +23,6 @@ namespace cpp3ds {
 		Gtk::Scale *scale3D;
 
 		sf::Thread* thread;
-		sf::Mutex mutex;
 
 		sf::Texture pausedFrameTexture;
 		sf::Sprite pausedFrame;
@@ -40,8 +41,9 @@ namespace cpp3ds {
 
 	public:
 		SFMLWidget *screen;
+		sf::Mutex mutex;
+
 		bool triggerStop = false;
-		bool triggerPause = false;
 		bool isPaused = true;
 		bool isThreadRunning = false;
 

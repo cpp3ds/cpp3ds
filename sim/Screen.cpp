@@ -1,4 +1,3 @@
-#include <SFML/Graphics.hpp>
 #include <sim3ds/sim/Simulator.h>
 #include <cpp3ds/Screen.h>
 #include <cpp3ds/Color.h>
@@ -16,8 +15,12 @@ namespace cpp3ds {
 	void Screen::clear(Color color){
 		sf::RectangleShape box(sf::Vector2f(width, height));
 		sf::Color c(color.r, color.g, color.b);
+		sf::Color outline(255,255,255, 10);
 		box.setFillColor(c);
+		box.setOutlineColor(outline);
+		box.setOutlineThickness(SIM_OUTLINE_THICKNESS);
 		box.setPosition(x,y);
+		pixelImage.create(width, height, sf::Color::Transparent);
 		// Should only clear the relevant screen area
 		_simulator->screen->renderWindow.draw(box);
 	}
@@ -27,14 +30,12 @@ namespace cpp3ds {
 		obj.draw(*this, x, y, use3D, true);
 	}
 
-	void Screen::display() {
+	void Screen::_display() {
 		sf::Texture starsTexture;
-        starsTexture.loadFromImage(pixelImage);
-        sf::Sprite test(starsTexture);
-        test.setPosition(x, y);
-
-        _simulator->screen->renderWindow.draw(test);
-		_simulator->screen->display();
+		starsTexture.loadFromImage(pixelImage);
+		sf::Sprite test(starsTexture);
+		test.setPosition(x, y);
+		_simulator->screen->renderWindow.draw(test);
 	}
 
 }

@@ -1,22 +1,26 @@
 #ifndef INPUT_H
 #define INPUT_H
 
+#include <SFML/Graphics.hpp>
+
 namespace cpp3ds {
 
-	enum Button {
-		BUTTON_A      = 1,
-		BUTTON_B      = 2,
-		BUTTON_X      = 1024,
-		BUTTON_Y      = 2048,
-		BUTTON_UP     = 64,
-		BUTTON_DOWN   = 128,
-		BUTTON_LEFT   = 32,
-		BUTTON_RIGHT  = 16,
-		BUTTON_L1     = 512,
-		BUTTON_R1     = 256,
-		BUTTON_START  = 8,
-		BUTTON_SELECT = 4
-	};
+	typedef sf::Keyboard::Key Button;
+
+	// enum Button {
+	// 	BUTTON_A      = 1,
+	// 	BUTTON_B      = 2,
+	// 	BUTTON_X      = 1024,
+	// 	BUTTON_Y      = 2048,
+	const Button BUTTON_UP     = sf::Keyboard::Up;
+	const Button BUTTON_DOWN   = sf::Keyboard::Down;
+	const Button BUTTON_LEFT   = sf::Keyboard::Left;
+	const Button BUTTON_RIGHT  = sf::Keyboard::Right;
+	// 	BUTTON_L1     = 512,
+	// 	BUTTON_R1     = 256,
+	// 	BUTTON_START  = 8,
+	// 	BUTTON_SELECT = 4
+	// };
 
 	enum Event {
 		EVENT_DOWN,

@@ -20,7 +20,7 @@ namespace cpp3ds {
 		// aboutDialog->set_logo(logo);
 
 		// TODO: Make pausedFrame the cpp3ds logo?
-		pausedFrameTexture.create(800,480);
+		pausedFrameTexture.create(800 + SIM_OUTLINE_THICKNESS*2, 480 + SIM_OUTLINE_THICKNESS*2);
 		pausedFrame.setTexture(pausedFrameTexture);
 
 		builder->get_widget("saveDialog", saveDialog);
@@ -33,9 +33,11 @@ namespace cpp3ds {
 		builder->get_widget("scale3D", scale3D);
 
 		// Create and add a SFMLWidget
-		screen = new SFMLWidget(sf::VideoMode(800, 480));
+		screen = new SFMLWidget(sf::VideoMode(800 + SIM_OUTLINE_THICKNESS*2, 480 + SIM_OUTLINE_THICKNESS*2));
 		boxSFML->pack_start(*screen, true, true);
 		screen->show();
+
+		screen->renderWindow.setFramerateLimit(60);
 
 		Glib::signal_timeout().connect(sigc::bind_return(sigc::mem_fun(*this,
 			&Simulator::checkThreadState ),true),200);
@@ -82,14 +84,14 @@ namespace cpp3ds {
 	}
 
 	void Simulator::play() {
-		triggerPause = false;
+		isPaused = false;
 		screen->renderWindow.setActive(false);
 		if (!isThreadRunning)
 			thread->launch();
 	}
 
 	void Simulator::pause() {
-		triggerPause = true;
+		isPaused = true;
 	}
 
 	void Simulator::stop() {
@@ -130,7 +132,7 @@ namespace cpp3ds {
 	void Simulator::on_sfml_size_allocate(Gtk::Allocation& allocation){
 		// Dirty hack to trigger event AFTER resize
 		Glib::signal_timeout().connect_once(sigc::mem_fun(*this,
-			&Simulator::drawPausedFrame ),10);
+			&Simulator::drawPausedFrame ),50);
 	}
 
 	void Simulator::on_playpause_clicked(){
@@ -157,7 +159,7 @@ namespace cpp3ds {
 		scale3D->set_sensitive(active);
 		scale3D->set_opacity(active ? 1.0 : 0.8);
 		screen->show3D();
-		screen->set_size_request(active ? 800 : 400, 480);
+		screen->set_size_request(active ? 800 + SIM_OUTLINE_THICKNESS*2 : 400, 480 + SIM_OUTLINE_THICKNESS*2);
 		// Resize window to smallest size allowed
 		window->resize(1,1);
 	}

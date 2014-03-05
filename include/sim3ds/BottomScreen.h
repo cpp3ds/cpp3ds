@@ -5,7 +5,7 @@
 #include <cpp3ds/Screen.h>
 
 #define BOTTOM_X (400-320)/2
-#define BOTTOM_Y 240
+#define BOTTOM_Y 240 + SIM_OUTLINE_THICKNESS*2
 #define BOTTOM_WIDTH 320
 #define BOTTOM_HEIGHT 240
 

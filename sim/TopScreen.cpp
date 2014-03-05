@@ -21,9 +21,9 @@ namespace cpp3ds {
 		}
 	}
 
-	void TopScreen::display(){
-		left_screen.display();
-		right_screen.display();
+	void TopScreen::_display(){
+		left_screen._display();
+		right_screen._display();
 	}
 
 }
