@@ -20,8 +20,8 @@ extern "C" int main() {
 	Color cBlue  = {0, 0, 255},
 	      cWhite = {255, 255, 255};
 
-	Actors::Text text1("BOOTROM 8046\nERRCODE:", cWhite, 10, 10);
-	Actors::Text text2("00F800EF\nFFFFFFFF FFFFFFFF\n00000008 00000000", cWhite, 80, 18);
+	Text text1("BOOTROM 8046\nERRCODE:", cWhite, 10, 10);
+	Text text2("00F800EF\nFFFFFFFF FFFFFFFF\n00000008 00000000", cWhite, 80, 18);
 
 	stage.addActor(text1);
 	stage.addActor(text2);

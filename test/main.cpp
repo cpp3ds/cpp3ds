@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include <cpp3ds/TopScreen.h>
+#include <cpp3ds/Graphics.hpp>
 
 TEST(Test, EqualityCheck){
 	cpp3ds::TopScreen ts;
