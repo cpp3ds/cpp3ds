@@ -1,3 +1,14 @@
+include(gresource)
+
+gresource(
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../res/sim
+  simulator.gresource.xml
+  ${CMAKE_CURRENT_BINARY_DIR}/../../src/sim3ds/Simulator
+  ${CMAKE_CURRENT_BINARY_DIR}/../../include/cpp3ds/Simulator
+  RESOURCE_SOURCE
+  RESOURCE_HEADER
+)
+
 
 add_library(cpp3ds-sim STATIC
     ${SRC_SIM}

@@ -64,16 +64,7 @@ list(REMOVE_ITEM SRC_SIM ${SRCROOT}/cpp3ds/syscalls.cpp)
 
 
 
-include(gresource)
 
-gresource(
-  ${CMAKE_CURRENT_SOURCE_DIR}/res/sim
-  simulator.gresource.xml
-  ${CMAKE_CURRENT_BINARY_DIR}/src/sim3ds/Simulator
-  ${CMAKE_CURRENT_BINARY_DIR}/include/cpp3ds/Simulator
-  RESOURCE_SOURCE
-  RESOURCE_HEADER
-)
 
 
 # uninstall target
