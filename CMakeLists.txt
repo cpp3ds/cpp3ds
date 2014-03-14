@@ -42,7 +42,7 @@ endif()
 # Fetch all source files
 FILE(GLOB_RECURSE SRC ${SRCROOT}/cpp3ds/*.cpp)
 FILE(GLOB_RECURSE SRC_SIM ${SRCROOT}/sim3ds/*.cpp)
-set(ARM_SRC ${SRC} ${SRCROOT}/cpp3ds/cpp3ds-crt0.S)
+set(SRC_ARM ${SRC} ${SRCROOT}/cpp3ds/cpp3ds-crt0.S)
 set(SRC_TEST ${SRC})
 
 # Remove duplicate files for simulator
@@ -56,7 +56,7 @@ foreach(test1 ${SRC_SIM})
     endforeach(test2)
 endforeach(test1)
 list(APPEND SRC_SIM ${SRC})
-list(REMOV ${SRCROOT}/cpp3ds/syscalls.cpp)
+list(REMOVE_ITEM SRC_SIM ${SRCROOT}/cpp3ds/syscalls.cpp)
 
 #source_group("" FILES ${SRC})
 
@@ -96,26 +96,11 @@ set(CPP3DS_ARM_FLAGS "-g -Wall -pedantic -march=armv5te -fno-rtti -fno-exception
 set(CPP3DS_TEST_FLAGS "-g -Wall -pedantic -fno-rtti -fno-exceptions")
 set(CPP3DS_SIM_FLAGS "-g -Wall -pedantic")
 
-add_library(cpp3ds-test STATIC
-    ${SRC_TEST}
-)
-set_target_properties(cpp3ds-sim PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${CPP3DS_ARM_FLAGS}")
-
-add_library(cpp3ds-sim STATIC
-    ${SRC_SIM}
-    ${RESOURCE_SOURCE}
-    ${RESOURCE_HEADER}
-)
-set_target_properties(cpp3ds-sim PROPERTIES COMPILE_DEFINITIONS "SIMULATION")
-set_target_properties(cpp3ds-sim PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${CPP3DS_SIM_FLAGS}")
-#set_target_properties(cpp3ds-sim PROPERTIES LINK_FLAGS "${CMAKE_CXX_FLAGS} ${CPP3DS_SIM_FLAGS}")
-
-add_library(cpp3ds-test STATIC
-    ${SRC_TEST}
-)
-set_target_properties(cpp3ds-test PROPERTIES COMPILE_DEFINITIONS "TESTING")
-
 
 if(CPP3DS_BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()
+
+add_subdirectory(cmake/arm)
+add_subdirectory(cmake/sim)
+add_subdirectory(cmake/test)

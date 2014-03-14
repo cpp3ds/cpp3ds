@@ -4,11 +4,7 @@
  */
 
 #include <string.h>
-#include <cpp3ds/BottomScreen.h>
-#include <cpp3ds/TopScreen.h>
-#include <cpp3ds/Stage.h>
-#include <cpp3ds/actors/Text.h>
-#include <cpp3ds/Color.h>
+#include <cpp3ds/Graphics.hpp>
 
 using namespace cpp3ds;
 
@@ -31,7 +27,7 @@ extern "C" int main() {
 	bottom_screen.draw(stage);
 	top_screen.draw(stage);
 
-	Screen::display(top_screen, bottom_screen);
+	display(top_screen, bottom_screen);
 
 	return 0;
 }

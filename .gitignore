@@ -6,3 +6,11 @@ lib/
 
 include/cpp3ds/Simulator/simulator-res.h
 src/sim3ds/Simulator/simulator-res.cpp
+
+# CMake ignores
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+cmake_uninstall.cmake
+install_manifest.txt
