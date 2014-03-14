@@ -2,9 +2,10 @@ language: cpp
 compiler:
  - gcc
 before_install:
+ - sudo add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu/ trusty main universe"
  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
  - sudo apt-get -qq update
- - sudo apt-get -qq install libgtest-dev g++-4.8 libsfml-dev libgtkmm-3.0-dev
+ - sudo apt-get -qq install libgtest-dev g++-4.8 libsfml-dev libgtkmm-3.0-dev gcc-arm-none-eabi
  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
  - git clone https://github.com/cpp3ds/universal-tween-engine-cpp.git ../tween-engine
  - "cd ../tween-engine && make test ; cd -"
