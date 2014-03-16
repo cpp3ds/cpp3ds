@@ -9,6 +9,9 @@ gresource(
   RESOURCE_HEADER
 )
 
+include_directories( ${GTKMM_INCLUDE_DIRS} )
+link_directories( ${GTKMM_LIBRARY_DIRS} )
+
 
 add_library(cpp3ds-sim STATIC
     ${SRC_SIM}
