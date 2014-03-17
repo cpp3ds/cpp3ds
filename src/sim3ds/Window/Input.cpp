@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <cpp3ds/Simulator/Simulator.hpp>
 #include <cpp3ds/System/utils.hpp>
 #include <cpp3ds/Window/Input.hpp>
 
@@ -17,8 +18,8 @@ namespace cpp3ds {
 		return sf::Keyboard::isKeyPressed(button);
 	}
 
-	void Input::update3DSlider(){
-		Input::slider = 1.0f;
+	void Input::update(float deltaTime){
+		Input::slider = _simulator->get_slider3d();
 	}
 
 }

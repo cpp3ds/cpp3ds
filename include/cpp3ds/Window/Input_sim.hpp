@@ -38,7 +38,7 @@ namespace cpp3ds {
 	public:
 		static float slider;
 		static bool isDown(Button button);
-		static void update3DSlider();
+		static void update(float deltaTime);
 		static float get3DSlider(){ return Input::slider; }
 		// int bind(Button button, Event event);
 		// void unbind(int binding);

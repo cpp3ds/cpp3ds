@@ -16,6 +16,7 @@ namespace cpp3ds {
 				display();
 			deltaTime = (float)(GetSystemTick() - lastTime) / TICKS_PER_SEC;
 			lastTime = GetSystemTick();
+			Input::update(deltaTime);
 			ret = update(deltaTime);
 		}
 		return ret;

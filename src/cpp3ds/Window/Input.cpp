@@ -14,7 +14,7 @@ namespace cpp3ds {
 		return (~read_word(HID) & button);
 	}
 
-	void Input::update3DSlider(){
+	void Input::update(float deltaTime){
 		Input::slider = (float)(read_word(SLIDERSTATE) & 0xFF) / 255;
 	}
 

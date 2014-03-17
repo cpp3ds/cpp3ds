@@ -19,10 +19,7 @@ namespace cpp3ds {
 		// Glib::RefPtr<Gdk::Pixbuf> logo = Gdk::Pixbuf::create_from_resource("/org/cpp3ds/ui/logo.png");
 		// aboutDialog->set_logo(logo);
 
-		// TODO: Make pausedFrame the cpp3ds logo?
-		pausedFrameTexture.create(800 + SIM_OUTLINE_THICKNESS*2, 480 + SIM_OUTLINE_THICKNESS*2);
-		pausedFrame.setTexture(pausedFrameTexture);
-
+		
 		builder->get_widget("saveDialog", saveDialog);
 
 		builder->get_widget("menuAbout", menuAbout);
@@ -36,6 +33,12 @@ namespace cpp3ds {
 		screen = new SFMLWidget(sf::VideoMode(800 + SIM_OUTLINE_THICKNESS*2, 480 + SIM_OUTLINE_THICKNESS*2));
 		boxSFML->pack_start(*screen, true, true);
 		screen->show();
+
+		// TODO: Make pausedFrame the cpp3ds logo?
+		pausedFrameTexture.create(800 + SIM_OUTLINE_THICKNESS*2, 480 + SIM_OUTLINE_THICKNESS*2);
+		screen->renderWindow.clear();
+		pausedFrameTexture.update(screen->renderWindow);
+		pausedFrame.setTexture(pausedFrameTexture);
 
 		screen->renderWindow.setFramerateLimit(60);
 
@@ -84,45 +87,49 @@ namespace cpp3ds {
 	}
 
 	void Simulator::play() {
-		isPaused = false;
+		if (state == SIM_PLAYING) return;
+		state = SIM_PLAYING;
 		screen->renderWindow.setActive(false);
 		if (!isThreadRunning)
 			thread->launch();
 	}
 
 	void Simulator::pause() {
-		isPaused = true;
+		state = SIM_PAUSED;
 	}
 
 	void Simulator::stop() {
-		// Set flag to trigger stop.
-		// It's checked in thread on every frame draw.
-		triggerStop = true;
+		if (state == SIM_STOPPED) return;
+		// Set state first to trigger thread stop
+		state = SIM_STOPPED;
 		thread->wait();
-		triggerStop = false;
 		screen->renderWindow.setActive(true);
 		pausedFrameTexture.update(screen->renderWindow);
 		pausedFrame.setTexture(pausedFrameTexture, true);
 	}
 
 	float Simulator::get_slider3d(){
-		// Mutex lock here
+		sf::Lock lock(mutex);
 		if (!buttonToggle3D->get_active())
 			return 0;
-		return 1.0;
+		return scale3D->get_value();
 	}
 
 	void Simulator::saveScreenshot(){
-		saveDialog->run();
-		sf::Image screenie = screen->renderWindow.capture();
-		screenie.saveToFile("test.png");
+		// saveDialog->run();
+		// sf::Image screenie = screen->renderWindow.capture();
+		// screenie.saveToFile("test.png");
+		drawPausedFrame();
+		std::cout << scale3D->get_value() << std::endl;
 	}
 
 	void Simulator::drawPausedFrame(){
-		screen->renderWindow.clear();
-		screen->renderWindow.draw(pausedFrame);
-		// If paused, redraw paused frame
-		screen->display();
+		if (state != SIM_PLAYING){
+			screen->renderWindow.clear();
+			screen->renderWindow.draw(pausedFrame);
+			// If paused, redraw paused frame
+			screen->display();
+		}
 	}
 
 	/***********************
@@ -132,12 +139,18 @@ namespace cpp3ds {
 	void Simulator::on_sfml_size_allocate(Gtk::Allocation& allocation){
 		// Dirty hack to trigger event AFTER resize
 		Glib::signal_timeout().connect_once(sigc::mem_fun(*this,
-			&Simulator::drawPausedFrame ),50);
+			&Simulator::drawPausedFrame ),20);
+	}
+
+	bool Simulator::on_my_delete_event(GdkEventAny* event) {
+		if (state != SIM_STOPPED)
+			on_stop_clicked();
+		return false;
 	}
 
 	void Simulator::on_playpause_clicked(){
 		buttonStop->set_sensitive(true);
-		if (isPaused){
+		if (state != SIM_PLAYING){
 			buttonPlayPause->set_icon_name("media-playback-pause");
 			play();
 		} else {
@@ -155,6 +168,7 @@ namespace cpp3ds {
 	}
 
 	void Simulator::on_toggle3d_clicked(){
+		sf::Lock lock(mutex);
 		bool active = buttonToggle3D->get_active();
 		scale3D->set_sensitive(active);
 		scale3D->set_opacity(active ? 1.0 : 0.8);

@@ -8,6 +8,12 @@
 
 namespace cpp3ds {
 
+	enum SimulatorState {
+		SIM_PLAYING,
+		SIM_PAUSED,
+		SIM_STOPPED
+	};
+
 	class Simulator{
 
 	private:
@@ -22,6 +28,7 @@ namespace cpp3ds {
 		Gtk::Scale *scale3D;
 
 		sf::Thread* thread;
+		sf::Mutex mutex;
 
 		sf::Texture pausedFrameTexture;
 		sf::Sprite pausedFrame;
@@ -33,6 +40,7 @@ namespace cpp3ds {
 		void drawPausedFrame();
 
 		void on_sfml_size_allocate(Gtk::Allocation& allocation);
+		bool on_my_delete_event(GdkEventAny* event);
 		void on_playpause_clicked();
 		void on_stop_clicked();
 		void on_toggle3d_clicked();
@@ -40,10 +48,8 @@ namespace cpp3ds {
 
 	public:
 		SFMLWidget *screen;
-		sf::Mutex mutex;
 
-		bool triggerStop = false;
-		bool isPaused = true;
+		SimulatorState state = SIM_STOPPED;
 		bool isThreadRunning = false;
 
 		Simulator(Glib::RefPtr<Gtk::Application> app, Glib::RefPtr<Gtk::Builder> builder);
