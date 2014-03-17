@@ -13,7 +13,7 @@ namespace cpp3ds {
 		sf::Clock clock;
 		sf::Time deltaTime;
 		while (ret == 0) {
-			if (_simulator->state == SIM_STOPPED)
+			if (_simulator->getState() == SIM_STOPPED)
 				return -1;
 			render();
 			if (useDisplay)

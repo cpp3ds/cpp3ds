@@ -33,6 +33,8 @@ namespace cpp3ds {
 		sf::Texture pausedFrameTexture;
 		sf::Sprite pausedFrame;
 
+		SimulatorState state = SIM_STOPPED;
+
 		void runGame();
 		void checkThreadState();
 		void saveScreenshot();
@@ -48,8 +50,7 @@ namespace cpp3ds {
 
 	public:
 		SFMLWidget *screen;
-
-		SimulatorState state = SIM_STOPPED;
+		
 		bool isThreadRunning = false;
 
 		Simulator(Glib::RefPtr<Gtk::Application> app, Glib::RefPtr<Gtk::Builder> builder);
@@ -60,6 +61,7 @@ namespace cpp3ds {
 		void stop();
 		float get_slider3d();
 
+		SimulatorState getState(){ return state; }
 	};
 
 	// Simulator global to be accessed in-game
