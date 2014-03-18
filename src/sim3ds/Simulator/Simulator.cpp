@@ -15,9 +15,10 @@ namespace cpp3ds {
 		builder->get_widget("boxSFML", boxSFML);
 
 		builder->get_widget("aboutDialog", aboutDialog);
-		// Works in Gtkmm 3.12 unstable
-		// Glib::RefPtr<Gdk::Pixbuf> logo = Gdk::Pixbuf::create_from_resource("/org/cpp3ds/ui/logo.png");
-		// aboutDialog->set_logo(logo);
+		builder->get_widget("image3", imageLogo);
+		Glib::RefPtr<Gdk::Pixbuf> logo = imageLogo->get_pixbuf();
+		float ratio = (float)logo->get_width() / logo->get_height();
+		aboutDialog->set_logo(logo->scale_simple(100*ratio,100,Gdk::INTERP_BILINEAR));
 
 		
 		builder->get_widget("saveDialog", saveDialog);
@@ -42,13 +43,18 @@ namespace cpp3ds {
 
 		screen->renderWindow.setFramerateLimit(60);
 
+		// Connect all GTK signals
 		Glib::signal_timeout().connect(sigc::bind_return(sigc::mem_fun(*this,
 			&Simulator::checkThreadState ),true),200);
 
 		menuAbout->signal_activate().connect(sigc::mem_fun(*this,
 			&Simulator::on_about_clicked ));
+		aboutDialog->signal_response().connect(sigc::mem_fun(*this,
+			&Simulator::on_about_response ));
+
 		screen->signal_size_allocate().connect(sigc::mem_fun(*this,
 			&Simulator::on_sfml_size_allocate ));
+
 		buttonScreenshot->signal_clicked().connect(sigc::mem_fun(*this,
 			&Simulator::saveScreenshot ));
 		buttonPlayPause->signal_clicked().connect(sigc::mem_fun(*this,
@@ -142,10 +148,15 @@ namespace cpp3ds {
 			&Simulator::drawPausedFrame ),20);
 	}
 
-	bool Simulator::on_my_delete_event(GdkEventAny* event) {
+	bool Simulator::on_my_delete_event(GdkEventAny* event){
 		if (state != SIM_STOPPED)
 			on_stop_clicked();
 		return false;
+	}
+
+	void Simulator::on_about_response(int response_id){
+		// There's only a close button, so what else is there to do?
+		aboutDialog->hide();
 	}
 
 	void Simulator::on_playpause_clicked(){

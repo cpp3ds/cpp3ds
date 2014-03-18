@@ -19,6 +19,7 @@ namespace cpp3ds {
 	private:
 		Glib::RefPtr<Gtk::Application> application;
 		Gtk::Window *window;
+		Gtk::Image *imageLogo;
 		Gtk::MenuItem *menuAbout;
 		Gtk::AboutDialog *aboutDialog;
 		Gtk::FileChooserDialog *saveDialog;
@@ -43,6 +44,7 @@ namespace cpp3ds {
 
 		void on_sfml_size_allocate(Gtk::Allocation& allocation);
 		bool on_my_delete_event(GdkEventAny* event);
+		void on_about_response(int response_id);
 		void on_playpause_clicked();
 		void on_stop_clicked();
 		void on_toggle3d_clicked();

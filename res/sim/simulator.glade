@@ -4,12 +4,18 @@
   <requires lib="gtk+" version="3.10"/>
   <object class="GtkAboutDialog" id="aboutDialog">
     <property name="can_focus">False</property>
+    <property name="type">popup</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="destroy_with_parent">True</property>
     <property name="type_hint">dialog</property>
+    <property name="gravity">center</property>
     <property name="program_name">cpp3ds Simulator</property>
     <property name="version">1.0.0</property>
     <property name="website">http://cpp3ds.github.io/</property>
     <property name="website_label" translatable="yes">http://cpp3ds.github.io/</property>
     <property name="authors">Thomas Edvalson "Cruel"</property>
+    <property name="logo">logo.svg</property>
     <property name="logo_icon_name"/>
     <property name="license_type">mit-x11</property>
     <child internal-child="vbox">
@@ -93,6 +99,21 @@
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="resource">/org/cpp3ds/ui/icon-camera.svg</property>
+  </object>
+  <object class="GtkImage" id="image2">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="resource">/org/cpp3ds/ui/icon-monitor.svg</property>
+  </object>
+  <object class="GtkImage" id="image3">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="resource">/org/cpp3ds/ui/logo.svg</property>
   </object>
   <object class="GtkAdjustment" id="value3D">
     <property name="upper">1</property>
@@ -292,7 +313,7 @@
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">toolbutton1</property>
                 <property name="use_underline">True</property>
-                <property name="icon_name">camera-photo</property>
+                <property name="icon_widget">image1</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -305,7 +326,7 @@
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">toolbutton2</property>
                 <property name="use_underline">True</property>
-                <property name="icon_name">video-display</property>
+                <property name="icon_widget">image2</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -353,7 +374,7 @@
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">toolbutton3</property>
                 <property name="use_underline">True</property>
-                <property name="icon_name">media-playback-start</property>
+                <property name="stock_id">gtk-media-play</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -367,7 +388,7 @@
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">toolbutton4</property>
                 <property name="use_underline">True</property>
-                <property name="icon_name">media-playback-stop</property>
+                <property name="stock_id">gtk-media-stop</property>
               </object>
               <packing>
                 <property name="expand">False</property>
