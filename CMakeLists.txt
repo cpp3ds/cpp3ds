@@ -40,7 +40,7 @@ endif()
 # Fetch all source files
 FILE(GLOB_RECURSE SRC ${SRCROOT}/cpp3ds/*.cpp)
 FILE(GLOB_RECURSE SRC_SIM ${SRCROOT}/sim3ds/*.cpp)
-set(SRC_ARM ${SRC} ${SRCROOT}/cpp3ds/cpp3ds-crt0.S)
+set(SRC_ARM ${SRC})
 set(SRC_TEST ${SRC})
 
 # Remove duplicate files for simulator
