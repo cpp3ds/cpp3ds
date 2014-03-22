@@ -24,7 +24,7 @@ namespace cpp3ds {
 		Gtk::AboutDialog *aboutDialog;
 		Gtk::FileChooserDialog *saveDialog;
 		Gtk::Box *boxSFML;
-		Gtk::ToolButton *buttonScreenshot, *buttonPlayPause, *buttonStop;
+		Gtk::ToolButton *buttonScreenshot, *buttonPlayPause, *buttonStop, *buttonTest;
 		Gtk::ToggleToolButton *buttonToggle3D;
 		Gtk::Scale *scale3D;
 
@@ -49,6 +49,7 @@ namespace cpp3ds {
 		void on_stop_clicked();
 		void on_toggle3d_clicked();
 		void on_about_clicked();
+		void on_test_clicked();
 
 	public:
 		SFMLWidget *screen;

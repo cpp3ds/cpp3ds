@@ -15,15 +15,18 @@ namespace cpp3ds {
 		builder->get_widget("boxSFML", boxSFML);
 
 		builder->get_widget("aboutDialog", aboutDialog);
-		builder->get_widget("image3", imageLogo);
+		builder->get_widget("imageLogo", imageLogo);
 		Glib::RefPtr<Gdk::Pixbuf> logo = imageLogo->get_pixbuf();
 		float ratio = (float)logo->get_width() / logo->get_height();
 		aboutDialog->set_logo(logo->scale_simple(100*ratio,100,Gdk::INTERP_BILINEAR));
 
 		
 		builder->get_widget("saveDialog", saveDialog);
+		saveDialog->add_button("gtk-cancel", Gtk::RESPONSE_CANCEL);
+		saveDialog->add_button("gtk-save", Gtk::RESPONSE_OK);
 
 		builder->get_widget("menuAbout", menuAbout);
+		builder->get_widget("buttonTest", buttonTest);
 		builder->get_widget("buttonScreenshot", buttonScreenshot);
 		builder->get_widget("buttonPlayPause", buttonPlayPause);
 		builder->get_widget("buttonStop", buttonStop);
@@ -55,6 +58,8 @@ namespace cpp3ds {
 		screen->signal_size_allocate().connect(sigc::mem_fun(*this,
 			&Simulator::on_sfml_size_allocate ));
 
+		buttonTest->signal_clicked().connect(sigc::mem_fun(*this,
+			&Simulator::on_test_clicked ));
 		buttonScreenshot->signal_clicked().connect(sigc::mem_fun(*this,
 			&Simulator::saveScreenshot ));
 		buttonPlayPause->signal_clicked().connect(sigc::mem_fun(*this,
@@ -122,11 +127,17 @@ namespace cpp3ds {
 	}
 
 	void Simulator::saveScreenshot(){
-		// saveDialog->run();
-		// sf::Image screenie = screen->renderWindow.capture();
-		// screenie.saveToFile("test.png");
-		drawPausedFrame();
-		std::cout << scale3D->get_value() << std::endl;
+		if (state == SIM_PLAYING)
+			on_playpause_clicked();
+		saveDialog->set_current_name("screenshot.png");
+		if (saveDialog->run() == Gtk::RESPONSE_OK){
+			sf::Image screenie = screen->renderWindow.capture();
+			screen->renderWindow.setActive(false);
+			std::cout << "Saving screenshot to '"
+				<< saveDialog->get_filename() << "'... " << std::endl;
+			screenie.saveToFile(saveDialog->get_filename());
+		}
+		saveDialog->close();
 	}
 
 	void Simulator::drawPausedFrame(){
@@ -191,6 +202,11 @@ namespace cpp3ds {
 
 	void Simulator::on_about_clicked(){
 		aboutDialog->run();
+	}
+
+	void Simulator::on_test_clicked(){
+		// drawPausedFrame();
+		std::cout << scale3D->get_value() << std::endl;
 	}
 
 }
