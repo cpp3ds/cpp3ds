@@ -173,10 +173,10 @@ namespace cpp3ds {
 	void Simulator::on_playpause_clicked(){
 		buttonStop->set_sensitive(true);
 		if (state != SIM_PLAYING){
-			buttonPlayPause->set_icon_name("media-playback-pause");
+			buttonPlayPause->set_icon_name("gtk-media-pause");
 			play();
 		} else {
-			buttonPlayPause->set_icon_name("media-playback-start");
+			buttonPlayPause->set_icon_name("gtk-media-play-ltr");
 			pause();
 		}
 	}
@@ -184,7 +184,7 @@ namespace cpp3ds {
 	void Simulator::on_stop_clicked(){
 		buttonStop->set_sensitive(false);
 		buttonPlayPause->set_sensitive(false);
-		buttonPlayPause->set_icon_name("media-playback-start");
+		buttonPlayPause->set_icon_name("gtk-media-play-ltr");
 		stop();
 		buttonPlayPause->set_sensitive(true);
 	}
