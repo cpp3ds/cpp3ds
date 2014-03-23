@@ -63,6 +63,7 @@ namespace cpp3ds {
 		void pause();
 		void stop();
 		float get_slider3d();
+		void updatePausedFrame();
 
 		SimulatorState getState(){ return state; }
 	};

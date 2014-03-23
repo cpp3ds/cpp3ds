@@ -7,6 +7,7 @@ namespace cpp3ds {
 		_simulator->screen->display();
 		if (_simulator->getState() == SIM_PAUSED){
 			_simulator->screen->renderWindow.setActive(false);
+			_simulator->updatePausedFrame();
 			while (_simulator->getState() == SIM_PAUSED)
 				sf:sleep(sf::milliseconds(100));
 		}

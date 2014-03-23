@@ -50,7 +50,7 @@ void SFMLWidget::on_size_allocate(Gtk::Allocation& allocation)
 		                            allocation.get_y(),
 		                            allocation.get_width(),
 		                            allocation.get_height() );
-		// renderWindow.setSize(sf::Vector2u(allocation.get_width(), allocation.get_height()));
+		renderWindow.setSize(sf::Vector2u(allocation.get_width(), allocation.get_height()));
 	}
 }
 

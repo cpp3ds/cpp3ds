@@ -109,14 +109,17 @@ namespace cpp3ds {
 		state = SIM_PAUSED;
 	}
 
+	void Simulator::updatePausedFrame(){
+		pausedFrameTexture.update(screen->renderWindow);
+		pausedFrame.setTexture(pausedFrameTexture, true);
+		screen->renderWindow.setActive(false);
+	}
+
 	void Simulator::stop() {
 		if (state == SIM_STOPPED) return;
 		// Set state first to trigger thread stop
 		state = SIM_STOPPED;
 		thread->wait();
-		screen->renderWindow.setActive(true);
-		pausedFrameTexture.update(screen->renderWindow);
-		pausedFrame.setTexture(pausedFrameTexture, true);
 	}
 
 	float Simulator::get_slider3d(){
@@ -132,9 +135,11 @@ namespace cpp3ds {
 		saveDialog->set_current_name("screenshot.png");
 		if (saveDialog->run() == Gtk::RESPONSE_OK){
 			sf::Image screenie = screen->renderWindow.capture();
+			// if (get_slider3d() != 0)
+
 			screen->renderWindow.setActive(false);
-			std::cout << "Saving screenshot to '"
-				<< saveDialog->get_filename() << "'... " << std::endl;
+			std::cout << "Saving screenshot to "
+				<< saveDialog->get_filename() << std::endl;
 			screenie.saveToFile(saveDialog->get_filename());
 		}
 		saveDialog->close();
@@ -154,6 +159,14 @@ namespace cpp3ds {
 	 ***********************/
 
 	void Simulator::on_sfml_size_allocate(Gtk::Allocation& allocation){
+		bool dualscreen = (get_slider3d() != 0);
+		if (!dualscreen){
+			sf::View view;
+			view.reset(sf::FloatRect(0, 0, 400, 480));
+			screen->renderWindow.setView(view);
+		} else {
+			screen->renderWindow.setView(screen->renderWindow.getDefaultView());
+		}
 		// Dirty hack to trigger event AFTER resize
 		Glib::signal_timeout().connect_once(sigc::mem_fun(*this,
 			&Simulator::drawPausedFrame ),20);
@@ -205,8 +218,8 @@ namespace cpp3ds {
 	}
 
 	void Simulator::on_test_clicked(){
-		// drawPausedFrame();
-		std::cout << scale3D->get_value() << std::endl;
+		drawPausedFrame();
+		// std::cout << scale3D->get_value() << std::endl;
 	}
 
 }
