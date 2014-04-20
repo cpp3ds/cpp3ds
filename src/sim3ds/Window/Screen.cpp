@@ -15,7 +15,7 @@ namespace cpp3ds {
 	void Screen::clear(Color color){
 		sf::RectangleShape box(sf::Vector2f(width, height));
 		sf::Color c(color.r, color.g, color.b);
-		sf::Color outline(255,255,255, 10);
+		sf::Color outline(25,25,25);
 		box.setFillColor(c);
 		box.setOutlineColor(outline);
 		box.setOutlineThickness(SIM_OUTLINE_THICKNESS);

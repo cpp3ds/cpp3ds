@@ -1,5 +1,7 @@
 #include <iostream>
 #include <gtkmm/widget.h>
+#include <cpp3ds/Window/TopScreen.hpp>
+#include <cpp3ds/Window/BottomScreen.hpp>
 #include <cpp3ds/Simulator/SFMLWidget.hpp>
 
 // Tested on Linux Mint 12.4 and Windows 7
@@ -31,7 +33,11 @@ SFMLWidget::SFMLWidget(sf::VideoMode mode, int size_request)
 
 	set_size_request(size_request, size_request);
 
-	set_has_window(false); // Makes this behave like an interal object rather then a parent window.
+	set_has_window(false); // Makes this behave like an internal object rather then a parent window.
+
+	topLeftScreen.create(TOP_WIDTH, TOP_HEIGHT, true);
+	topRightScreen.create(TOP_WIDTH, TOP_HEIGHT, true);
+	bottomScreen.create(BOTTOM_WIDTH, BOTTOM_HEIGHT, true);
 }
 
 SFMLWidget::~SFMLWidget(){}

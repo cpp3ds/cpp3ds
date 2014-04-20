@@ -7,7 +7,39 @@ lib/
 include/cpp3ds/Simulator/simulator-res.h
 src/sim3ds/Simulator/simulator-res.cpp
 
-# CMake ignores
+# Eclipse
+*.pydevproject
+.metadata
+.gradle
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+
+# External tool builders
+.externalToolBuilders/
+
+# Locally stored "Eclipse launch configurations"
+*.launch
+
+# CDT-specific
+.cproject
+
+# PDT-specific
+.buildpath
+
+# sbteclipse plugin 
+.target
+
+# TeXlipse plugin
+.texlipse
+
+# CMake
 CMakeCache.txt
 CMakeFiles
 Makefile

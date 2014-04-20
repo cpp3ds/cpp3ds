@@ -7,7 +7,7 @@
 
 #include <stdlib.h>
 #include <stddef.h>
-#include <stdint.h>
+#include <inttypes.h>
 
 #define TICKS_PER_SEC 0x80C0000
 #define TICKS_PER_MSEC (TICKS_PER_SEC/1000)

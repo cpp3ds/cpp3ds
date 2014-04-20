@@ -13,7 +13,7 @@ namespace cpp3ds {
 		return last_hid;
 	}
 
-	bool Input::isDown(Button button) {
+	bool Input::isDown(sf::Keyboard::Key button) {
 		// return (~read_word(HID) & button);
 		return sf::Keyboard::isKeyPressed(button);
 	}

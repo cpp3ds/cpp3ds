@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <inttypes.h>
 #include <cpp3ds/System/utils.hpp>
 
 void *operator new(size_t size){

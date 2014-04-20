@@ -2,6 +2,7 @@
 #define CPP3DS_SIMULATOR_HPP
 
 #include <gtkmm.h>
+#include <SFML/Graphics.hpp>
 #include <cpp3ds/Simulator/SFMLWidget.hpp>
 
 #define SIM_OUTLINE_THICKNESS 1
@@ -35,6 +36,8 @@ namespace cpp3ds {
 		sf::Sprite pausedFrame;
 
 		SimulatorState state = SIM_STOPPED;
+
+		bool initialized = false;
 
 		void runGame();
 		void checkThreadState();

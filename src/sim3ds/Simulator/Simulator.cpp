@@ -1,5 +1,6 @@
 #include <iostream>
 #include <gtkmm.h>
+#include <SFML/Graphics.hpp>
 #include <cpp3ds/Simulator/Simulator.hpp>
 
 // Should never be executed. Only defined so the linker sees the
@@ -38,11 +39,7 @@ namespace cpp3ds {
 		boxSFML->pack_start(*screen, true, true);
 		screen->show();
 
-		// TODO: Make pausedFrame the cpp3ds logo?
 		pausedFrameTexture.create(800 + SIM_OUTLINE_THICKNESS*2, 480 + SIM_OUTLINE_THICKNESS*2);
-		screen->renderWindow.clear();
-		pausedFrameTexture.update(screen->renderWindow);
-		pausedFrame.setTexture(pausedFrameTexture);
 
 		screen->renderWindow.setFramerateLimit(60);
 
@@ -135,8 +132,6 @@ namespace cpp3ds {
 		saveDialog->set_current_name("screenshot.png");
 		if (saveDialog->run() == Gtk::RESPONSE_OK){
 			sf::Image screenie = screen->renderWindow.capture();
-			// if (get_slider3d() != 0)
-
 			screen->renderWindow.setActive(false);
 			std::cout << "Saving screenshot to "
 				<< saveDialog->get_filename() << std::endl;
@@ -146,12 +141,22 @@ namespace cpp3ds {
 	}
 
 	void Simulator::drawPausedFrame(){
+		if (!initialized){
+			initialized = true;
+			screen->renderWindow.clear();
+			// TODO: Make pausedFrame the cpp3ds logo?
+			screen->renderWindow.display();
+//			pausedFrameTexture.update(screen->renderWindow);
+			updatePausedFrame();
+		}
+
+		// If paused/stopped, redraw paused frame
 		if (state != SIM_PLAYING){
 			screen->renderWindow.clear();
 			screen->renderWindow.draw(pausedFrame);
-			// If paused, redraw paused frame
 			screen->display();
 		}
+
 	}
 
 	/***********************
@@ -169,7 +174,9 @@ namespace cpp3ds {
 		}
 		// Dirty hack to trigger event AFTER resize
 		Glib::signal_timeout().connect_once(sigc::mem_fun(*this,
-			&Simulator::drawPausedFrame ),20);
+			&Simulator::drawPausedFrame ), 20);
+
+
 	}
 
 	bool Simulator::on_my_delete_event(GdkEventAny* event){
@@ -218,8 +225,10 @@ namespace cpp3ds {
 	}
 
 	void Simulator::on_test_clicked(){
-		drawPausedFrame();
-		// std::cout << scale3D->get_value() << std::endl;
+		screen->renderWindow.clear();
+		screen->renderWindow.display();
+//		drawPausedFrame();
+		std::cout << scale3D->get_value() << std::endl;
 	}
 
 }

@@ -1,6 +1,7 @@
 #ifndef CPP3DS_SCENE_HPP
 #define CPP3DS_SCENE_HPP
 
+#include <inttypes.h>
 #include <cpp3ds/Window/BottomScreen.hpp>
 #include <cpp3ds/Window/TopScreen.hpp>
 #include <cpp3ds/Window/Input.hpp>
