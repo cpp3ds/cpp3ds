@@ -1,4 +1,3 @@
-#include <stddef.h>
 #include <cpp3ds/Graphics/Actor.hpp>
 #include <cpp3ds/Graphics/Stage.hpp>
 
@@ -7,10 +6,10 @@ namespace cpp3ds {
 	void Actor::addStage(Stage& stage){
 		StageNode *node = new StageNode();
 		node->stage = &stage;
-		node->next = NULL;
-		if (stageHead == NULL)
+		node->next = nullptr;
+		if (stageHead == nullptr)
 			stageHead = node;
-		if (stageTail != NULL)
+		if (stageTail != nullptr)
 			stageTail->next = node;
 		stageTail = node;
 	}
@@ -18,7 +17,7 @@ namespace cpp3ds {
 	void Actor::detach(){
 		// Remove this actor from all stages
 		StageNode* cur = stageHead;
-		while (cur != NULL) {
+		while (cur != nullptr) {
 			cur->stage->removeActor(*this);
 			cur = cur->next;
 		}

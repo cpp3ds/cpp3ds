@@ -1,4 +1,3 @@
-#include <stddef.h>
 #include <cpp3ds/Graphics/Stage.hpp>
 #include <cpp3ds/Graphics/Actor.hpp>
 #include <cpp3ds/Window/Input.hpp>
@@ -13,10 +12,10 @@ namespace cpp3ds {
 		ActorNode *node = new ActorNode();
 		node->actor = &actor;
 		node->prev = actorTail;
-		node->next = NULL;
-		if (actorHead == NULL)
+		node->next = nullptr;
+		if (actorHead == nullptr)
 			actorHead = node;
-		if (actorTail != NULL)
+		if (actorTail != nullptr)
 			actorTail->next = node;
 		actorTail = node;
 		actor.addStage(*this);
@@ -24,15 +23,15 @@ namespace cpp3ds {
 
 	void Stage::removeActor(Actor& actor){
 		ActorNode* cur = actorHead;
-		while (cur != NULL) {
+		while (cur != nullptr) {
 			if (cur->actor == &actor) {
 				if (cur == actorHead)
 					actorHead = cur->next;
 				if (cur == actorTail)
 					actorTail = cur->prev;
-				if (cur->prev != NULL)
+				if (cur->prev != nullptr)
 					cur->prev->next = cur->next;
-				if (cur->next != NULL)
+				if (cur->next != nullptr)
 					cur->next->prev = cur->prev;
 				delete cur;
 				break;
@@ -46,7 +45,7 @@ namespace cpp3ds {
 		ActorNode* cur = actorTail;
 		x += this->x;
 		y += this->y;
-		while (cur != NULL) {
+		while (cur != nullptr) {
 			Actor& actor = *cur->actor;
 			if (use3D) {
 				float slider = Input::get3DSlider() * actor.depth3d;
