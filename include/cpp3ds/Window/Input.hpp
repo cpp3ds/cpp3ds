@@ -26,13 +26,6 @@ namespace cpp3ds {
 		BUTTON_SELECT = 4
 	};
 
-	enum Event {
-		EVENT_DOWN,
-		EVENT_UP,
-		EVENT_PRESS,
-		EVENT_HOLD
-	};
-
 	typedef void (*InputCallback)(Button button);
 
 	class Input {

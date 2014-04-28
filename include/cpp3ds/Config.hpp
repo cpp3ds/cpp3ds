@@ -11,7 +11,7 @@
 ////////////////////////////////////////////////////////////
 // Define portable fixed-size types
 ////////////////////////////////////////////////////////////
-namespace sf
+namespace cpp3ds
 {
     // All "common" platforms use the same size for char, short and int
     // (basically there are 3 types for 3 sizes, so no other match is possible),

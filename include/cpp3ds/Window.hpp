@@ -4,7 +4,7 @@
 #include <cpp3ds/System.hpp>
 //#include <cpp3ds/Window/Context.hpp>
 //#include <cpp3ds/Window/ContextSettings.hpp>
-//#include <cpp3ds/Window/Event.hpp>
+#include <cpp3ds/Window/Event.hpp>
 
 #include <cpp3ds/Window/Input.hpp>
 //#include <cpp3ds/Window/Joystick.hpp>
