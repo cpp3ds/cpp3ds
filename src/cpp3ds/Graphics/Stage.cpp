@@ -1,6 +1,6 @@
 #include <cpp3ds/Graphics/Stage.hpp>
 #include <cpp3ds/Graphics/Actor.hpp>
-#include <cpp3ds/Window/Input.hpp>
+#include <cpp3ds/Window/Keyboard.hpp>
 #include <cpp3ds/System/utils.hpp>
 
 namespace cpp3ds {
@@ -48,7 +48,7 @@ namespace cpp3ds {
 		while (cur != nullptr) {
 			Actor& actor = *cur->actor;
 			if (use3D) {
-				float slider = Input::get3DSlider() * actor.depth3d;
+				float slider = Keyboard::get3DSlider() * actor.depth3d;
 				actor.draw(screen, (isLeftside) ? x-slider : x+slider, y, use3D, isLeftside);
 			} else {
 				actor.draw(screen, x, y, use3D, isLeftside);

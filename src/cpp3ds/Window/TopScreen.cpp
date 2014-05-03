@@ -1,5 +1,5 @@
 #include <cpp3ds/Window/TopScreen.hpp>
-#include <cpp3ds/Window/Input.hpp>
+#include <cpp3ds/Window/Keyboard.hpp>
 #include <cpp3ds/Graphics/Color.hpp>
 #include <cpp3ds/Graphics/Drawable.hpp>
 
@@ -12,7 +12,7 @@ namespace cpp3ds {
 
 	void TopScreen::draw(Drawable& obj, float x, float y, bool use3D) {
 		if (use3D) {
-			float slider = Input::get3DSlider() * obj.depth3d;
+			float slider = Keyboard::get3DSlider() * obj.depth3d;
 			obj.draw(left_screen, x - slider, y, use3D, true);
 			obj.draw(right_screen, x + slider, y, use3D, false);
 		} else {

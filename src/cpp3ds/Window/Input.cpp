@@ -1,4 +1,4 @@
-#include <cpp3ds/Window/Input.hpp>
+#include <cpp3ds/Window/Input_.hpp>
 #include <cpp3ds/System/utils.hpp>
 
 namespace cpp3ds {

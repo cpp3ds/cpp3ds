@@ -1,7 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <cpp3ds/Simulator/Simulator.hpp>
 #include <cpp3ds/System/utils.hpp>
-#include <cpp3ds/Window/Input.hpp>
+#include <cpp3ds/Window/Input_.hpp>
 
 namespace cpp3ds {
 

@@ -19,7 +19,7 @@ namespace cpp3ds {
 			if (useDisplay)
 				display();
 			deltaTime = clock.restart();
-			Input::update(deltaTime.asSeconds());
+			Keyboard::update();
 			ret = update(deltaTime.asSeconds());
 		}
 		return ret;

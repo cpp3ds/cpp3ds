@@ -2,6 +2,7 @@
 #include <cpp3ds/Window/Screen.hpp>
 #include <cpp3ds/Window/Scene.hpp>
 #include <cpp3ds/Window/Display.hpp>
+#include <cpp3ds/Window/Keyboard.hpp>
 #include <cpp3ds/System/utils.hpp>
 
 namespace cpp3ds {
@@ -16,7 +17,7 @@ namespace cpp3ds {
 				display();
 			deltaTime = (float)(GetSystemTick() - lastTime) / TICKS_PER_SEC;
 			lastTime = GetSystemTick();
-			Input::update(deltaTime);
+			Keyboard::update();
 			ret = update(deltaTime);
 		}
 		return ret;
