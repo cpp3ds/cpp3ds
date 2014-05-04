@@ -105,6 +105,8 @@ private:
 	////////////////////////////////////////////////////////////
 	void processEvents();
 
+	bool filterEvent(const Event& event);
+
 	std::queue<Event> m_events;                          ///< Queue of available events
 //	JoystickState     m_joystickStates[Joystick::Count]; ///< Previous state of the joysticks
 	Vector3f          m_sensorValue[Sensor::Count];      ///< Previous value of the sensors

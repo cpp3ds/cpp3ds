@@ -4,11 +4,19 @@
 namespace cpp3ds {
 
 bool EventManager::pollEvent(Event& event) {
-	return false;
+	if (popEvent(event, false)) {
+		return filterEvent(event);
+	} else {
+		return false;
+	}
 }
 
 bool EventManager::waitEvent(Event& event) {
-	return false;
+	if (popEvent(event, true)) {
+		return filterEvent(event);
+	} else {
+		return false;
+	}
 }
 
 void EventManager::setJoystickThreshold(float threshold) {
@@ -17,6 +25,10 @@ void EventManager::setJoystickThreshold(float threshold) {
 
 void EventManager::pushEvent(const Event& event) {
 	//
+}
+
+bool EventManager::filterEvent(const Event& event) {
+	return true;
 }
 
 ////////////////////////////////////////////////////////////
