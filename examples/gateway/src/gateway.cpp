@@ -8,7 +8,7 @@
 
 using namespace cpp3ds;
 
-extern "C" int main() {
+void cpp3ds_main() {
 	BottomScreen bottom_screen;
 	TopScreen top_screen;
 	Stage stage;
@@ -28,6 +28,4 @@ extern "C" int main() {
 	top_screen.draw(stage);
 
 	display(top_screen, bottom_screen);
-
-	return 0;
 }
