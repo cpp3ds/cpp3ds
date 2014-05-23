@@ -1,25 +1,37 @@
-include(gresource)
+# Find includes in corresponding build directories
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+# Instruct CMake to run moc automatically when needed.
+set(CMAKE_AUTOMOC ON)
 
-gresource(
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../res/sim
-  simulator.gresource.xml
-  ${CMAKE_CURRENT_BINARY_DIR}/../../src/sim3ds/Simulator
-  ${CMAKE_CURRENT_BINARY_DIR}/../../include/cpp3ds/Simulator
-  RESOURCE_SOURCE
-  RESOURCE_HEADER
+set(ui_header ${CMAKE_CURRENT_SOURCE_DIR}/../../include/cpp3ds/Simulator/ui_emulator.h)
+
+add_custom_command(
+	OUTPUT ${ui_header}
+	COMMAND uic ${CMAKE_CURRENT_SOURCE_DIR}/../../res/sim/emulator.ui -o ${ui_header}
+	COMMENT "Generating ui_emulator.h"
 )
+             
+qt5_wrap_cpp(tst_hdr_moc ${CMAKE_CURRENT_SOURCE_DIR}/../../include/cpp3ds/Simulator/Simulator.hpp)
+#qt5_wrap_ui(tst_form_hdr ${CMAKE_CURRENT_SOURCE_DIR}/../../res/sim/emulator.ui)
+qt5_add_resources(RESOURCE_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/../../res/sim/emulator.qrc)
 
-include_directories( ${GTKMM_INCLUDE_DIRS} )
-link_directories( ${GTKMM_LIBRARY_DIRS} )
+#include_directories( ${GTKMM_INCLUDE_DIRS} )
+#link_directories( ${GTKMM_LIBRARY_DIRS} )
 
 
 add_library(cpp3ds-sim STATIC
     ${SRC_SIM}
-    ${RESOURCE_SOURCE}
+    ${tst_hdr_moc}
+    ${tst_form_hdr}
     ${RESOURCE_HEADER}
 )
 set_target_properties(cpp3ds-sim PROPERTIES COMPILE_DEFINITIONS "SIMULATION")
 set_target_properties(cpp3ds-sim PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${CPP3DS_SIM_FLAGS}")
 #set_target_properties(cpp3ds-sim PROPERTIES LINK_FLAGS "${CMAKE_CXX_FLAGS} ${CPP3DS_SIM_FLAGS}")
 
-target_link_libraries(cpp3ds-sim ${GTKMM_LIBRARIES})
+add_custom_target(ui ALL DEPENDS
+	${CMAKE_CURRENT_SOURCE_DIR}/../../include/cpp3ds/Simulator/ui_emulator.h
+)
+add_dependencies(cpp3ds-sim ui)
+qt5_use_modules(cpp3ds-sim Core Gui Widgets)
+#target_link_libraries(cpp3ds-sim ${GTKMM_LIBRARIES})

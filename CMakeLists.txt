@@ -5,9 +5,7 @@ project(CPP3DS)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(GTKMM gtkmm-3.0)
-pkg_check_modules(GMODULE gmodule-2.0)
+find_package(Qt5Widgets)
 
 set(INCROOT ${PROJECT_SOURCE_DIR}/include/cpp3ds)
 set(SRCROOT ${PROJECT_SOURCE_DIR}/src)
@@ -16,10 +14,12 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src)
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}/include
     "../tween-engine/include"
+    "../ctrulib/libctru/include"
 )
 
 link_directories(
     "../tween-engine/lib"
+    "../ctrulib/libctru/lib"
 )
 
 # C++11 support
@@ -55,6 +55,8 @@ foreach(test1 ${SRC_SIM})
 endforeach(test1)
 list(APPEND SRC_SIM ${SRC})
 list(REMOVE_ITEM SRC_SIM ${SRCROOT}/cpp3ds/syscalls.cpp)
+list(REMOVE_ITEM SRC_SIM ${SRCROOT}/cpp3ds/cpp3ds.cpp)
+list(REMOVE_ITEM SRC_TEST ${SRCROOT}/cpp3ds/cpp3ds.cpp)
 
 #source_group("" FILES ${SRC})
 
@@ -81,9 +83,9 @@ add_custom_target(uninstall
 # set the output directory for cpp3ds libraries
 set(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/lib")
 
-set(CPP3DS_ARM_FLAGS "-g -Wall -pedantic -march=armv5te -fno-rtti -fno-exceptions")
-set(CPP3DS_TEST_FLAGS "-g -Wall -pedantic -fno-rtti -fno-exceptions")
-set(CPP3DS_SIM_FLAGS "-g -Wall -pedantic")
+set(CPP3DS_ARM_FLAGS "-Wall -pedantic -O3 -march=armv6 -fdata-sections -fno-rtti -fno-exceptions")
+set(CPP3DS_TEST_FLAGS "-g -Wall -pedantic -O0 -fno-rtti -fno-exceptions")
+set(CPP3DS_SIM_FLAGS "-g -Wall -pedantic -O0")
 
 
 if(CPP3DS_BUILD_EXAMPLES)

@@ -1,70 +1,67 @@
 #include <iostream>
-#include <gtkmm.h>
+//#include <gtkmm.h>
 #include <SFML/Graphics.hpp>
 #include <cpp3ds/Simulator/Simulator.hpp>
 
-// Should never be executed. Only defined so the linker sees the
-// symbol in the absence of the --wrap option.
-extern "C" int __real_main();
-
 namespace cpp3ds {
 
-	Simulator::Simulator(Glib::RefPtr<Gtk::Application> app, Glib::RefPtr<Gtk::Builder> builder){
-		application = app;
+	Simulator::Simulator(QWidget *parent): QMainWindow(parent){
+		setupUi(this);
+//		application = app;
 		thread = new sf::Thread(&Simulator::runGame, this);
-		builder->get_widget("window", window);
-		builder->get_widget("boxSFML", boxSFML);
-
-		builder->get_widget("aboutDialog", aboutDialog);
-		builder->get_widget("imageLogo", imageLogo);
-		Glib::RefPtr<Gdk::Pixbuf> logo = imageLogo->get_pixbuf();
-		float ratio = (float)logo->get_width() / logo->get_height();
-		aboutDialog->set_logo(logo->scale_simple(100*ratio,100,Gdk::INTERP_BILINEAR));
-
-		
-		builder->get_widget("saveDialog", saveDialog);
-		saveDialog->add_button("gtk-cancel", Gtk::RESPONSE_CANCEL);
-		saveDialog->add_button("gtk-save", Gtk::RESPONSE_OK);
-
-		builder->get_widget("menuAbout", menuAbout);
-		builder->get_widget("buttonTest", buttonTest);
-		builder->get_widget("buttonScreenshot", buttonScreenshot);
-		builder->get_widget("buttonPlayPause", buttonPlayPause);
-		builder->get_widget("buttonStop", buttonStop);
-		builder->get_widget("buttonToggle3D", buttonToggle3D);
-		builder->get_widget("scale3D", scale3D);
+//		builder->get_widget("window", window);
+//		builder->get_widget("boxSFML", boxSFML);
+//
+//		builder->get_widget("aboutDialog", aboutDialog);
+//		builder->get_widget("imageLogo", imageLogo);
+//		Glib::RefPtr<Gdk::Pixbuf> logo = imageLogo->get_pixbuf();
+//		float ratio = (float)logo->get_width() / logo->get_height();
+//		aboutDialog->set_logo(logo->scale_simple(100*ratio,100,Gdk::INTERP_BILINEAR));
+//
+//
+//		builder->get_widget("saveDialog", saveDialog);
+//		saveDialog->add_button("gtk-cancel", Gtk::RESPONSE_CANCEL);
+//		saveDialog->add_button("gtk-save", Gtk::RESPONSE_OK);
+//
+//		builder->get_widget("menuAbout", menuAbout);
+//		builder->get_widget("buttonTest", buttonTest);
+//		builder->get_widget("buttonScreenshot", buttonScreenshot);
+//		builder->get_widget("buttonPlayPause", buttonPlayPause);
+//		builder->get_widget("buttonStop", buttonStop);
+//		builder->get_widget("buttonToggle3D", buttonToggle3D);
+//		builder->get_widget("scale3D", scale3D);
 
 		// Create and add a SFMLWidget
-		screen = new SFMLWidget(sf::VideoMode(800 + SIM_OUTLINE_THICKNESS*2, 480 + SIM_OUTLINE_THICKNESS*2));
-		boxSFML->pack_start(*screen, true, true);
-		screen->show();
+		screen = new SFMLWidget();
+//		boxSFML->pack_start(*screen, true, true);
+//		screen->show();
 
 		pausedFrameTexture.create(800 + SIM_OUTLINE_THICKNESS*2, 480 + SIM_OUTLINE_THICKNESS*2);
 
 		screen->renderWindow.setFramerateLimit(60);
 
 		// Connect all GTK signals
-		Glib::signal_timeout().connect(sigc::bind_return(sigc::mem_fun(*this,
-			&Simulator::checkThreadState ),true),200);
-
-		menuAbout->signal_activate().connect(sigc::mem_fun(*this,
-			&Simulator::on_about_clicked ));
-		aboutDialog->signal_response().connect(sigc::mem_fun(*this,
-			&Simulator::on_about_response ));
-
-		screen->signal_size_allocate().connect(sigc::mem_fun(*this,
-			&Simulator::on_sfml_size_allocate ));
-
-		buttonTest->signal_clicked().connect(sigc::mem_fun(*this,
-			&Simulator::on_test_clicked ));
-		buttonScreenshot->signal_clicked().connect(sigc::mem_fun(*this,
-			&Simulator::saveScreenshot ));
-		buttonPlayPause->signal_clicked().connect(sigc::mem_fun(*this,
-			&Simulator::on_playpause_clicked ));
-		buttonStop->signal_clicked().connect(sigc::mem_fun(*this,
-			&Simulator::on_stop_clicked ));
-		buttonToggle3D->signal_toggled().connect(sigc::mem_fun(*this,
-			&Simulator::on_toggle3d_clicked ));
+//		Glib::signal_timeout().connect(sigc::bind_return(sigc::mem_fun(*this,
+//			&Simulator::checkThreadState ),true),200);
+//
+//		menuAbout->signal_activate().connect(sigc::mem_fun(*this,
+//			&Simulator::on_about_clicked ));
+//		aboutDialog->signal_response().connect(sigc::mem_fun(*this,
+//			&Simulator::on_about_response ));
+//
+//		screen->signal_size_allocate().connect(sigc::mem_fun(*this,
+//			&Simulator::on_sfml_size_allocate ));
+//
+//		buttonTest->signal_clicked().connect(sigc::mem_fun(*this,
+//			&Simulator::on_test_clicked ));
+//		buttonScreenshot->signal_clicked().connect(sigc::mem_fun(*this,
+//			&Simulator::saveScreenshot ));
+//		buttonPlayPause->signal_clicked().connect(sigc::mem_fun(*this,
+//			&Simulator::on_playpause_clicked ));
+//		buttonStop->signal_clicked().connect(sigc::mem_fun(*this,
+//			&Simulator::on_stop_clicked ));
+//		buttonToggle3D->signal_toggled().connect(sigc::mem_fun(*this,
+//			&Simulator::on_toggle3d_clicked ));
 	}
 
 	Simulator::~Simulator(){
@@ -74,15 +71,15 @@ namespace cpp3ds {
 	}
 
 	void Simulator::run(){
-		application->run(*window);
+//		application->run(*window);
 	}
 
 	// Meant to be run in another thread or will block the GUI.
 	void Simulator::runGame(){
 		isThreadRunning = true;
 		std::cout << "Simulation starting..." << std::endl;
-		int ret = __real_main();
-		std::cout << "Simulation ended." << std::endl;
+		cpp3ds_main();
+		std::cout << "Simulation ended. " << std::endl;
 		screen->renderWindow.setActive(false);
 		isThreadRunning = false;
 	}
@@ -90,14 +87,20 @@ namespace cpp3ds {
 	void Simulator::checkThreadState(){
 		// Check to see if thread ended but GUI hasn't updated
 		// (Can't easily update GUI inside thread)
-		if (!isThreadRunning && buttonStop->get_sensitive())
-			on_stop_clicked();
+//		if (!isThreadRunning && buttonStop->get_sensitive())
+//			on_stop_clicked();
 	}
 
 	void Simulator::play() {
-		if (state == SIM_PLAYING) return;
+		if (state == SIM_PLAYING)
+			return;
 		state = SIM_PLAYING;
 		screen->renderWindow.setActive(false);
+
+		// Clear event queue
+		sf::Event event;
+		while (screen->renderWindow.pollEvent(event)) {}
+
 		if (!isThreadRunning)
 			thread->launch();
 	}
@@ -113,7 +116,8 @@ namespace cpp3ds {
 	}
 
 	void Simulator::stop() {
-		if (state == SIM_STOPPED) return;
+		if (state == SIM_STOPPED)
+			return;
 		// Set state first to trigger thread stop
 		state = SIM_STOPPED;
 		thread->wait();
@@ -121,23 +125,23 @@ namespace cpp3ds {
 
 	float Simulator::get_slider3d(){
 		sf::Lock lock(mutex);
-		if (!buttonToggle3D->get_active())
+//		if (!buttonToggle3D->get_active())
 			return 0;
-		return scale3D->get_value();
+//		return scale3D->get_value();
 	}
 
 	void Simulator::saveScreenshot(){
-		if (state == SIM_PLAYING)
-			on_playpause_clicked();
-		saveDialog->set_current_name("screenshot.png");
-		if (saveDialog->run() == Gtk::RESPONSE_OK){
-			sf::Image screenie = screen->renderWindow.capture();
-			screen->renderWindow.setActive(false);
-			std::cout << "Saving screenshot to "
-				<< saveDialog->get_filename() << std::endl;
-			screenie.saveToFile(saveDialog->get_filename());
-		}
-		saveDialog->close();
+//		if (state == SIM_PLAYING)
+//			on_playpause_clicked();
+//		saveDialog->set_current_name("screenshot.png");
+//		if (saveDialog->run() == Gtk::RESPONSE_OK){
+//			sf::Image screenie = screen->renderWindow.capture();
+//			screen->renderWindow.setActive(false);
+//			std::cout << "Saving screenshot to "
+//				<< saveDialog->get_filename() << std::endl;
+//			screenie.saveToFile(saveDialog->get_filename());
+//		}
+//		saveDialog->close();
 	}
 
 	void Simulator::drawPausedFrame(){
@@ -156,13 +160,12 @@ namespace cpp3ds {
 			screen->renderWindow.draw(pausedFrame);
 			screen->display();
 		}
-
 	}
 
 	/***********************
 	  UI Events
 	 ***********************/
-
+/*
 	void Simulator::on_sfml_size_allocate(Gtk::Allocation& allocation){
 		bool dualscreen = (get_slider3d() != 0);
 		if (!dualscreen){
@@ -176,7 +179,9 @@ namespace cpp3ds {
 		Glib::signal_timeout().connect_once(sigc::mem_fun(*this,
 			&Simulator::drawPausedFrame ), 20);
 
-
+		// Won't give proper focus without this for some reason
+		// (for key_press events)
+		screen->grab_focus();
 	}
 
 	bool Simulator::on_my_delete_event(GdkEventAny* event){
@@ -230,5 +235,5 @@ namespace cpp3ds {
 //		drawPausedFrame();
 		std::cout << scale3D->get_value() << std::endl;
 	}
-
+*/
 }

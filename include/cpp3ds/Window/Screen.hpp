@@ -5,6 +5,7 @@
 #ifndef CPP3DS_SCREEN_HPP
 #define CPP3DS_SCREEN_HPP
 
+#include <cpp3ds/Config.hpp>
 #include <cpp3ds/Graphics/Color.hpp>
 
 namespace cpp3ds {
@@ -16,7 +17,7 @@ namespace cpp3ds {
 		void setPixelAddress(int addr, Color color);
 	protected:
 		bool buffer;
-		int frame1, frame2;
+		Uint8 frame1, frame2;
 		int width, height;
 	public:
 		Screen(int addr1, int addr2, int w, int h):

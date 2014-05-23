@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<gresources>
- <gresource prefix="/org/cpp3ds/ui">
-  <file compressed="true">simulator.glade</file>
-  <file compressed="true">logo.svg</file>
-  <file compressed="true">icon-camera.svg</file>
-  <file compressed="true">icon-monitor.svg</file>
- </gresource>
-</gresources>
