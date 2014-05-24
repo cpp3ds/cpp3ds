@@ -1,18 +1,79 @@
+#ifdef Q_WS_X11
+    #include <Qt/qx11info_x11.h>
+    #include <X11/Xlib.h>
+#endif
 #include <iostream>
-//#include <gtkmm/widget.h>
 #include <cpp3ds/Window/TopScreen.hpp>
 #include <cpp3ds/Window/BottomScreen.hpp>
 #include <cpp3ds/Simulator/SFMLWidget.hpp>
 
-
-SFMLWidget::SFMLWidget()
+QSFMLCanvas::QSFMLCanvas(QWidget* Parent, const QPoint& Position, const QSize& Size, unsigned int FrameTime) :
+QWidget       (Parent),
+myInitialized (false)
 {
-	topLeftScreen.create(TOP_WIDTH, TOP_HEIGHT, true);
+    // Setup some states to allow direct rendering into the widget
+    setAttribute(Qt::WA_PaintOnScreen);
+    setAttribute(Qt::WA_OpaquePaintEvent);
+    setAttribute(Qt::WA_NoSystemBackground);
+    setAttribute(Qt::WA_PaintUnclipped);
+
+    topLeftScreen.create(TOP_WIDTH, TOP_HEIGHT, true);
 	topRightScreen.create(TOP_WIDTH, TOP_HEIGHT, true);
 	bottomScreen.create(BOTTOM_WIDTH, BOTTOM_HEIGHT, true);
+
+    // Set strong focus to enable keyboard events to be received
+    setFocusPolicy(Qt::StrongFocus);
+
+    // Setup the widget geometry
+    move(Position);
+    resize(Size);
+
+    // Setup the timer
+    myTimer.setInterval(FrameTime);
 }
 
-SFMLWidget::~SFMLWidget(){}
+QSFMLCanvas::~QSFMLCanvas(){}
+
+void QSFMLCanvas::showEvent(QShowEvent*)
+{
+    if (!myInitialized)
+    {
+        // Under X11, we need to flush the commands sent to the server to ensure that
+        // SFML will get an updated view of the windows
+        #ifdef Q_WS_X11
+            XFlush(QX11Info::display());
+        #endif
+
+        // Create the SFML window with the widget handle
+		RenderWindow::create(winId());
+
+//        RenderWindow::create((void *) winId());
+
+        // Let the derived class do its specific stuff
+//        OnInit();
+
+        // Setup the timer to trigger a refresh at specified framerate
+//        connect(&myTimer, SIGNAL(timeout()), this, SLOT(repaint()));
+//        myTimer.start();
+
+        myInitialized = true;
+    }
+}
+
+QPaintEngine* QSFMLCanvas::paintEngine() const {
+//	We make the paintEvent function return a null paint engine. This functions works together with
+//	the WA_PaintOnScreen flag to tell Qt that we're not using any of its built-in paint engines.
+	return nullptr;
+}
+
+void QSFMLCanvas::paintEvent(QPaintEvent*)
+{
+    // Let the derived class do its specific stuff
+//    OnUpdate();
+
+    // Display on screen
+	RenderWindow::display();
+}
 
 /*
 void SFMLWidget::on_size_allocate(Gtk::Allocation& allocation)
@@ -76,17 +137,3 @@ void SFMLWidget::on_unrealize(){
 	Gtk::Widget::on_unrealize();
 }
 */
-void SFMLWidget::display(){
-//	if(m_refGdkWindow)
-		renderWindow.display();
-}
-
-void SFMLWidget::invalidate(){
-//	if(m_refGdkWindow)
-//		m_refGdkWindow->invalidate(true);
-}
-
-void SFMLWidget::show3D(){
-	//
-}
-

@@ -2,29 +2,33 @@
 #define CPP3DS_SFMLWIDGET_HPP
 
 #include <SFML/Graphics.hpp>
-//#include <gtkmm/widget.h>
-//#include <gdkmm/general.h>
+#include <QWidget>
+#include <QTimer>
 
-class SFMLWidget
+class QSFMLCanvas: public QWidget, public sf::RenderWindow
 {
-protected:
-//    sf::VideoMode m_vMode;
-//
-//    virtual void on_size_allocate(Gtk::Allocation& allocation);
-//    virtual void on_realize();
-//    virtual void on_unrealize();
-//
-//    Glib::RefPtr<Gdk::Window> m_refGdkWindow;
-public:
-    sf::RenderWindow renderWindow;
-    sf::RenderTexture topLeftScreen, topRightScreen, bottomScreen;
+public :
 
-    SFMLWidget();
-    virtual ~SFMLWidget();
+	sf::RenderTexture topLeftScreen, topRightScreen, bottomScreen;
 
-    void invalidate();
-    void display();
-    void show3D();
+	QSFMLCanvas(QWidget* Parent, const QPoint& Position, const QSize& Size, unsigned int FrameTime = 0);
+
+    virtual ~QSFMLCanvas();
+
+private :
+
+//    virtual void OnInit();
+//
+//    virtual void OnUpdate();
+
+    virtual QPaintEngine* paintEngine() const;
+
+    virtual void showEvent(QShowEvent*);
+
+    virtual void paintEvent(QPaintEvent*);
+
+    QTimer myTimer;
+    bool   myInitialized;
 };
 
 #endif

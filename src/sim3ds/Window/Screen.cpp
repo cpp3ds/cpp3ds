@@ -22,7 +22,7 @@ namespace cpp3ds {
 		box.setPosition(x,y);
 		pixelImage.create(width, height, sf::Color::Transparent);
 		// Should only clear the relevant screen area
-		_simulator->screen->renderWindow.draw(box);
+		_simulator->screen->draw(box);
 	}
 
 	void Screen::draw(Drawable& obj, float x, float y, bool use3D) {
@@ -35,7 +35,7 @@ namespace cpp3ds {
 		starsTexture.loadFromImage(pixelImage);
 		sf::Sprite test(starsTexture);
 		test.setPosition(x, y);
-		_simulator->screen->renderWindow.draw(test);
+		_simulator->screen->draw(test);
 	}
 
 }

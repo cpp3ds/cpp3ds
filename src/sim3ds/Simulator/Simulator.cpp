@@ -32,13 +32,13 @@ namespace cpp3ds {
 //		builder->get_widget("scale3D", scale3D);
 
 		// Create and add a SFMLWidget
-		screen = new SFMLWidget();
+		screen = new QSFMLCanvas(this, QPoint(20, 20), QSize(360, 360));
 //		boxSFML->pack_start(*screen, true, true);
-//		screen->show();
+		screen->show();
 
 		pausedFrameTexture.create(800 + SIM_OUTLINE_THICKNESS*2, 480 + SIM_OUTLINE_THICKNESS*2);
 
-		screen->renderWindow.setFramerateLimit(60);
+		screen->setFramerateLimit(60);
 
 		// Connect all GTK signals
 //		Glib::signal_timeout().connect(sigc::bind_return(sigc::mem_fun(*this,
@@ -80,7 +80,7 @@ namespace cpp3ds {
 		std::cout << "Simulation starting..." << std::endl;
 		cpp3ds_main();
 		std::cout << "Simulation ended. " << std::endl;
-		screen->renderWindow.setActive(false);
+		screen->setActive(false);
 		isThreadRunning = false;
 	}
 
@@ -95,11 +95,11 @@ namespace cpp3ds {
 		if (state == SIM_PLAYING)
 			return;
 		state = SIM_PLAYING;
-		screen->renderWindow.setActive(false);
+		screen->setActive(false);
 
 		// Clear event queue
 		sf::Event event;
-		while (screen->renderWindow.pollEvent(event)) {}
+		while (screen->pollEvent(event)) {}
 
 		if (!isThreadRunning)
 			thread->launch();
@@ -110,9 +110,9 @@ namespace cpp3ds {
 	}
 
 	void Simulator::updatePausedFrame(){
-		pausedFrameTexture.update(screen->renderWindow);
+		pausedFrameTexture.update(*screen);
 		pausedFrame.setTexture(pausedFrameTexture, true);
-		screen->renderWindow.setActive(false);
+		screen->setActive(false);
 	}
 
 	void Simulator::stop() {
@@ -147,17 +147,17 @@ namespace cpp3ds {
 	void Simulator::drawPausedFrame(){
 		if (!initialized){
 			initialized = true;
-			screen->renderWindow.clear();
+			screen->clear();
 			// TODO: Make pausedFrame the cpp3ds logo?
-			screen->renderWindow.display();
+			screen->display();
 //			pausedFrameTexture.update(screen->renderWindow);
 			updatePausedFrame();
 		}
 
 		// If paused/stopped, redraw paused frame
 		if (state != SIM_PLAYING){
-			screen->renderWindow.clear();
-			screen->renderWindow.draw(pausedFrame);
+			screen->clear();
+			screen->draw(pausedFrame);
 			screen->display();
 		}
 	}
@@ -165,6 +165,13 @@ namespace cpp3ds {
 	/***********************
 	  UI Events
 	 ***********************/
+
+	void Simulator::on_pushButton_clicked() {
+		play();
+//		screen->clear(sf::Color(200,50,50));
+//		screen->display();
+		std::cout << "okok" << std::endl;
+	}
 /*
 	void Simulator::on_sfml_size_allocate(Gtk::Allocation& allocation){
 		bool dualscreen = (get_slider3d() != 0);

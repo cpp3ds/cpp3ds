@@ -58,8 +58,11 @@ private:
 //		void on_about_clicked();
 //		void on_test_clicked();
 
+private slots:
+	void on_pushButton_clicked();
+
 public:
-	SFMLWidget *screen;
+	QSFMLCanvas *screen;
 
 	bool isThreadRunning = false;
 

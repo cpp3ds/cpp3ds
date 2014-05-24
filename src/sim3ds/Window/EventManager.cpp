@@ -38,7 +38,7 @@ bool EventManager::filterEvent(const Event& event) {
 void EventManager::processEvents() {
 	// Check all inputs and push Events that are triggered
 	sf::Event event;
-	while (_simulator->screen->renderWindow.pollEvent(event)) {
+	while (_simulator->screen->pollEvent(event)) {
 		switch (event.type) {
 			case sf::Event::KeyPressed:
 				break;
