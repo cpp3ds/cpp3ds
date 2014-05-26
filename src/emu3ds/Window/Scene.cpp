@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <SFML/Graphics.hpp>
-#include <cpp3ds/Simulator/Simulator.hpp>
+#include <cpp3ds/Emulator.hpp>
 #include <cpp3ds/System/utils.hpp>
 #include <cpp3ds/Window/Screen.hpp>
 #include <cpp3ds/Window/Display.hpp>
@@ -13,7 +13,7 @@ namespace cpp3ds {
 		sf::Clock clock;
 		sf::Time deltaTime;
 		while (ret == 0) {
-			if (_simulator->getState() == SIM_STOPPED)
+			if (_emulator->getState() == EMU_STOPPED)
 				return -1;
 			render();
 			if (useDisplay)

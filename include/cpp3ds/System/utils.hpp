@@ -1,5 +1,5 @@
-#ifdef SIMULATION
-#include <cpp3ds/System/utils_sim.hpp>
+#ifdef EMULATION
+#include <cpp3ds/System/utils_emu.hpp>
 #endif
 
 #ifndef CPP3DS_UTILS_HPP

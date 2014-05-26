@@ -5,7 +5,7 @@
 #include <iostream>
 #include <cpp3ds/Window/TopScreen.hpp>
 #include <cpp3ds/Window/BottomScreen.hpp>
-#include <cpp3ds/Simulator/SFMLWidget.hpp>
+#include <cpp3ds/Emulator/SFMLWidget.hpp>
 
 QSFMLCanvas::QSFMLCanvas(QWidget* Parent, const QPoint& Position, const QSize& Size, unsigned int FrameTime) :
 QWidget       (Parent),
@@ -22,10 +22,13 @@ myInitialized (false)
 	bottomScreen.create(BOTTOM_WIDTH, BOTTOM_HEIGHT, true);
 
     // Set strong focus to enable keyboard events to be received
-    setFocusPolicy(Qt::StrongFocus);
+    setFocusPolicy(Qt::WheelFocus);
+
+    this->setMinimumHeight(480);
+    this->setMinimumWidth(400);
 
     // Setup the widget geometry
-    move(Position);
+//    move(Position);
     resize(Size);
 
     // Setup the timer
@@ -36,8 +39,7 @@ QSFMLCanvas::~QSFMLCanvas(){}
 
 void QSFMLCanvas::showEvent(QShowEvent*)
 {
-    if (!myInitialized)
-    {
+    if (!myInitialized) {
         // Under X11, we need to flush the commands sent to the server to ensure that
         // SFML will get an updated view of the windows
         #ifdef Q_WS_X11
@@ -46,15 +48,6 @@ void QSFMLCanvas::showEvent(QShowEvent*)
 
         // Create the SFML window with the widget handle
 		RenderWindow::create(winId());
-
-//        RenderWindow::create((void *) winId());
-
-        // Let the derived class do its specific stuff
-//        OnInit();
-
-        // Setup the timer to trigger a refresh at specified framerate
-//        connect(&myTimer, SIGNAL(timeout()), this, SLOT(repaint()));
-//        myTimer.start();
 
         myInitialized = true;
     }
@@ -66,13 +59,44 @@ QPaintEngine* QSFMLCanvas::paintEngine() const {
 	return nullptr;
 }
 
-void QSFMLCanvas::paintEvent(QPaintEvent*)
-{
-    // Let the derived class do its specific stuff
-//    OnUpdate();
-
-    // Display on screen
+void QSFMLCanvas::paintEvent(QPaintEvent*) {
 	RenderWindow::display();
+}
+
+void QSFMLCanvas::mousePressEvent(QMouseEvent* event) {
+    sf::Event e;
+    e.type = sf::Event::MouseButtonPressed;
+    e.mouseButton.x = event->x();
+    e.mouseButton.y = event->y();
+    pushMouseEvent(e);
+}
+void QSFMLCanvas::mouseMoveEvent(QMouseEvent* event) {
+	sf::Event e;
+	e.type = sf::Event::MouseMoved;
+	e.mouseButton.x = event->x();
+	e.mouseButton.y = event->y();
+	pushMouseEvent(e);
+}
+void QSFMLCanvas::mouseReleaseEvent(QMouseEvent* event) {
+	sf::Event e;
+	e.type = sf::Event::MouseButtonReleased;
+	e.mouseButton.x = event->x();
+	e.mouseButton.y = event->y();
+	pushMouseEvent(e);
+}
+
+void QSFMLCanvas::pushMouseEvent(const sf::Event& event) {
+	m_events.push(event);
+}
+
+bool QSFMLCanvas::pollMouseEvent(sf::Event& event) {
+	// Pop the first event of the queue, if it is not empty
+	if (!m_events.empty()) {
+		event = m_events.front();
+		m_events.pop();
+		return true;
+	}
+	return false;
 }
 
 /*

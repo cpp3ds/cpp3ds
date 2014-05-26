@@ -2,7 +2,7 @@
 #define CPP3DS_SCREEN_HPP
 
 #include <SFML/Graphics.hpp>
-#include <cpp3ds/Simulator/Simulator.hpp>
+#include <cpp3ds/Emulator/Emulator.hpp>
 #include <cpp3ds/Graphics/Color.hpp>
 
 namespace cpp3ds {

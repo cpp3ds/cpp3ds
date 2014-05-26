@@ -1,4 +1,4 @@
-#include <cpp3ds/Simulator.hpp>
+#include <cpp3ds/Emulator.hpp>
 #include <cpp3ds/Window/EventManager.hpp>
 #include <cpp3ds/Window/BottomScreen.hpp>
 #include <cpp3ds/System/Sleep.hpp>
@@ -38,12 +38,8 @@ bool EventManager::filterEvent(const Event& event) {
 void EventManager::processEvents() {
 	// Check all inputs and push Events that are triggered
 	sf::Event event;
-	while (_simulator->screen->pollEvent(event)) {
+	while (_emulator->screen->pollMouseEvent(event)) {
 		switch (event.type) {
-			case sf::Event::KeyPressed:
-				break;
-			case sf::Event::KeyReleased:
-				break;
 			case sf::Event::MouseButtonPressed:
 				if (event.mouseButton.x > BOTTOM_X && event.mouseButton.x < BOTTOM_X+BOTTOM_WIDTH && event.mouseButton.y > BOTTOM_Y){
 					cpp3ds::Event e;
@@ -63,6 +59,24 @@ void EventManager::processEvents() {
 				}
 				break;
 			case sf::Event::MouseMoved:
+				if (event.mouseButton.x > BOTTOM_X && event.mouseButton.x < BOTTOM_X+BOTTOM_WIDTH && event.mouseButton.y > BOTTOM_Y){
+					cpp3ds::Event e;
+					e.type = Event::TouchMoved;
+					e.touch.x = event.mouseButton.x - BOTTOM_X;
+					e.touch.y = event.mouseButton.y - BOTTOM_Y;
+					pushEvent(e);
+				}
+				break;
+			default:
+				break;
+		}
+	}
+	while (_emulator->screen->pollEvent(event)) {
+//		std::cout << "EVENT: " << event.type << std::endl;
+		switch (event.type) {
+			case sf::Event::KeyPressed:
+				break;
+			case sf::Event::KeyReleased:
 				break;
 			case sf::Event::JoystickMoved:
 				break;

@@ -1,4 +1,4 @@
-#ifdef SIMULATION
+#ifdef EMULATION
 #include <cpp3ds/Window/Input_sim_.hpp>
 #endif
 

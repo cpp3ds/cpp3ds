@@ -1,4 +1,4 @@
-#include <cpp3ds/Simulator/Simulator.hpp>
+#include <cpp3ds/Emulator.hpp>
 #include <cpp3ds/Window/Keyboard.hpp>
 #include <SFML/Window/Keyboard.hpp>
 
@@ -18,7 +18,7 @@ float Keyboard::get3DSlider() {
 }
 
 void Keyboard::update() {
-	m_slider = _simulator->get_slider3d();
+	m_slider = _emulator->get_slider3d();
 }
 
 }

@@ -1,5 +1,5 @@
-#ifdef SIMULATION
-#include <cpp3ds/Window/Keyboard_sim.hpp>
+#ifdef EMULATION
+#include <cpp3ds/Window/Keyboard_emu.hpp>
 #endif
 
 #ifndef CPP3DS_KEYBOARD_HPP

@@ -39,12 +39,12 @@ endif()
 
 # Fetch all source files
 FILE(GLOB_RECURSE SRC ${SRCROOT}/cpp3ds/*.cpp)
-FILE(GLOB_RECURSE SRC_SIM ${SRCROOT}/sim3ds/*.cpp)
+FILE(GLOB_RECURSE SRC_EMU ${SRCROOT}/emu3ds/*.cpp)
 set(SRC_ARM ${SRC})
 set(SRC_TEST ${SRC})
 
-# Remove duplicate files for simulator
-foreach(test1 ${SRC_SIM})
+# Remove duplicate files for emulator
+foreach(test1 ${SRC_EMU})
     get_filename_component(filename1 ${test1} NAME)
     foreach(test2 ${SRC})
         get_filename_component(filename2 ${test2} NAME)
@@ -53,9 +53,9 @@ foreach(test1 ${SRC_SIM})
         endif()
     endforeach(test2)
 endforeach(test1)
-list(APPEND SRC_SIM ${SRC})
-list(REMOVE_ITEM SRC_SIM ${SRCROOT}/cpp3ds/syscalls.cpp)
-list(REMOVE_ITEM SRC_SIM ${SRCROOT}/cpp3ds/cpp3ds.cpp)
+list(APPEND SRC_EMU ${SRC})
+list(REMOVE_ITEM SRC_EMU ${SRCROOT}/cpp3ds/syscalls.cpp)
+list(REMOVE_ITEM SRC_EMU ${SRCROOT}/cpp3ds/cpp3ds.cpp)
 list(REMOVE_ITEM SRC_TEST ${SRCROOT}/cpp3ds/cpp3ds.cpp)
 
 #source_group("" FILES ${SRC})
@@ -85,7 +85,7 @@ set(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/lib")
 
 set(CPP3DS_ARM_FLAGS "-Wall -pedantic -O3 -march=armv6 -fdata-sections -fno-rtti -fno-exceptions")
 set(CPP3DS_TEST_FLAGS "-g -Wall -pedantic -O0 -fno-rtti -fno-exceptions")
-set(CPP3DS_SIM_FLAGS "-g -Wall -pedantic -O0")
+set(CPP3DS_EMU_FLAGS "-g -Wall -pedantic -O0")
 
 
 if(CPP3DS_BUILD_EXAMPLES)
@@ -93,5 +93,5 @@ if(CPP3DS_BUILD_EXAMPLES)
 endif()
 
 add_subdirectory(cmake/arm)
-add_subdirectory(cmake/sim)
+add_subdirectory(cmake/emu)
 add_subdirectory(cmake/test)

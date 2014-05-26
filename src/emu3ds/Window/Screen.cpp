@@ -1,5 +1,5 @@
 #include <string.h>
-#include <cpp3ds/Simulator/Simulator.hpp>
+#include <cpp3ds/Emulator.hpp>
 #include <cpp3ds/Graphics/Color.hpp>
 #include <cpp3ds/Graphics/Drawable.hpp>
 #include <cpp3ds/System/utils.hpp>
@@ -18,11 +18,11 @@ namespace cpp3ds {
 		sf::Color outline(25,25,25);
 		box.setFillColor(c);
 		box.setOutlineColor(outline);
-		box.setOutlineThickness(SIM_OUTLINE_THICKNESS);
+		box.setOutlineThickness(EMU_OUTLINE_THICKNESS);
 		box.setPosition(x,y);
 		pixelImage.create(width, height, sf::Color::Transparent);
 		// Should only clear the relevant screen area
-		_simulator->screen->draw(box);
+		_emulator->screen->draw(box);
 	}
 
 	void Screen::draw(Drawable& obj, float x, float y, bool use3D) {
@@ -35,7 +35,7 @@ namespace cpp3ds {
 		starsTexture.loadFromImage(pixelImage);
 		sf::Sprite test(starsTexture);
 		test.setPosition(x, y);
-		_simulator->screen->draw(test);
+		_emulator->screen->draw(test);
 	}
 
 }

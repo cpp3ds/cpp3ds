@@ -1,5 +1,5 @@
 #include <SFML/Graphics.hpp>
-#include <cpp3ds/Simulator/Simulator.hpp>
+#include <cpp3ds/Emulator.hpp>
 #include <cpp3ds/System/utils.hpp>
 #include <cpp3ds/Window/Input_.hpp>
 
@@ -19,7 +19,7 @@ namespace cpp3ds {
 	}
 
 	void Input::update(float deltaTime){
-		Input::slider = _simulator->get_slider3d();
+		Input::slider = _emulator->get_slider3d();
 	}
 
 }

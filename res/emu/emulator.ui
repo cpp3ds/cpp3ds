@@ -10,34 +10,54 @@
     <height>385</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <property name="windowIcon">
    <iconset resource="emulator.qrc">
-    <normaloff>:/sim/logo.svg</normaloff>:/sim/logo.svg</iconset>
+    <normaloff>:/emu/logo.svg</normaloff>:/emu/logo.svg</iconset>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <layout class="QVBoxLayout" name="verticalLayout_2">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
+     <layout class="QVBoxLayout" name="verticalLayout" stretch="0">
       <property name="spacing">
        <number>6</number>
       </property>
       <property name="sizeConstraint">
-       <enum>QLayout::SetMaximumSize</enum>
+       <enum>QLayout::SetMinimumSize</enum>
       </property>
       <item>
        <widget class="QPushButton" name="pushButton">
         <property name="text">
          <string>PushButton</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSlider" name="horizontalSlider">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
@@ -60,6 +80,12 @@
    <property name="windowTitle">
     <string>toolBar</string>
    </property>
+   <property name="iconSize">
+    <size>
+     <width>32</width>
+     <height>32</height>
+    </size>
+   </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
@@ -68,11 +94,12 @@
    </attribute>
    <addaction name="actionScreenshot"/>
    <addaction name="actionToggle_3D"/>
+   <addaction name="actionVolume"/>
   </widget>
   <action name="actionScreenshot">
    <property name="icon">
     <iconset resource="emulator.qrc">
-     <normaloff>:/sim/icon-camera.svg</normaloff>:/sim/icon-camera.svg</iconset>
+     <normaloff>:/emu/icons/camera.svg</normaloff>:/emu/icons/camera.svg</iconset>
    </property>
    <property name="text">
     <string>Screenshot</string>
@@ -87,13 +114,28 @@
    </property>
    <property name="icon">
     <iconset resource="emulator.qrc">
-     <normaloff>:/sim/icon-monitor.svg</normaloff>:/sim/icon-monitor.svg</iconset>
+     <normaloff>:/emu/icons/3d.svg</normaloff>:/emu/icons/3d.svg</iconset>
    </property>
    <property name="text">
     <string>Toggle 3D</string>
    </property>
    <property name="toolTip">
     <string>Toggle 3D stereoscopy</string>
+   </property>
+  </action>
+  <action name="actionVolume">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="emulator.qrc">
+     <normaloff>:/emu/icons/volume.svg</normaloff>:/emu/icons/volume.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Volume</string>
+   </property>
+   <property name="toolTip">
+    <string>Adjust audio volume</string>
    </property>
   </action>
  </widget>

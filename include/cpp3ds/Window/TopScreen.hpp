@@ -1,5 +1,5 @@
-#ifdef SIMULATION
-#include <cpp3ds/Window/TopScreen_sim.hpp>
+#ifdef EMULATION
+#include <cpp3ds/Window/TopScreen_emu.hpp>
 #endif
 
 #ifndef CPP3DS_TOPSCREEN_HPP

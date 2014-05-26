@@ -37,8 +37,8 @@ set(SOURCE_FILES
 add_executable(${PROJECT} ${SOURCE_FILES})
 qt5_use_modules(${PROJECT} Core Gui Widgets)
 
-target_link_libraries(${PROJECT} cpp3ds-sim tween-test sfml-graphics sfml-window sfml-system)
+target_link_libraries(${PROJECT} cpp3ds-emu tween-test sfml-graphics sfml-window sfml-system)
 
 set_target_properties(${PROJECT} PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -O3")
-set_target_properties(${PROJECT} PROPERTIES COMPILE_DEFINITIONS "SIMULATION")
-#set_target_properties(${PROJECT} PROPERTIES LINK_FLAGS "${CMAKE_CXX_FLAGS} ${CPP3DS_SIM_FLAGS}")
+set_target_properties(${PROJECT} PROPERTIES COMPILE_DEFINITIONS "EMULATION")
+#set_target_properties(${PROJECT} PROPERTIES LINK_FLAGS "${CMAKE_CXX_FLAGS} ${CPP3DS_EMU_FLAGS}")

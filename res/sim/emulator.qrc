@@ -1,7 +1,0 @@
-<RCC>
-  <qresource prefix="sim">
-    <file>icon-camera.svg</file>
-    <file>icon-monitor.svg</file>
-    <file>logo.svg</file>
-  </qresource>
-</RCC>

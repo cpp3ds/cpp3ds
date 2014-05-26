@@ -1,100 +1,64 @@
 #include <iostream>
-//#include <gtkmm.h>
 #include <SFML/Graphics.hpp>
-#include <cpp3ds/Simulator/Simulator.hpp>
+#include <cpp3ds/Emulator/Emulator.hpp>
 
 namespace cpp3ds {
 
-	Simulator::Simulator(QWidget *parent): QMainWindow(parent){
+	Emulator::Emulator(QWidget *parent): QMainWindow(parent){
 		setupUi(this);
-//		application = app;
-		thread = new sf::Thread(&Simulator::runGame, this);
-//		builder->get_widget("window", window);
-//		builder->get_widget("boxSFML", boxSFML);
-//
-//		builder->get_widget("aboutDialog", aboutDialog);
-//		builder->get_widget("imageLogo", imageLogo);
-//		Glib::RefPtr<Gdk::Pixbuf> logo = imageLogo->get_pixbuf();
+
+		thread = new sf::Thread(&Emulator::runGame, this);
+
 //		float ratio = (float)logo->get_width() / logo->get_height();
 //		aboutDialog->set_logo(logo->scale_simple(100*ratio,100,Gdk::INTERP_BILINEAR));
-//
-//
-//		builder->get_widget("saveDialog", saveDialog);
-//		saveDialog->add_button("gtk-cancel", Gtk::RESPONSE_CANCEL);
-//		saveDialog->add_button("gtk-save", Gtk::RESPONSE_OK);
-//
-//		builder->get_widget("menuAbout", menuAbout);
-//		builder->get_widget("buttonTest", buttonTest);
-//		builder->get_widget("buttonScreenshot", buttonScreenshot);
-//		builder->get_widget("buttonPlayPause", buttonPlayPause);
-//		builder->get_widget("buttonStop", buttonStop);
-//		builder->get_widget("buttonToggle3D", buttonToggle3D);
-//		builder->get_widget("scale3D", scale3D);
 
-		// Create and add a SFMLWidget
-		screen = new QSFMLCanvas(this, QPoint(20, 20), QSize(360, 360));
+		// Create and add a SFML widget
+		screen = new QSFMLCanvas(nullptr, QPoint(0, 0), QSize(400, 480));
 //		boxSFML->pack_start(*screen, true, true);
-		screen->show();
-
-		pausedFrameTexture.create(800 + SIM_OUTLINE_THICKNESS*2, 480 + SIM_OUTLINE_THICKNESS*2);
-
+		verticalLayout->addWidget(screen);
+//		screen->show();
 		screen->setFramerateLimit(60);
 
-		// Connect all GTK signals
-//		Glib::signal_timeout().connect(sigc::bind_return(sigc::mem_fun(*this,
-//			&Simulator::checkThreadState ),true),200);
-//
-//		menuAbout->signal_activate().connect(sigc::mem_fun(*this,
-//			&Simulator::on_about_clicked ));
-//		aboutDialog->signal_response().connect(sigc::mem_fun(*this,
-//			&Simulator::on_about_response ));
-//
-//		screen->signal_size_allocate().connect(sigc::mem_fun(*this,
-//			&Simulator::on_sfml_size_allocate ));
-//
-//		buttonTest->signal_clicked().connect(sigc::mem_fun(*this,
-//			&Simulator::on_test_clicked ));
-//		buttonScreenshot->signal_clicked().connect(sigc::mem_fun(*this,
-//			&Simulator::saveScreenshot ));
-//		buttonPlayPause->signal_clicked().connect(sigc::mem_fun(*this,
-//			&Simulator::on_playpause_clicked ));
-//		buttonStop->signal_clicked().connect(sigc::mem_fun(*this,
-//			&Simulator::on_stop_clicked ));
-//		buttonToggle3D->signal_toggled().connect(sigc::mem_fun(*this,
-//			&Simulator::on_toggle3d_clicked ));
+		slider3D = new QSlider();
+		slider3D->setOrientation(Qt::Horizontal);
+		toolBar->insertWidget(actionVolume, slider3D);
+
+		spacer = new QWidget();
+		spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+		toolBar->insertWidget(actionVolume, spacer);
+
+		pausedFrameTexture.create(800 + EMU_OUTLINE_THICKNESS*2, 480 + EMU_OUTLINE_THICKNESS*2);
+
 	}
 
-	Simulator::~Simulator(){
+	Emulator::~Emulator(){
 		stop();
 		delete thread;
 		delete screen;
-	}
-
-	void Simulator::run(){
-//		application->run(*window);
+		delete slider3D;
 	}
 
 	// Meant to be run in another thread or will block the GUI.
-	void Simulator::runGame(){
+	void Emulator::runGame(){
 		isThreadRunning = true;
-		std::cout << "Simulation starting..." << std::endl;
+		std::cout << "Emulation starting..." << std::endl;
 		cpp3ds_main();
-		std::cout << "Simulation ended. " << std::endl;
+		std::cout << "Emulation ended. " << std::endl;
 		screen->setActive(false);
 		isThreadRunning = false;
 	}
 
-	void Simulator::checkThreadState(){
+	void Emulator::checkThreadState(){
 		// Check to see if thread ended but GUI hasn't updated
 		// (Can't easily update GUI inside thread)
 //		if (!isThreadRunning && buttonStop->get_sensitive())
 //			on_stop_clicked();
 	}
 
-	void Simulator::play() {
-		if (state == SIM_PLAYING)
+	void Emulator::play() {
+		if (state == EMU_PLAYING)
 			return;
-		state = SIM_PLAYING;
+		state = EMU_PLAYING;
 		screen->setActive(false);
 
 		// Clear event queue
@@ -105,32 +69,32 @@ namespace cpp3ds {
 			thread->launch();
 	}
 
-	void Simulator::pause() {
-		state = SIM_PAUSED;
+	void Emulator::pause() {
+		state = EMU_PAUSED;
 	}
 
-	void Simulator::updatePausedFrame(){
+	void Emulator::updatePausedFrame(){
 		pausedFrameTexture.update(*screen);
 		pausedFrame.setTexture(pausedFrameTexture, true);
 		screen->setActive(false);
 	}
 
-	void Simulator::stop() {
-		if (state == SIM_STOPPED)
+	void Emulator::stop() {
+		if (state == EMU_STOPPED)
 			return;
 		// Set state first to trigger thread stop
-		state = SIM_STOPPED;
+		state = EMU_STOPPED;
 		thread->wait();
 	}
 
-	float Simulator::get_slider3d(){
+	float Emulator::get_slider3d(){
 		sf::Lock lock(mutex);
 //		if (!buttonToggle3D->get_active())
 			return 0;
 //		return scale3D->get_value();
 	}
 
-	void Simulator::saveScreenshot(){
+	void Emulator::saveScreenshot(){
 //		if (state == SIM_PLAYING)
 //			on_playpause_clicked();
 //		saveDialog->set_current_name("screenshot.png");
@@ -144,7 +108,7 @@ namespace cpp3ds {
 //		saveDialog->close();
 	}
 
-	void Simulator::drawPausedFrame(){
+	void Emulator::drawPausedFrame(){
 		if (!initialized){
 			initialized = true;
 			screen->clear();
@@ -155,7 +119,7 @@ namespace cpp3ds {
 		}
 
 		// If paused/stopped, redraw paused frame
-		if (state != SIM_PLAYING){
+		if (state != EMU_PLAYING){
 			screen->clear();
 			screen->draw(pausedFrame);
 			screen->display();
@@ -166,11 +130,30 @@ namespace cpp3ds {
 	  UI Events
 	 ***********************/
 
-	void Simulator::on_pushButton_clicked() {
-		play();
-//		screen->clear(sf::Color(200,50,50));
-//		screen->display();
-		std::cout << "okok" << std::endl;
+	void Emulator::on_pushButton_clicked() {
+//		buttonStop->set_sensitive(true);
+		if (state != EMU_PLAYING){
+//			buttonPlayPause->set_icon_name("gtk-media-pause");
+			play();
+		} else {
+//			buttonPlayPause->set_icon_name("gtk-media-play-ltr");
+			pause();
+		}
+	}
+
+	void Emulator::on_toolBar_orientationChanged(Qt::Orientation orientation){
+		slider3D->setOrientation(orientation);
+		if (orientation == Qt::Horizontal){
+			slider3D->setMinimumWidth(50);
+			slider3D->setMaximumWidth(150);
+			slider3D->setMinimumHeight(0);
+			slider3D->setMaximumHeight(200);
+		} else {
+			slider3D->setMinimumWidth(0);
+			slider3D->setMaximumWidth(200);
+			slider3D->setMinimumHeight(50);
+			slider3D->setMaximumHeight(150);
+		}
 	}
 /*
 	void Simulator::on_sfml_size_allocate(Gtk::Allocation& allocation){
@@ -200,17 +183,6 @@ namespace cpp3ds {
 	void Simulator::on_about_response(int response_id){
 		// There's only a close button, so what else is there to do?
 		aboutDialog->hide();
-	}
-
-	void Simulator::on_playpause_clicked(){
-		buttonStop->set_sensitive(true);
-		if (state != SIM_PLAYING){
-			buttonPlayPause->set_icon_name("gtk-media-pause");
-			play();
-		} else {
-			buttonPlayPause->set_icon_name("gtk-media-play-ltr");
-			pause();
-		}
 	}
 
 	void Simulator::on_stop_clicked(){

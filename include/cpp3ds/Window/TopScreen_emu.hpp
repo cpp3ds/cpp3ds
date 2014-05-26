@@ -1,14 +1,14 @@
 #ifndef CPP3DS_TOPSCREEN_HPP
 #define CPP3DS_TOPSCREEN_HPP
 
-#include <cpp3ds/Simulator/Simulator.hpp>
+#include <cpp3ds/Emulator/Emulator.hpp>
 #include <cpp3ds/Window/Screen.hpp>
 
 #define TOP_HEIGHT 240
 #define TOP_WIDTH 400
 #define TOP_LEFT_X 0
 #define TOP_LEFT_Y 0
-#define TOP_RIGHT_X 400 + SIM_OUTLINE_THICKNESS*2
+#define TOP_RIGHT_X 400 + EMU_OUTLINE_THICKNESS*2
 #define TOP_RIGHT_Y 0
 
 namespace cpp3ds {

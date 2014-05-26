@@ -1,10 +1,10 @@
-#if !defined(TESTING) && !defined(SIMULATION)
+#if !defined(TESTING) && !defined(EMULATION)
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stddef.h>
 
-extern int  __HEAP_START;
+//extern int  __HEAP_START;
 
 extern "C" {
 
@@ -15,15 +15,18 @@ extern "C" {
 	// TODO: Update syscalls when more hardware access is available.
 	// https://sourceware.org/newlib/libc.html#Syscalls
 	caddr_t _sbrk ( int incr ){
+		/*
 		static unsigned char *heap = NULL;
 		unsigned char *prev_heap;
 		if (heap == NULL) {
 			heap = (unsigned char *)&__HEAP_START;
 		}
 		prev_heap = heap;
-		/* check removed to show basic approach */
+		// check removed to show basic approach
 		heap += incr;
 		return (caddr_t) prev_heap;
+		*/
+		return NULL;
 	}
 	int _close(int file) { return -1; }
 	int _fstat(int file, struct stat *st) { return 0; }

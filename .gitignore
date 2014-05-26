@@ -4,8 +4,7 @@ build/
 lib/
 *.bin
 
-include/cpp3ds/Simulator/simulator-res.h
-src/sim3ds/Simulator/simulator-res.cpp
+include/cpp3ds/Emulator/ui-emulator.h
 
 # Eclipse
 *.pydevproject
