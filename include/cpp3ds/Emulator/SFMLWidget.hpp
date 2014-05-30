@@ -12,7 +12,7 @@ public :
 
 	sf::RenderTexture topLeftScreen, topRightScreen, bottomScreen;
 
-	QSFMLCanvas(QWidget* Parent, const QPoint& Position, const QSize& Size, unsigned int FrameTime = 0);
+	QSFMLCanvas(QWidget* Parent);
     virtual ~QSFMLCanvas();
 
     bool pollMouseEvent(sf::Event& event);
@@ -26,14 +26,15 @@ private :
     virtual QPaintEngine* paintEngine() const;
 
     virtual void showEvent(QShowEvent*);
+    virtual void resizeEvent (QResizeEvent* event);
     virtual void paintEvent(QPaintEvent*);
     virtual void mousePressEvent(QMouseEvent* event);
     virtual void mouseReleaseEvent(QMouseEvent* event);
     virtual void mouseMoveEvent(QMouseEvent* event);
+    virtual int heightForWidth(int w);
 
     void pushMouseEvent(const sf::Event& event);
 
-    QTimer myTimer;
     bool   myInitialized;
     std::queue<sf::Event> m_events;
 };

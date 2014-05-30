@@ -18,7 +18,7 @@ enum EmulatorState {
 	EMU_STOPPED
 };
 
-class Emulator : public QMainWindow, private Ui::MainWindow{
+class Emulator : public QMainWindow, private Ui::EmuWindow{
 	Q_OBJECT
 private:
 	QSlider* slider3D;
@@ -41,7 +41,10 @@ private:
 	void drawPausedFrame();
 
 private slots:
-	void on_pushButton_clicked();
+	void on_actionScreenshot_triggered(bool checked = false);
+	void on_actionToggle_3D_triggered(bool checked = false);
+	void on_actionPlay_Pause_triggered(bool checked = false);
+	void on_actionStop_triggered(bool checked = false);
 	void on_toolBar_orientationChanged(Qt::Orientation orientation);
 
 public:

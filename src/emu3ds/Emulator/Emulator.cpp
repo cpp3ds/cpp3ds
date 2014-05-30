@@ -7,34 +7,39 @@ namespace cpp3ds {
 	Emulator::Emulator(QWidget *parent): QMainWindow(parent){
 		setupUi(this);
 
-		thread = new sf::Thread(&Emulator::runGame, this);
-
 //		float ratio = (float)logo->get_width() / logo->get_height();
 //		aboutDialog->set_logo(logo->scale_simple(100*ratio,100,Gdk::INTERP_BILINEAR));
 
 		// Create and add a SFML widget
-		screen = new QSFMLCanvas(nullptr, QPoint(0, 0), QSize(400, 480));
-//		boxSFML->pack_start(*screen, true, true);
-		verticalLayout->addWidget(screen);
-//		screen->show();
+		screen = new QSFMLCanvas(this);
+		screen->setMinimumHeight(480);
+		screen->setMinimumWidth(400);
+		verticalLayout->addWidget(screen, 0, Qt::AlignCenter);
 		screen->setFramerateLimit(60);
 
+		// Add 3D slider in toolbar
 		slider3D = new QSlider();
 		slider3D->setOrientation(Qt::Horizontal);
+		slider3D->setEnabled(false);
+		slider3D->setMaximum(1000);
 		toolBar->insertWidget(actionVolume, slider3D);
+		on_toolBar_orientationChanged(Qt::Horizontal);
 
+		// Add spacer between 3D slider and right-side buttons
 		spacer = new QWidget();
 		spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 		toolBar->insertWidget(actionVolume, spacer);
 
-		pausedFrameTexture.create(800 + EMU_OUTLINE_THICKNESS*2, 480 + EMU_OUTLINE_THICKNESS*2);
+		thread = new sf::Thread(&Emulator::runGame, this);
 
+		pausedFrameTexture.create(800 + EMU_OUTLINE_THICKNESS*2, 480 + EMU_OUTLINE_THICKNESS*2);
 	}
 
 	Emulator::~Emulator(){
 		stop();
 		delete thread;
 		delete screen;
+		delete spacer;
 		delete slider3D;
 	}
 
@@ -51,8 +56,8 @@ namespace cpp3ds {
 	void Emulator::checkThreadState(){
 		// Check to see if thread ended but GUI hasn't updated
 		// (Can't easily update GUI inside thread)
-//		if (!isThreadRunning && buttonStop->get_sensitive())
-//			on_stop_clicked();
+		if (!isThreadRunning && actionStop->isEnabled())
+			actionStop->trigger();
 	}
 
 	void Emulator::play() {
@@ -61,9 +66,10 @@ namespace cpp3ds {
 		state = EMU_PLAYING;
 		screen->setActive(false);
 
-		// Clear event queue
+		// Clear event queues
 		sf::Event event;
 		while (screen->pollEvent(event)) {}
+		while (screen->pollMouseEvent(event)) {}
 
 		if (!isThreadRunning)
 			thread->launch();
@@ -89,14 +95,14 @@ namespace cpp3ds {
 
 	float Emulator::get_slider3d(){
 		sf::Lock lock(mutex);
-//		if (!buttonToggle3D->get_active())
+		if (!slider3D->isEnabled())
 			return 0;
-//		return scale3D->get_value();
+		return static_cast<float>(slider3D->value()) / 1000;
 	}
 
 	void Emulator::saveScreenshot(){
-//		if (state == SIM_PLAYING)
-//			on_playpause_clicked();
+		if (state == EMU_PLAYING)
+			actionPlay_Pause->trigger();
 //		saveDialog->set_current_name("screenshot.png");
 //		if (saveDialog->run() == Gtk::RESPONSE_OK){
 //			sf::Image screenie = screen->renderWindow.capture();
@@ -130,17 +136,6 @@ namespace cpp3ds {
 	  UI Events
 	 ***********************/
 
-	void Emulator::on_pushButton_clicked() {
-//		buttonStop->set_sensitive(true);
-		if (state != EMU_PLAYING){
-//			buttonPlayPause->set_icon_name("gtk-media-pause");
-			play();
-		} else {
-//			buttonPlayPause->set_icon_name("gtk-media-play-ltr");
-			pause();
-		}
-	}
-
 	void Emulator::on_toolBar_orientationChanged(Qt::Orientation orientation){
 		slider3D->setOrientation(orientation);
 		if (orientation == Qt::Horizontal){
@@ -155,64 +150,45 @@ namespace cpp3ds {
 			slider3D->setMaximumHeight(150);
 		}
 	}
-/*
-	void Simulator::on_sfml_size_allocate(Gtk::Allocation& allocation){
-		bool dualscreen = (get_slider3d() != 0);
-		if (!dualscreen){
-			sf::View view;
-			view.reset(sf::FloatRect(0, 0, 400, 480));
-			screen->renderWindow.setView(view);
-		} else {
-			screen->renderWindow.setView(screen->renderWindow.getDefaultView());
-		}
-		// Dirty hack to trigger event AFTER resize
-		Glib::signal_timeout().connect_once(sigc::mem_fun(*this,
-			&Simulator::drawPausedFrame ), 20);
 
-		// Won't give proper focus without this for some reason
-		// (for key_press events)
-		screen->grab_focus();
+	void Emulator::on_actionScreenshot_triggered(bool checked) {
+//		this->adjustSize();
+//		std::cout << slider3D->value() << std::endl;
+		drawPausedFrame();
 	}
 
-	bool Simulator::on_my_delete_event(GdkEventAny* event){
-		if (state != SIM_STOPPED)
-			on_stop_clicked();
-		return false;
-	}
-
-	void Simulator::on_about_response(int response_id){
-		// There's only a close button, so what else is there to do?
-		aboutDialog->hide();
-	}
-
-	void Simulator::on_stop_clicked(){
-		buttonStop->set_sensitive(false);
-		buttonPlayPause->set_sensitive(false);
-		buttonPlayPause->set_icon_name("gtk-media-play-ltr");
-		stop();
-		buttonPlayPause->set_sensitive(true);
-	}
-
-	void Simulator::on_toggle3d_clicked(){
+	void Emulator::on_actionToggle_3D_triggered(bool checked) {
 		sf::Lock lock(mutex);
-		bool active = buttonToggle3D->get_active();
-		scale3D->set_sensitive(active);
-		scale3D->set_opacity(active ? 1.0 : 0.8);
-		screen->show3D();
-		screen->set_size_request(active ? 800 + SIM_OUTLINE_THICKNESS*2 : 400, 480 + SIM_OUTLINE_THICKNESS*2);
+		slider3D->setEnabled(checked);
+		if (checked) {
+			screen->setMinimumWidth(800);
+			sf::View view;
+			view.reset(sf::FloatRect(0, 0, 800, 480));
+			screen->setView(view);
+		} else {
+			screen->setMinimumWidth(400);
+			screen->setView(screen->getDefaultView());
+		}
+//		screen->set_size_request(active ? 800 + SIM_OUTLINE_THICKNESS*2 : 400, 480 + SIM_OUTLINE_THICKNESS*2);
 		// Resize window to smallest size allowed
-		window->resize(1,1);
+		this->adjustSize();
 	}
 
-	void Simulator::on_about_clicked(){
-		aboutDialog->run();
+	void Emulator::on_actionPlay_Pause_triggered(bool checked) {
+		actionStop->setEnabled(true);
+		if (checked){
+			play();
+		} else {
+			pause();
+		}
 	}
 
-	void Simulator::on_test_clicked(){
-		screen->renderWindow.clear();
-		screen->renderWindow.display();
-//		drawPausedFrame();
-		std::cout << scale3D->get_value() << std::endl;
+	void Emulator::on_actionStop_triggered(bool checked) {
+		actionStop->setEnabled(false);
+		actionPlay_Pause->setEnabled(false);
+		actionPlay_Pause->setChecked(false);
+		stop();
+		actionPlay_Pause->setEnabled(true);
 	}
-*/
+
 }

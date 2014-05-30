@@ -7,7 +7,7 @@
 #include <cpp3ds/Window/BottomScreen.hpp>
 #include <cpp3ds/Emulator/SFMLWidget.hpp>
 
-QSFMLCanvas::QSFMLCanvas(QWidget* Parent, const QPoint& Position, const QSize& Size, unsigned int FrameTime) :
+QSFMLCanvas::QSFMLCanvas(QWidget* Parent) :
 QWidget       (Parent),
 myInitialized (false)
 {
@@ -24,15 +24,9 @@ myInitialized (false)
     // Set strong focus to enable keyboard events to be received
     setFocusPolicy(Qt::WheelFocus);
 
-    this->setMinimumHeight(480);
-    this->setMinimumWidth(400);
-
-    // Setup the widget geometry
-//    move(Position);
-    resize(Size);
-
-    // Setup the timer
-    myTimer.setInterval(FrameTime);
+    QSizePolicy test = this->sizePolicy();// (QSizePolicy::Minimum, QSizePolicy::Minimum);
+    test.setHeightForWidth(true);
+    setSizePolicy(test);
 }
 
 QSFMLCanvas::~QSFMLCanvas(){}
@@ -51,6 +45,17 @@ void QSFMLCanvas::showEvent(QShowEvent*)
 
         myInitialized = true;
     }
+}
+
+void QSFMLCanvas::resizeEvent (QResizeEvent* event) {
+	int w = event->size().width(),
+	    h = event->size().height();
+	std::cout << "width:" << w << " height:" << h << std::endl;
+}
+
+int QSFMLCanvas::heightForWidth( int w ) {
+	std::cout << "test" << std::endl;
+	return w;
 }
 
 QPaintEngine* QSFMLCanvas::paintEngine() const {
@@ -98,66 +103,3 @@ bool QSFMLCanvas::pollMouseEvent(sf::Event& event) {
 	}
 	return false;
 }
-
-/*
-void SFMLWidget::on_size_allocate(Gtk::Allocation& allocation)
-{
-	//Do something with the space that we have actually been given:
-	//(We will not be given heights or widths less than we have requested, though
-	//we might get more)
-
-	this->set_allocation(allocation);
-
-	if (m_refGdkWindow) {
-		m_refGdkWindow->move_resize(allocation.get_x(),
-		                            allocation.get_y(),
-		                            allocation.get_width(),
-		                            allocation.get_height() );
-		renderWindow.setSize(sf::Vector2u(allocation.get_width(), allocation.get_height()));
-		m_refGdkWindow->focus(0);
-	}
-}
-
-void SFMLWidget::on_realize(){
-	Gtk::Widget::on_realize();
-
-	if(!m_refGdkWindow){
-		//Create the GdkWindow:
-		GdkWindowAttr attributes;
-		memset(&attributes, 0, sizeof(attributes));
-
-		Gtk::Allocation allocation = get_allocation();
-
-		//Set initial position and size of the Gdk::Window:
-		attributes.x = allocation.get_x();
-		attributes.y = allocation.get_y();
-		attributes.width = 800;
-		attributes.height = allocation.get_height();
-
-		//make the widget receive expose events
-		attributes.event_mask = get_events();//Gdk::ALL_EVENTS_MASK;
-		attributes.window_type = GDK_WINDOW_CHILD;
-		attributes.wclass = GDK_INPUT_OUTPUT;
-
-
-		m_refGdkWindow = Gdk::Window::create(get_window(), &attributes, GDK_WA_X | GDK_WA_Y);
-		set_has_window(true);
-		set_window(m_refGdkWindow);
-
-		// transparent background
-		unset_background_color();
-		set_double_buffered(false);
-		set_can_focus(true);
-
-		m_refGdkWindow->set_user_data(gobj());
-
-//		renderWindow.create(GET_WINDOW_HANDLE_FROM_GDK(m_refGdkWindow->gobj()));
-		renderWindow.create(sf::VideoMode(800, TOP_HEIGHT*2), "SFML window");
-	}
-}
-
-void SFMLWidget::on_unrealize(){
-	m_refGdkWindow.clear();
-	Gtk::Widget::on_unrealize();
-}
-*/

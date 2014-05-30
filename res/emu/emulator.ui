@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>EmuWindow</class>
+ <widget class="QMainWindow" name="EmuWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -28,7 +28,7 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
@@ -47,20 +47,13 @@
      <number>0</number>
     </property>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout" stretch="0">
+     <layout class="QVBoxLayout" name="verticalLayout">
       <property name="spacing">
        <number>6</number>
       </property>
       <property name="sizeConstraint">
-       <enum>QLayout::SetMinimumSize</enum>
+       <enum>QLayout::SetDefaultConstraint</enum>
       </property>
-      <item>
-       <widget class="QPushButton" name="pushButton">
-        <property name="text">
-         <string>PushButton</string>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
    </layout>
@@ -82,8 +75,8 @@
    </property>
    <property name="iconSize">
     <size>
-     <width>32</width>
-     <height>32</height>
+     <width>28</width>
+     <height>28</height>
     </size>
    </property>
    <attribute name="toolBarArea">
@@ -95,6 +88,9 @@
    <addaction name="actionScreenshot"/>
    <addaction name="actionToggle_3D"/>
    <addaction name="actionVolume"/>
+   <addaction name="actionWifi"/>
+   <addaction name="actionStop"/>
+   <addaction name="actionPlay_Pause"/>
   </widget>
   <action name="actionScreenshot">
    <property name="icon">
@@ -125,7 +121,7 @@
   </action>
   <action name="actionVolume">
    <property name="enabled">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="icon">
     <iconset resource="emulator.qrc">
@@ -136,6 +132,54 @@
    </property>
    <property name="toolTip">
     <string>Adjust audio volume</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="emulator.qrc">
+     <normaloff>:/emu/icons/stop.svg</normaloff>:/emu/icons/stop.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Stop</string>
+   </property>
+   <property name="toolTip">
+    <string>Stop emulation</string>
+   </property>
+  </action>
+  <action name="actionWifi">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="emulator.qrc">
+     <normaloff>:/emu/icons/wifi.svg</normaloff>:/emu/icons/wifi.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Wifi</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle wifi</string>
+   </property>
+  </action>
+  <action name="actionPlay_Pause">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="emulator.qrc">
+     <normaloff>:/emu/icons/play.svg</normaloff>:/emu/icons/play.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Play/Pause</string>
+   </property>
+   <property name="toolTip">
+    <string>Play/Pause emulation</string>
    </property>
   </action>
  </widget>
