@@ -8,7 +8,8 @@
 
 #define EMU_OUTLINE_THICKNESS 1
 
-extern void cpp3ds_main();
+//extern void cpp3ds_main();
+extern "C" int __real_main(int argc, char **argv);
 
 namespace cpp3ds {
 

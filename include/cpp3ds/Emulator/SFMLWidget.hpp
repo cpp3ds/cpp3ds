@@ -2,9 +2,11 @@
 #define CPP3DS_SFMLWIDGET_HPP
 
 #include <queue>
-#include <SFML/Graphics.hpp>
 #include <QWidget>
 #include <QTimer>
+#include <QResizeEvent>
+#include <QMouseEvent>
+#include <SFML/Graphics.hpp>
 
 class QSFMLCanvas: public QWidget, public sf::RenderWindow
 {
@@ -36,6 +38,7 @@ private :
     void pushMouseEvent(const sf::Event& event);
 
     bool   myInitialized;
+    int paintCount;
     std::queue<sf::Event> m_events;
 };
 

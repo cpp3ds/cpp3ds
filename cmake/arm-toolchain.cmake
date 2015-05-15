@@ -2,10 +2,10 @@
 SET(CMAKE_SYSTEM_NAME Generic)
 
 # which compilers to use for C and C++
-SET(CMAKE_C_COMPILER arm-none-eabi-gcc)
-SET(CMAKE_CXX_COMPILER arm-none-eabi-g++)
-SET(CMAKE_SIZE arm-none-eabi-size)
-SET(CMAKE_OBJCOPY arm-none-eabi-objcopy)
+SET(CMAKE_C_COMPILER $ENV{DEVKITARM}/bin/arm-none-eabi-gcc)
+SET(CMAKE_CXX_COMPILER $ENV{DEVKITARM}/bin/arm-none-eabi-g++)
+SET(CMAKE_SIZE $ENV{DEVKITARM}/bin/arm-none-eabi-size)
+SET(CMAKE_OBJCOPY $ENV{DEVKITARM}/bin/arm-none-eabi-objcopy)
 
 # adjust the default behaviour of the FIND_XXX() commands:
 # search headers and libraries in the target environment, search 

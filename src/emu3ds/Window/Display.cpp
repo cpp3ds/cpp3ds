@@ -9,7 +9,7 @@ namespace cpp3ds {
 			_emulator->screen->setActive(false);
 			_emulator->updatePausedFrame();
 			while (_emulator->getState() == EMU_PAUSED)
-				sf:sleep(sf::milliseconds(100));
+				sf::sleep(sf::milliseconds(100));
 		}
 		// _simulator->screen->renderWindow.clear();
 	}

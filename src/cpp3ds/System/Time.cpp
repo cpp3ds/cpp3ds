@@ -257,4 +257,4 @@ Time& operator %=(Time& left, Time right)
     return left = left % right;
 }
 
-}
+} // namespace cpp3ds

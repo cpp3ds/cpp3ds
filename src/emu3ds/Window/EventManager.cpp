@@ -1,6 +1,5 @@
 #include <cpp3ds/Emulator.hpp>
 #include <cpp3ds/Window/EventManager.hpp>
-#include <cpp3ds/Window/BottomScreen.hpp>
 #include <cpp3ds/System/Sleep.hpp>
 #include <iostream>
 
@@ -36,6 +35,9 @@ bool EventManager::filterEvent(const Event& event) {
 
 ////////////////////////////////////////////////////////////
 void EventManager::processEvents() {
+	int BOTTOM_X = 20,
+		BOTTOM_Y = 320,
+		BOTTOM_WIDTH = 320;
 	// Check all inputs and push Events that are triggered
 	sf::Event event;
 	while (_emulator->screen->pollMouseEvent(event)) {
@@ -73,10 +75,17 @@ void EventManager::processEvents() {
 	}
 	while (_emulator->screen->pollEvent(event)) {
 //		std::cout << "EVENT: " << event.type << std::endl;
+        cpp3ds::Event e;
 		switch (event.type) {
 			case sf::Event::KeyPressed:
+				std::cout << "EVENT: " << event.type << std::endl;
+				e.type = Event::KeyPressed;
+				pushEvent(e);
 				break;
 			case sf::Event::KeyReleased:
+				std::cout << "EVENT: " << event.type << std::endl;
+                e.type = Event::KeyReleased;
+                pushEvent(e);
 				break;
 			case sf::Event::JoystickMoved:
 				break;

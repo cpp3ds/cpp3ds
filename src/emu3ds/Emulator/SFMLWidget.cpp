@@ -3,13 +3,13 @@
     #include <X11/Xlib.h>
 #endif
 #include <iostream>
-#include <cpp3ds/Window/TopScreen.hpp>
-#include <cpp3ds/Window/BottomScreen.hpp>
 #include <cpp3ds/Emulator/SFMLWidget.hpp>
+#include <cpp3ds/Graphics/Color.hpp>
 
 QSFMLCanvas::QSFMLCanvas(QWidget* Parent) :
 QWidget       (Parent),
-myInitialized (false)
+myInitialized (false),
+paintCount (0)
 {
     // Setup some states to allow direct rendering into the widget
     setAttribute(Qt::WA_PaintOnScreen);
@@ -17,9 +17,9 @@ myInitialized (false)
     setAttribute(Qt::WA_NoSystemBackground);
     setAttribute(Qt::WA_PaintUnclipped);
 
-    topLeftScreen.create(TOP_WIDTH, TOP_HEIGHT, true);
-	topRightScreen.create(TOP_WIDTH, TOP_HEIGHT, true);
-	bottomScreen.create(BOTTOM_WIDTH, BOTTOM_HEIGHT, true);
+	topLeftScreen.create(400, 240, true);
+	topRightScreen.create(400, 240, true);
+	bottomScreen.create(320, 240, true);
 
     // Set strong focus to enable keyboard events to be received
     setFocusPolicy(Qt::WheelFocus);
@@ -27,6 +27,7 @@ myInitialized (false)
     QSizePolicy test = this->sizePolicy();// (QSizePolicy::Minimum, QSizePolicy::Minimum);
     test.setHeightForWidth(true);
     setSizePolicy(test);
+    std::cout << "QSFMLCanvas Made!" << std::endl;
 }
 
 QSFMLCanvas::~QSFMLCanvas(){}
@@ -48,9 +49,10 @@ void QSFMLCanvas::showEvent(QShowEvent*)
 }
 
 void QSFMLCanvas::resizeEvent (QResizeEvent* event) {
+	RenderWindow::onResize();
 	int w = event->size().width(),
 	    h = event->size().height();
-	std::cout << "width:" << w << " height:" << h << std::endl;
+	std::cout << "RESIZED width:" << w << " height:" << h << std::endl;
 }
 
 int QSFMLCanvas::heightForWidth( int w ) {
@@ -65,7 +67,12 @@ QPaintEngine* QSFMLCanvas::paintEngine() const {
 }
 
 void QSFMLCanvas::paintEvent(QPaintEvent*) {
-	RenderWindow::display();
+	// Dirty hack to get cleared black widget after initialization
+	if (paintCount++ < 2) {
+		std::cout << "QSFMLCanvas::paintEvent" << std::endl;
+		RenderWindow::clear(sf::Color::Black);
+		RenderWindow::display();
+	}
 }
 
 void QSFMLCanvas::mousePressEvent(QMouseEvent* event) {

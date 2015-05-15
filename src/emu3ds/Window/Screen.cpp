@@ -3,8 +3,8 @@
 #include <cpp3ds/Graphics/Color.hpp>
 #include <cpp3ds/Graphics/Drawable.hpp>
 #include <cpp3ds/System/utils.hpp>
-#include <cpp3ds/Window/Screen.hpp>
-
+//#include <cpp3ds/Window/Screen.hpp>
+/*
 namespace cpp3ds {
 
 	void Screen::setPixel(int x, int y, Color color){
@@ -25,9 +25,12 @@ namespace cpp3ds {
 		_emulator->screen->draw(box);
 	}
 
-	void Screen::draw(Drawable& obj, float x, float y, bool use3D) {
+	void Screen::draw(cpp3ds::RenderTarget& target, cpp3ds::RenderStates states) {
+//	void Screen::draw(Drawable& obj, float x, float y, bool use3D) {
 		// TODO: Check bounds and don't draw objects outside screen
-		obj.draw(*this, x, y, use3D, true);
+//		obj.draw(*this, x, y, use3D, true);
+		Vertex* m_vertices = nullptr;
+		target.draw(m_vertices, states);
 	}
 
 	void Screen::_display() {
@@ -39,3 +42,4 @@ namespace cpp3ds {
 	}
 
 }
+*/

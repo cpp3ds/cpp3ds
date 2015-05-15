@@ -15,6 +15,7 @@ namespace cpp3ds {
 		screen->setMinimumHeight(480);
 		screen->setMinimumWidth(400);
 		verticalLayout->addWidget(screen, 0, Qt::AlignCenter);
+//		centralwidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 		screen->setFramerateLimit(60);
 
 		// Add 3D slider in toolbar
@@ -33,6 +34,9 @@ namespace cpp3ds {
 		thread = new sf::Thread(&Emulator::runGame, this);
 
 		pausedFrameTexture.create(800 + EMU_OUTLINE_THICKNESS*2, 480 + EMU_OUTLINE_THICKNESS*2);
+
+//		this->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+		this->setMinimumWidth(500);
 	}
 
 	Emulator::~Emulator(){
@@ -47,7 +51,9 @@ namespace cpp3ds {
 	void Emulator::runGame(){
 		isThreadRunning = true;
 		std::cout << "Emulation starting..." << std::endl;
-		cpp3ds_main();
+        screen->setActive(true);
+//		cpp3ds_main();
+        __real_main(0, NULL);
 		std::cout << "Emulation ended. " << std::endl;
 		screen->setActive(false);
 		isThreadRunning = false;
@@ -64,13 +70,15 @@ namespace cpp3ds {
 		if (state == EMU_PLAYING)
 			return;
 		state = EMU_PLAYING;
-		screen->setActive(false);
 
+        screen->setActive(true);
 		// Clear event queues
 		sf::Event event;
-		while (screen->pollEvent(event)) {}
+		while (screen->pollEvent(event)) {
+            int i = 0;
+        }
 		while (screen->pollMouseEvent(event)) {}
-
+        screen->setActive(false);
 		if (!isThreadRunning)
 			thread->launch();
 	}
@@ -88,6 +96,10 @@ namespace cpp3ds {
 	void Emulator::stop() {
 		if (state == EMU_STOPPED)
 			return;
+		actionStop->setEnabled(false);
+		actionPlay_Pause->setEnabled(false);
+		actionPlay_Pause->setChecked(false);
+		actionPlay_Pause->setEnabled(true);
 		// Set state first to trigger thread stop
 		state = EMU_STOPPED;
 		thread->wait();
@@ -184,11 +196,7 @@ namespace cpp3ds {
 	}
 
 	void Emulator::on_actionStop_triggered(bool checked) {
-		actionStop->setEnabled(false);
-		actionPlay_Pause->setEnabled(false);
-		actionPlay_Pause->setChecked(false);
 		stop();
-		actionPlay_Pause->setEnabled(true);
 	}
 
 }

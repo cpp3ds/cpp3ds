@@ -2,41 +2,15 @@ docs/doxyxml/
 docs/github.io/
 build/
 lib/
+bin/
 *.bin
 
-include/cpp3ds/Emulator/ui-emulator.h
+include/cpp3ds/Emulator/ui_emulator.h
 
-# Eclipse
-*.pydevproject
-.metadata
-.gradle
-bin/
-tmp/
-*.tmp
-*.bak
-*.swp
-*~.nib
-local.properties
-.settings/
-.loadpath
-
-# External tool builders
-.externalToolBuilders/
-
-# Locally stored "Eclipse launch configurations"
-*.launch
-
-# CDT-specific
-.cproject
-
-# PDT-specific
-.buildpath
-
-# sbteclipse plugin 
-.target
-
-# TeXlipse plugin
-.texlipse
+# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion
+*.iml
+## Directory-based project format:
+.idea/
 
 # CMake
 CMakeCache.txt

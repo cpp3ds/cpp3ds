@@ -1,6 +1,5 @@
 #include <SFML/Graphics.hpp>
 #include <cpp3ds/Emulator.hpp>
-#include <cpp3ds/System/utils.hpp>
 #include <cpp3ds/Window/Input_.hpp>
 
 namespace cpp3ds {

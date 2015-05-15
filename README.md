@@ -1,20 +1,21 @@
 cpp3ds [![Build Status](https://travis-ci.org/cpp3ds/cpp3ds.png?branch=master)](https://travis-ci.org/cpp3ds/cpp3ds)
 ======
 
-Basic C++ gaming framework and library for Nintendo 3DS. http://cpp3ds.github.io/
+Basic C++ gaming framework and library for Nintendo 3DS.
 
-Project progress is on hold at the moment while 3DS hardware is still being reverse engineered.
+cpp3ds is essentially a barebones port of SFML with a parallel native 3ds emulator built on top of it. The goal is to completely abstract the developer from the hardware SDK and provide a nice object-oriented C++ framework for clean and easy coding. And the emulator is designed to provide a means of surface-level realtime debugging (with GDB or whatever you prefer).
+
+Won't be stable and usable until v1.0
 
 Documentation
 -------------
-http://cpp3ds.github.io/docs/
+Will be released with v1.0 stable
 
 Requirements
 ------------
  
-- GNU Binutils
-- GCC 4.8 (arm-none-eabi)
-- [Universal Tween Engine port](https://github.com/cpp3ds/universal-tween-engine-cpp)
+- DevkitARM
+- ctrulib
 
 For emulator:
 
@@ -27,7 +28,6 @@ For unit tests:
 
 Credit and Thanks
 -----------------
-- Kevin Lee https://github.com/kleemedia
-- smealum https://github.com/smealum
-- nop90 https://github.com/nop90
-- Kane49 https://github.com/insaneKane
+- [Kevin Lee](https://github.com/kleemedia) - tween engine port
+- [smealum](https://github.com/smealum) - ctrulib
+- [minexew](https://github.com/minexew) - ctrgl

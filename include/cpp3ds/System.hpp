@@ -2,21 +2,20 @@
 #define CPP3DS_SYSTEM_HPP
 
 #include <cpp3ds/Config.hpp>
-#include <cpp3ds/System/utils.hpp>
 
-//#include <cpp3ds/System/Clock.hpp>
-//#include <cpp3ds/System/Err.hpp>
-//#include <cpp3ds/System/InputStream.hpp>
-//#include <cpp3ds/System/Lock.hpp>
-//#include <cpp3ds/System/Mutex.hpp>
-//#include <cpp3ds/System/Sleep.hpp>
-//#include <cpp3ds/System/String.hpp>
-//#include <cpp3ds/System/Thread.hpp>
-//#include <cpp3ds/System/ThreadLocal.hpp>
-//#include <cpp3ds/System/ThreadLocalPtr.hpp>
-//#include <cpp3ds/System/Utf.hpp>
-//#include <cpp3ds/System/Vector2.hpp>
-//#include <cpp3ds/System/Vector3.hpp>
+#include <cpp3ds/System/Clock.hpp>
+#include <cpp3ds/System/Err.hpp>
+#include <cpp3ds/System/InputStream.hpp>
+#include <cpp3ds/System/Lock.hpp>
+#include <cpp3ds/System/Mutex.hpp>
+#include <cpp3ds/System/Sleep.hpp>
+#include <cpp3ds/System/String.hpp>
+#include <cpp3ds/System/Thread.hpp>
+#include <cpp3ds/System/ThreadLocal.hpp>
+#include <cpp3ds/System/ThreadLocalPtr.hpp>
+#include <cpp3ds/System/Utf.hpp>
+#include <cpp3ds/System/Vector2.hpp>
+#include <cpp3ds/System/Vector3.hpp>
 
 #endif
 
