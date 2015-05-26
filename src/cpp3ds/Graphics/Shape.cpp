@@ -244,6 +244,12 @@ void Shape::updateTexCoords()
         float yratio = m_insideBounds.height > 0 ? (m_vertices[i].position.y - m_insideBounds.top) / m_insideBounds.height : 0;
         m_vertices[i].texCoords.x = m_textureRect.left + m_textureRect.width * xratio;
         m_vertices[i].texCoords.y = m_textureRect.top + m_textureRect.height * yratio;
+        #ifndef EMULATION
+            if (m_textureRect.width != 0)
+                m_vertices[i].texCoords.x /= m_textureRect.width;
+            if (m_textureRect.height != 0)
+                m_vertices[i].texCoords.y /= m_textureRect.height;
+        #endif
     }
 }
 
