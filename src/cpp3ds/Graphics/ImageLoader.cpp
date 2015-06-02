@@ -104,9 +104,14 @@ bool ImageLoader::loadImageFromFile(const std::string& filename, std::vector<Uin
 
     // Load the image and get a pointer to the pixels in memory
     int width, height, channels;
-    unsigned char* ptr = stbi_load(filename.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+	#ifdef EMULATION
+		std::string rel_filename = "res/sdmc/" + filename;
+		unsigned char* ptr = stbi_load(rel_filename.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+	#else
+		unsigned char* ptr = stbi_load(filename.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+	#endif
 
-    if (ptr && width && height)
+	if (ptr && width && height)
     {
         // Assign the image properties
         size.x = width;
