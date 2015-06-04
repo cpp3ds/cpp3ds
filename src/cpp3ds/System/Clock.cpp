@@ -26,19 +26,24 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/System/Clock.hpp>
+#include <3ds.h>
 
-//#if defined(SFML_SYSTEM_WINDOWS)
-//    #include <SFML/System/Win32/ClockImpl.hpp>
-//#else
-//    #include <SFML/System/Unix/ClockImpl.hpp>
-//#endif
-
+// TODO: Update for New 3DS?
+#define TICKS_PER_SEC 268123480
 
 namespace cpp3ds
 {
+namespace priv {
+
+	static Time getCurrentTime()
+	{
+		return seconds(static_cast<float>(svcGetSystemTick())/TICKS_PER_SEC);
+	}
+}
+
 ////////////////////////////////////////////////////////////
-Clock::Clock()
-//m_startTime(priv::ClockImpl::getCurrentTime())
+Clock::Clock():
+m_startTime(priv::getCurrentTime())
 {
 }
 
@@ -46,18 +51,18 @@ Clock::Clock()
 ////////////////////////////////////////////////////////////
 Time Clock::getElapsedTime() const
 {
-//    return priv::ClockImpl::getCurrentTime() - m_startTime;
+    return priv::getCurrentTime() - m_startTime;
 }
 
 
 ////////////////////////////////////////////////////////////
 Time Clock::restart()
 {
-//    Time now = priv::ClockImpl::getCurrentTime();
-//    Time elapsed = now - m_startTime;
-//    m_startTime = now;
-//
-//    return elapsed;
+    Time now = priv::getCurrentTime();
+    Time elapsed = now - m_startTime;
+    m_startTime = now;
+
+    return elapsed;
 }
 
 } // namespace cpp3ds

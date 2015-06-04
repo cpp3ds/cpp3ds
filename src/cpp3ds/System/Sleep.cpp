@@ -26,21 +26,15 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/System/Sleep.hpp>
-
-//#if defined(SFML_SYSTEM_WINDOWS)
-//    #include <SFML/System/Win32/SleepImpl.hpp>
-//#else
-//    #include <SFML/System/Unix/SleepImpl.hpp>
-//#endif
-
+#include <3ds.h>
 
 namespace cpp3ds
 {
 ////////////////////////////////////////////////////////////
 void sleep(Time duration)
 {
-//    if (duration >= Time::Zero)
-//        priv::sleepImpl(duration);
+    if (duration >= Time::Zero)
+		svcSleepThread(duration.asMicroseconds() * 1000);
 }
 
 } // namespace cpp3ds
