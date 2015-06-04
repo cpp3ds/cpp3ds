@@ -278,7 +278,7 @@ protected:
     ////////////////////////////////////////////////////////////
     Clock             m_clock;          ///< Clock for measuring the elapsed time between frames
     Time              m_frameTimeLimit; ///< Current framerate limit
-//    Vector2u          m_size;           ///< Current size of the window
+    Vector2u          m_size;           ///< Current size of the window
 };
 
 }

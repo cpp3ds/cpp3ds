@@ -34,11 +34,12 @@ namespace cpp3ds
 {
 ////////////////////////////////////////////////////////////
 Window::Window() :
-m_frameTimeLimit(Time::Zero)
-//m_size          (0, 0)
+m_frameTimeLimit(Time::Zero),
+m_size          (400, 240)
 {
 	// Perform common initializations
 	initialize();
+	RenderTarget::initialize();
 }
 
 
@@ -94,7 +95,8 @@ bool Window::waitEvent(Event& event)
 ////////////////////////////////////////////////////////////
 Vector2u Window::getSize() const
 {
-    return RenderTexture::getSize();
+	return m_size;
+//    return RenderTexture::getSize();
 }
 
 
