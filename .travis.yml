@@ -2,24 +2,10 @@ language: cpp
 compiler:
  - gcc
 before_install:
- - sudo add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu/ trusty main universe"
- - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
- - sudo apt-get -qq update
- - sudo apt-get -qq install libgtest-dev g++-4.8 libsfml-dev libgtkmm-3.0-dev libexpat1 gcc-arm-none-eabi
- - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
- - git clone https://github.com/cpp3ds/universal-tween-engine-cpp.git ../tween-engine
- - "cd ../tween-engine && make test ; cd -"
- - "cd /usr/src/gtest && sudo cmake . && sudo cmake --build . && sudo mv libg* /usr/local/lib/ ; cd -"
- - cmake .
+ - export DEVKITPRO=/home/travis/devkitPro
+ - export DEVKITARM=${DEVKITPRO}/devkitARM
+ - export CTRULIB=${DEVKITPRO}/libctru
+ - export GL3DS=/home/travis/gl3ds
+ - sh .travis-deps.sh
 script:
-  - make -j4
-  - cd test
-  - ./run.sh
-notifications:
-  recipients:
-    - machin3@gmail.com
-  email:
-    on_success: change
-    on_failure: always
-rvm:
-  - 1.00
+ - sh .travis-build.sh
