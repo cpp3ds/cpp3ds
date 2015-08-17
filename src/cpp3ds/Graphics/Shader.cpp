@@ -37,8 +37,6 @@
 #include <vector>
 
 
-// OpenGL ES 1 does't support GLSL shaders at all, we have to provide an empty implementation
-
 namespace cpp3ds
 {
 ////////////////////////////////////////////////////////////
@@ -95,7 +93,7 @@ bool Shader::loadFromMemory(const std::string& vertexShader, const std::string& 
 bool Shader::loadFromResource(const std::string& vertexShader, Type type, bool compiled)
 {
     if (compiled) {
-        return loadProgram(priv::resources[vertexShader].data, priv::resources[vertexShader].size);
+        return loadBinary(priv::resources[vertexShader].data, priv::resources[vertexShader].size);
     } else {
         return compile(vertexShader.c_str(), nullptr);
     }
@@ -353,7 +351,7 @@ bool Shader::compile(const char* vertexShaderCode, const char* fragmentShaderCod
 
 
 ////////////////////////////////////////////////////////////
-bool Shader::loadProgram(const Uint8* data, const Uint32 size)
+bool Shader::loadBinary(const Uint8* data, const Uint32 size)
 {
     if (m_shaderProgram) {
         glCheck(glDeleteProgram(m_shaderProgram));

@@ -140,7 +140,7 @@ public :
     ////////////////////////////////////////////////////////////
     bool loadFromFile(const std::string& vertexShaderFilename, const std::string& fragmentShaderFilename);
 
-    ////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////
     /// \brief Load either the vertex or fragment shader from a source code in memory
     ///
     /// This function loads a single shader, either vertex or
@@ -182,6 +182,8 @@ public :
     bool loadFromMemory(const std::string& vertexShader, const std::string& fragmentShader);
 
     bool loadFromResource(const std::string& vertexShader, Type type, bool compiled = true);
+
+	bool loadBinary(const Uint8* data, const Uint32 size);
 
     ////////////////////////////////////////////////////////////
     /// \brief Load either the vertex or fragment shader from a custom stream
@@ -523,8 +525,6 @@ private :
     ///
     ////////////////////////////////////////////////////////////
     bool compile(const char* vertexShaderCode, const char* fragmentShaderCode);
-
-    bool loadProgram(const Uint8* data, const Uint32 size);
 
     ////////////////////////////////////////////////////////////
     /// \brief Bind all the textures used by the shader
