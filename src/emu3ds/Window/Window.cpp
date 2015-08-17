@@ -25,18 +25,18 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
+#include <cpp3ds/Emulator.hpp>
 #include <cpp3ds/Window/Window.hpp>
+#include <cpp3ds/Graphics/Sprite.hpp>
 #include <cpp3ds/System/Sleep.hpp>
 #include <cpp3ds/System/Err.hpp>
-#include <cpp3ds/Window/GlContext.hpp>
 
 
 namespace cpp3ds
 {
 ////////////////////////////////////////////////////////////
 Window::Window() :
-m_frameTimeLimit(Time::Zero),
-m_size          (0, 0)
+m_frameTimeLimit(Time::Zero)
 {
 	// Perform common initializations
 	initialize();
@@ -53,17 +53,11 @@ Window::~Window()
 ////////////////////////////////////////////////////////////
 void Window::create(const ContextSettings& settings)
 {
-	// Destroy the previous window implementation
-	close();
-
-	unsigned int width  = settings.screen == TopScreen ? 400 : 400;
+	unsigned int width  = settings.screen == TopScreen ? 400 : 320;
 	unsigned int height = 240;
 
 	m_size.x = width;
 	m_size.y = height;
-
-	// Recreate the context
-	m_context = priv::GlContext::create(settings, width, height);
 
 	// Perform common initializations
 	initialize();
@@ -73,14 +67,13 @@ void Window::create(const ContextSettings& settings)
 ////////////////////////////////////////////////////////////
 void Window::close()
 {
+	_emulator->stop();
 }
 
 
 ////////////////////////////////////////////////////////////
-bool Window::isOpen() const
-{
-    return m_context != NULL;
-//	return true;
+bool Window::isOpen() const {
+	return _emulator->getState() != EMU_STOPPED;
 }
 
 
@@ -88,8 +81,29 @@ bool Window::isOpen() const
 const ContextSettings& Window::getSettings() const
 {
 	static const ContextSettings empty(TopScreen, 0, 0, 0);
+	// TODO: store settings or fetch from emu window?
+	return empty;
+}
 
-	return m_context ? m_context->getSettings() : empty;
+
+////////////////////////////////////////////////////////////
+Vector2u Window::getSize() const
+{
+	return m_size;
+}
+
+
+////////////////////////////////////////////////////////////
+void Window::setVerticalSyncEnabled(bool enabled)
+{
+	_emulator->screen->setVerticalSyncEnabled(enabled);
+}
+
+
+////////////////////////////////////////////////////////////
+void Window::setFramerateLimit(unsigned int limit)
+{
+	_emulator->screen->setFramerateLimit(limit);
 }
 
 
@@ -103,88 +117,14 @@ bool Window::activate(bool active)
 ////////////////////////////////////////////////////////////
 bool Window::setActive(bool active) const
 {
-	if (m_context)
-	{
-		if (m_context->setActive(active))
-		{
-			return true;
-		}
-		else
-		{
-			err() << "Failed to activate the window's context" << std::endl;
-			return false;
-		}
-	}
-	else
-	{
-		return false;
-	}
-}
-
-
-////////////////////////////////////////////////////////////
-Vector2u Window::getSize() const
-{
-	return m_size;
-}
-
-
-////////////////////////////////////////////////////////////
-Image Window::capture() const
-{
-	Image image;
-	if (setActive())
-	{
-		int width = static_cast<int>(getSize().x);
-		int height = static_cast<int>(getSize().y);
-
-		// copy rows one by one and flip them (OpenGL's origin is bottom while SFML's origin is top)
-		std::vector<Uint8> pixels(width * height * 4);
-		for (int i = 0; i < height; ++i)
-		{
-			Uint8* ptr = &pixels[i * width * 4];
-			// TODO: implement glReadPixels in gl3ds
-//			glCheck(glReadPixels(0, height - i - 1, width, 1, GL_RGBA, GL_UNSIGNED_BYTE, ptr));
-		}
-
-		image.create(width, height, &pixels[0]);
-	}
-
-	return image;
-}
-
-
-////////////////////////////////////////////////////////////
-void Window::setVerticalSyncEnabled(bool enabled)
-{
-//    if (setActive())
-//        m_context->setVerticalSyncEnabled(enabled);
-}
-
-
-////////////////////////////////////////////////////////////
-void Window::setFramerateLimit(unsigned int limit)
-{
-    if (limit > 0)
-        m_frameTimeLimit = seconds(1.f / limit);
-    else
-        m_frameTimeLimit = Time::Zero;
+	return true;
 }
 
 
 ////////////////////////////////////////////////////////////
 void Window::display()
 {
-	// Display the backbuffer on screen
-	if (setActive())
-		m_context->display();
 
-    // Limit the framerate if needed
-    if (m_frameTimeLimit != Time::Zero)
-    {
-        sleep(m_frameTimeLimit - m_clock.getElapsedTime());
-        m_clock.restart();
-    }
 }
 
 

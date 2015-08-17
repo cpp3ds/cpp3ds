@@ -28,6 +28,7 @@
 #include <cpp3ds/Graphics/RenderTexture.hpp>
 #include <cpp3ds/OpenGL.hpp>
 #include <cpp3ds/System/Err.hpp>
+#include <cpp3ds/Graphics/TextureSaver.hpp>
 
 
 namespace cpp3ds
@@ -44,7 +45,7 @@ m_height (0)
 ////////////////////////////////////////////////////////////
 RenderTexture::~RenderTexture()
 {
-//    delete m_impl;
+	delete m_context;
 }
 
 
@@ -66,7 +67,7 @@ bool RenderTexture::create(unsigned int width, unsigned int height, bool depthBu
     m_height = height;
 
     // Create the in-memory OpenGL context
-//    m_context = new Context(ContextSettings(depthBuffer ? 32 : 0), width, height);
+    m_context = new Context(ContextSettings(TopScreen, depthBuffer ? 32 : 0), width, height);
 
     // We can now initialize the render target part
     RenderTarget::initialize();
@@ -106,7 +107,7 @@ bool RenderTexture::isRepeated() const
 ////////////////////////////////////////////////////////////
 bool RenderTexture::setActive(bool active)
 {
-//    return m_impl && m_impl->activate(active);
+	return m_context->setActive(active);
 }
 
 
@@ -117,7 +118,7 @@ void RenderTexture::display()
     if (setActive(true))
     {
         // Make sure that the current texture binding will be preserved
-//        priv::TextureSaver save;
+        priv::TextureSaver save;
 
         // Copy the rendered pixels to the texture
         glCheck(glBindTexture(GL_TEXTURE_2D, m_texture.m_texture));
