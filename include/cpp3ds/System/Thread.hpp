@@ -37,7 +37,7 @@ namespace cpp3ds
 namespace priv
 {
 //    class ThreadImpl;
-//    struct ThreadFunc;
+    struct ThreadFunc;
 }
 
 ////////////////////////////////////////////////////////////
@@ -186,10 +186,10 @@ private :
     // Member data
     ////////////////////////////////////////////////////////////
 //    priv::ThreadImpl* m_impl;       ///< OS-specific implementation of the thread
-//    priv::ThreadFunc* m_entryPoint; ///< Abstraction of the function to run
+    priv::ThreadFunc* m_entryPoint; ///< Abstraction of the function to run
 };
 
-//#include <cpp3ds/System/Thread.inl>
+#include <cpp3ds/System/Thread.inl>
 
 } // namespace cpp3ds
 
