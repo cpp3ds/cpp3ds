@@ -30,6 +30,7 @@
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/Config.hpp>
 #include <cpp3ds/Graphics/Image.hpp>
+#include <cpp3ds/Window/GlResource.hpp>
 
 
 namespace cpp3ds
@@ -39,11 +40,11 @@ class RenderTarget;
 class RenderTexture;
 class InputStream;
 
-////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////some things could easily be broken///////
 /// \brief Image living on the graphics card that can be used for drawing
 ///
 ////////////////////////////////////////////////////////////
-class Texture
+class Texture: GlResource
 {
 public :
 
