@@ -4,22 +4,11 @@
 #include <cpp3ds/System.hpp>
 #include <cpp3ds/Window/Event.hpp>
 #include <cpp3ds/Window/EventManager.hpp>
-
-//#include <cpp3ds/Window/Input.hpp>
 #include <cpp3ds/Window/Joystick.hpp>
 #include <cpp3ds/Window/Keyboard.hpp>
-//#include <cpp3ds/Window/Mouse.hpp>
 #include <cpp3ds/Window/Touch.hpp>
 #include <cpp3ds/Window/Sensor.hpp>
-
-//#include <cpp3ds/Window/TopScreen.hpp>
-//#include <cpp3ds/Window/BottomScreen.hpp>
-//#include <cpp3ds/Window/Display.hpp>
-//#include <cpp3ds/Window/VideoMode.hpp>
 #include <cpp3ds/Window/Window.hpp>
-//#include <cpp3ds/Window/WindowStyle.hpp>
-
-//#include <cpp3ds/Window/Scene.hpp>
 
 #endif
 
