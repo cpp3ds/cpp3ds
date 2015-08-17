@@ -9,7 +9,7 @@ namespace cpp3ds {
 int wrapper_main(int argc, char **argv) {
     QApplication a(argc, argv);
 
-    // Force resource init because it's in archive lib
+    // Force resource init because it's in cpp3ds archive lib
     Q_INIT_RESOURCE(emulator);
 
     cpp3ds::_emulator = new cpp3ds::Emulator();
@@ -21,6 +21,8 @@ int wrapper_main(int argc, char **argv) {
     return ret;
 }
 
+// Use extern "C" to avoid name mangling and call wrapper_main
+// to get back into the glorious C++ world.
 extern "C" int __wrap_main(int argc, char **argv) {
     return wrapper_main(argc, argv);
 }

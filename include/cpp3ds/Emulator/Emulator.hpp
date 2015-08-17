@@ -35,6 +35,7 @@ private:
 
 	bool initialized = false;
 
+	void showEvent(QShowEvent *);
 	void runGame();
 	void checkThreadState();
 	void saveScreenshot();
