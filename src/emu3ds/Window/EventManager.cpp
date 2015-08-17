@@ -2,8 +2,19 @@
 #include <cpp3ds/Window/EventManager.hpp>
 #include <cpp3ds/System/Sleep.hpp>
 #include <iostream>
+#include <map>
 
 namespace cpp3ds {
+
+// TODO: configurable key-mapping
+std::map<sf::Keyboard::Key, cpp3ds::Keyboard::Key> keyMap = {
+	{sf::Keyboard::A, cpp3ds::Keyboard::A},
+	{sf::Keyboard::B, cpp3ds::Keyboard::B}
+};
+
+EventManager::EventManager() {
+	m_joystickThreshold = 10.f;
+}
 
 bool EventManager::pollEvent(Event& event) {
 	if (popEvent(event, false)) {
@@ -22,7 +33,8 @@ bool EventManager::waitEvent(Event& event) {
 }
 
 void EventManager::setJoystickThreshold(float threshold) {
-	//
+	if (threshold >=0 && threshold <= 100)
+		m_joystickThreshold = threshold;
 }
 
 void EventManager::pushEvent(const Event& event) {
@@ -35,8 +47,8 @@ bool EventManager::filterEvent(const Event& event) {
 
 ////////////////////////////////////////////////////////////
 void EventManager::processEvents() {
-	int BOTTOM_X = 20,
-		BOTTOM_Y = 320,
+	int BOTTOM_X = 40,
+		BOTTOM_Y = 240,
 		BOTTOM_WIDTH = 320;
 	// Check all inputs and push Events that are triggered
 	sf::Event event;
@@ -74,20 +86,29 @@ void EventManager::processEvents() {
 		}
 	}
 	while (_emulator->screen->pollEvent(event)) {
-//		std::cout << "EVENT: " << event.type << std::endl;
+		std::cout << "EVENT: " << event.type << std::endl;
         cpp3ds::Event e;
+		std::map<sf::Keyboard::Key, cpp3ds::Keyboard::Key>::iterator key;
 		switch (event.type) {
 			case sf::Event::KeyPressed:
-				std::cout << "EVENT: " << event.type << std::endl;
-				e.type = Event::KeyPressed;
-				pushEvent(e);
+			std::cout << "sf::KeyPressed";
+				key = keyMap.find(event.key.code);
+				if (key != keyMap.end()) {
+					e.type = Event::KeyPressed;
+					e.key.code = key->second;
+					pushEvent(e);
+				}
 				break;
 			case sf::Event::KeyReleased:
-				std::cout << "EVENT: " << event.type << std::endl;
+//				std::cout << "EVENT: " << event.type << std::endl;
                 e.type = Event::KeyReleased;
                 pushEvent(e);
 				break;
 			case sf::Event::JoystickMoved:
+				e.type = Event::JoystickMoved;
+				// TODO: implement joystick for emulator
+				e.joystickMove.x = event.joystickMove.position;
+//				pushEvent(e);
 				break;
 			default:
 				break;

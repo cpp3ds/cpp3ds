@@ -4,7 +4,6 @@
 #include <cpp3ds/System/Vector3.hpp>
 #include <cpp3ds/System/Time.hpp>
 
-
 namespace cpp3ds {
 ////////////////////////////////////////////////////////////
 /// \brief Give access to the real-time state of the sensors
@@ -53,6 +52,22 @@ public:
     ////////////////////////////////////////////////////////////
     static void setEnabled(Type sensor, bool enabled);
 
+	////////////////////////////////////////////////////////////
+	/// \brief Check if a sensor is enabled
+	///
+	/// \param sensor Sensor to check
+	///
+	/// \return True if the sensor is enabled, false otherwise
+	///
+	////////////////////////////////////////////////////////////
+	static bool isEnabled(Type sensor);
+
+	////////////////////////////////////////////////////////////
+	/// \brief Update the state of all the sensors
+	///
+	////////////////////////////////////////////////////////////
+	static void update();
+
     ////////////////////////////////////////////////////////////
     /// \brief Get the current sensor value
     ///
@@ -62,6 +77,14 @@ public:
     ///
     ////////////////////////////////////////////////////////////
     static Vector3f getValue(Type sensor);
+
+private:
+
+	static bool         m_accel_enabled;
+	static bool         m_gyro_enabled;
+	static Vector3f     m_accel;
+	static Vector3f     m_gyro;
+
 };
 
 }

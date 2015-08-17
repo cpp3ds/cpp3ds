@@ -3,11 +3,17 @@
 
 #include <queue>
 #include <cpp3ds/Window/Event.hpp>
+#ifndef EMULATION
+#include <3ds.h>
+#endif
 
 namespace cpp3ds {
 
 class EventManager {
 public:
+
+	EventManager();
+
 	////////////////////////////////////////////////////////////
 	/// \brief Pop the event on top of the event queue, if any, and return it
 	///
@@ -111,7 +117,13 @@ private:
 //	JoystickState     m_joystickStates[Joystick::Count]; ///< Previous state of the joysticks
 	Vector3f          m_sensorValue[Sensor::Count];      ///< Previous value of the sensors
 	float             m_joystickThreshold;               ///< Joystick threshold (minimum motion for "move" event to be generated)
-
+	float             m_slider3d;                        ///< Position of 3D slider with [0,1] range
+	float             m_sliderVolume;                    ///< Position of volume slider with [0,1] range
+	#ifndef EMULATION
+	touchPosition   m_touch;
+	circlePosition  m_circle;
+	u32             m_heldKeys;
+	#endif
 };
 
 }
