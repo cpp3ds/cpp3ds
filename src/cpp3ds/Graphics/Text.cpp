@@ -28,15 +28,23 @@
 #include <cpp3ds/Graphics/Text.hpp>
 #include <cpp3ds/Graphics/Texture.hpp>
 #include <cpp3ds/Graphics/RenderTarget.hpp>
+#include <cpp3ds/Resources.hpp>
 #include <cassert>
 
 
 namespace cpp3ds
 {
+namespace priv
+{
+	// Default font for Text objects for user convenience
+	Font system_font;
+	static bool system_font_loaded;
+}
+
 ////////////////////////////////////////////////////////////
 Text::Text() :
 m_string            (),
-m_font              (NULL),
+m_font              (&priv::system_font),
 m_characterSize     (30),
 m_style             (Regular),
 m_color             (255, 255, 255),
@@ -225,14 +233,19 @@ FloatRect Text::getGlobalBounds() const
 ////////////////////////////////////////////////////////////
 void Text::draw(RenderTarget& target, RenderStates states) const
 {
-    if (m_font)
-    {
-        ensureGeometryUpdate();
+	// Load system's opensans.tff if user attempts drawing without font
+	if (m_font == &priv::system_font && !priv::system_font_loaded)
+	{
+		priv::system_font_loaded = true;
+		priv::ResourceInfo font = priv::core_resources["opensans.ttf"];
+		priv::system_font.loadFromMemory(font.data, font.size);
+	}
 
-        states.transform *= getTransform();
-        states.texture = &m_font->getTexture(m_characterSize);
-        target.draw(m_vertices, states);
-    }
+	ensureGeometryUpdate();
+
+	states.transform *= getTransform();
+	states.texture = &m_font->getTexture(m_characterSize);
+	target.draw(m_vertices, states);
 }
 
 

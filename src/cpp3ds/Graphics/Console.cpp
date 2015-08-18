@@ -62,7 +62,7 @@ void Console::create()
 		setvbuf(stdout, NULL, _IONBF, 0);
 		setvbuf(stderr, NULL, _IONBF, 0);
 
-		priv::ResourceInfo font = priv::core_resources["sansation.ttf"];
+		priv::ResourceInfo font = priv::core_resources["opensans.ttf"];
 		m_font.loadFromMemory(font.data, font.size);
 #endif
 
