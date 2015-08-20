@@ -1,11 +1,13 @@
 # the name of the target operating system
 SET(CMAKE_SYSTEM_NAME Generic)
 
+#include(cpp3ds)
+
 # which compilers to use for C and C++
-SET(CMAKE_C_COMPILER $ENV{DEVKITARM}/bin/arm-none-eabi-gcc)
-SET(CMAKE_CXX_COMPILER $ENV{DEVKITARM}/bin/arm-none-eabi-g++)
-SET(CMAKE_SIZE $ENV{DEVKITARM}/bin/arm-none-eabi-size)
-SET(CMAKE_OBJCOPY $ENV{DEVKITARM}/bin/arm-none-eabi-objcopy)
+SET(CMAKE_C_COMPILER ${DEVKITARM}/bin/arm-none-eabi-gcc)
+SET(CMAKE_CXX_COMPILER ${DEVKITARM}/bin/arm-none-eabi-g++)
+SET(CMAKE_SIZE ${DEVKITARM}/bin/arm-none-eabi-size)
+SET(CMAKE_OBJCOPY ${DEVKITARM}/bin/arm-none-eabi-objcopy)
 
 # adjust the default behaviour of the FIND_XXX() commands:
 # search headers and libraries in the target environment, search 
