@@ -44,7 +44,7 @@ class Event;
 /// \brief Window that serves as a target for OpenGL rendering
 ///
 ////////////////////////////////////////////////////////////
-class Window : public RenderTarget, GlResource, NonCopyable
+class Window : public RenderTarget, GlResource
 {
 public :
 
