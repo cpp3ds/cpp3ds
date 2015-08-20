@@ -21,7 +21,13 @@ extern "C" {
 
 #ifndef EMULATION
 ssize_t console_write(struct _reent *r, int fd, const char *ptr, size_t len) {
-	cpp3ds::g_stdout.push_back(cpp3ds::String(ptr));
+	cpp3ds::String s;
+	int i = 0;
+	while (i < len) {
+		s += ptr[i];
+		i++;
+	}
+	cpp3ds::g_stdout.push_back(s);
 	return len;
 }
 
@@ -86,7 +92,7 @@ void Console::update(float delta)
 ////////////////////////////////////////////////////////////
 void Console::write(String text)
 {
-	Text line(text, m_font, 12);
+	Text line(text, m_font, 10);
 	m_lines.push_back(line);
 }
 
