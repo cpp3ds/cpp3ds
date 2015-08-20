@@ -5,6 +5,7 @@
 #include <cpp3ds/Window/Event.hpp>
 #include <cpp3ds/Window/Window.hpp>
 #include <cpp3ds/Graphics/Console.hpp>
+#include <cpp3ds/Graphics/Shader.hpp>
 #include <cpp3ds/Graphics/RenderTexture.hpp>
 #ifdef EMULATION
     #include <SFML/Graphics.hpp>

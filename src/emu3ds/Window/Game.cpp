@@ -1,3 +1,4 @@
+#include <cpp3ds/OpenGL.hpp>
 #include <cpp3ds/Emulator.hpp>
 #include <cpp3ds/Window/Game.hpp>
 #include <cpp3ds/Window/EventManager.hpp>

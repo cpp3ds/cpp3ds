@@ -29,11 +29,9 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/Config.hpp>
+#include <cpp3ds/OpenGL.hpp>
 
 #ifdef EMULATION
-
-    #include <GL/glew.h>
-	#include <cpp3ds/OpenGL.hpp>
 
     #define GLEXT_blend_func_separate              GLEW_EXT_blend_func_separate
     #define GLEXT_blend_equation_separate          GLEW_EXT_blend_equation_separate
@@ -70,14 +68,13 @@
 #else
 
 	#define GL_GLEXT_PROTOTYPES
-	#include <cpp3ds/OpenGL.hpp>
 
     #define GLEXT_blend_func_separate              GL_OES_blend_func_separate
     #define GLEXT_blend_equation_separate          GL_OES_blend_equation_separate
     #define GLEXT_glBlendFuncSeparate              glBlendFuncSeparateOES
     #define GLEXT_glBlendEquationSeparate          glBlendEquationSeparateOES
     #define GLEXT_framebuffer_object               GL_OES_framebuffer_object
-    #define GLEXT_glGenFramebuffers                glGenFramebuffersOES
+    #define GLEXT_glGenFramebuffers                glGenFramebuffers
     #define GLEXT_glGenRenderbuffers               glGenRenderbuffersOES
     #define GLEXT_glBindFramebuffer                glBindFramebufferOES
     #define GLEXT_glBindRenderbuffer               glBindRenderbufferOES
@@ -87,9 +84,9 @@
     #define GLEXT_glFramebufferRenderbuffer        glFramebufferRenderbufferOES
     #define GLEXT_glFramebufferTexture2D           glFramebufferTexture2DOES
     #define GLEXT_glCheckFramebufferStatus         glCheckFramebufferStatusOES
-    #define GLEXT_GL_FRAMEBUFFER                   GL_FRAMEBUFFER_OES
-    #define GLEXT_GL_FRAMEBUFFER_BINDING           GL_FRAMEBUFFER_BINDING_OES
-    #define GLEXT_GL_RENDERBUFFER                  GL_RENDERBUFFER_OES
+    #define GLEXT_GL_FRAMEBUFFER                   GL_FRAMEBUFFER
+    #define GLEXT_GL_FRAMEBUFFER_BINDING           GL_FRAMEBUFFER_BINDING
+    #define GLEXT_GL_RENDERBUFFER                  GL_RENDERBUFFER
     #define GLEXT_GL_COLOR_ATTACHMENT0             GL_COLOR_ATTACHMENT0_OES
     #define GLEXT_GL_DEPTH_ATTACHMENT              GL_DEPTH_ATTACHMENT_OES
     #define GLEXT_GL_FRAMEBUFFER_COMPLETE          GL_FRAMEBUFFER_COMPLETE_OES
