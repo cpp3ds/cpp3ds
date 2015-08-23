@@ -50,6 +50,8 @@ public:
 
 	void setVisible(bool visible);
 
+	static void initialize();
+
 private:
 
 	////////////////////////////////////////////////////////////
@@ -66,8 +68,9 @@ private:
 	////////////////////////////////////////////////////////////
 	Font  m_font;
 	std::vector<Text> m_lines;
+	Text m_memoryText;
 	unsigned int m_limit;
-	bool m_initialized;
+	static bool m_initialized;
 	bool m_visible;
 };
 

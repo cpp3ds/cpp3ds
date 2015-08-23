@@ -11,6 +11,7 @@ Game::Game()
 {
 	gfxInitDefault();
 	initCfgu();
+	Console::initialize();
 
 	windowTop.create(ContextSettings(TopScreen));
 	windowBottom.create(ContextSettings(BottomScreen));

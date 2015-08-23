@@ -9,8 +9,10 @@
 #include <cpp3ds/Graphics/RenderTarget.hpp>
 #include <cpp3ds/Resources.hpp>
 #include <stdio.h>
+#include <sstream>
 #ifndef EMULATION
 #include <sys/iosupport.h>
+extern u32 __linear_heap_size;
 #endif
 
 namespace cpp3ds {
@@ -40,6 +42,9 @@ static const devoptab_t dotab_stdout = {
 
 namespace cpp3ds
 {
+
+bool Console::m_initialized = false;
+
 ////////////////////////////////////////////////////////////
 Console::Console()
 {
@@ -58,7 +63,7 @@ Console::~Console()
 
 
 ////////////////////////////////////////////////////////////
-void Console::create()
+void Console::initialize()
 {
 	if (!m_initialized) {
 		m_initialized = true;
@@ -67,13 +72,22 @@ void Console::create()
 		devoptab_list[STD_ERR] = &dotab_stdout;
 		setvbuf(stdout, NULL, _IONBF, 0);
 		setvbuf(stderr, NULL, _IONBF, 0);
-
-		priv::ResourceInfo font = priv::core_resources["opensans.ttf"];
-		m_font.loadFromMemory(font.data, font.size);
 #endif
-
-		m_limit = 1000;
 	}
+}
+
+
+////////////////////////////////////////////////////////////
+void Console::create()
+{
+	initialize();
+	priv::ResourceInfo font = priv::core_resources["opensans.ttf"];
+	m_font.loadFromMemory(font.data, font.size);
+
+	m_memoryText.setFont(m_font);
+	m_memoryText.setCharacterSize(12);
+
+	m_limit = 1000;
 }
 
 
@@ -86,6 +100,13 @@ void Console::update(float delta)
 
 	if (m_lines.size() > m_limit)
 		m_lines.erase(m_lines.begin(), m_lines.end() - m_limit);
+
+	#ifndef EMULATION
+	std::ostringstream ss;
+	ss << (__linear_heap_size - linearSpaceFree()) / 1024 << "kb / " << __linear_heap_size / 1024 << "kb";
+	m_memoryText.setString(ss.str());
+	m_memoryText.setPosition(395 - m_memoryText.getGlobalBounds().width, 5);
+	#endif
 }
 
 
@@ -101,7 +122,7 @@ void Console::write(String text)
 bool Console::processEvent(Event& event)
 {
 	if (event.type == Event::KeyPressed) {
-		if (event.key.code == Keyboard::A) {
+		if (event.key.code == Keyboard::DPadDown && Keyboard::isKeyDown(Keyboard::R)) {
 			m_visible = !m_visible;
 			return false;
 		}
@@ -134,6 +155,8 @@ void Console::draw(RenderTarget& target, RenderStates states) const
 		text.setPosition(0, h);
 		target.draw(text);
 	}
+
+	target.draw(m_memoryText);
 }
 
 
