@@ -19,6 +19,7 @@ class Service {
 public:
 	static bool enable(ServiceName service);
 	static bool disable(ServiceName service);
+	static bool isEnabled(ServiceName service);
 
 private:
 	static Uint16 m_enabledServices;

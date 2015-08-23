@@ -8,8 +8,9 @@ namespace cpp3ds {
 Uint16 Service::m_enabledServices = 0x0;
 u32* Service::socBuffer = NULL;
 
+
 bool Service::enable(ServiceName service) {
-	if (service & m_enabledServices)
+	if (isEnabled(service))
 		return true;
 
 	if (service == ALL)
@@ -36,6 +37,7 @@ bool Service::enable(ServiceName service) {
 	return false;
 }
 
+
 bool Service::disable(ServiceName service) {
 	if (service & ~m_enabledServices)
 		return true;
@@ -56,6 +58,11 @@ bool Service::disable(ServiceName service) {
 		csndExecCmds(true);
 		csndExit();
 	}
+}
+
+
+bool Service::isEnabled(ServiceName service) {
+	return service & m_enabledServices;
 }
 
 } // namespace cpp3ds

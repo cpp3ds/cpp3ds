@@ -10,4 +10,8 @@ namespace cpp3ds {
 		return true;
 	}
 
+	bool Service::isEnabled(ServiceName service) {
+		return true;
+	}
+
 } // namespace cpp3ds
