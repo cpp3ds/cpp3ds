@@ -7,6 +7,18 @@
 namespace cpp3ds {
 
 
+//Apt hook cookie
+static aptHookCookie apt_hook_cookie;
+
+static void apt_clock_hook(int hook, void* param)
+{
+	if (hook == APTHOOK_ONRESTORE) {
+		Clock* clock = (Clock*) param;
+		clock->restart();
+	}
+}
+
+
 Game::Game()
 {
 	gfxInitDefault();
@@ -60,6 +72,9 @@ void Game::run()
 	Clock clock;
 	Time deltaTime;
 
+	// Hook for clock
+	aptHook(&apt_hook_cookie, apt_clock_hook, &clock);
+
 	// Use default shader if one isn't provided by user
 	if (m_shader.getNativeHandle() == NULL) {
 		priv::ResourceInfo defaultShader = priv::core_resources["default_shader.vsh"];
@@ -90,6 +105,8 @@ void Game::run()
 		update(deltaTime.asSeconds());
 		render();
 	}
+
+	aptUnhook(&apt_hook_cookie);
 }
 
 
