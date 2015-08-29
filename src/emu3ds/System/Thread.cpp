@@ -26,7 +26,6 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/System/Thread.hpp>
-#include <malloc.h>
 
 
 namespace cpp3ds
@@ -34,15 +33,14 @@ namespace cpp3ds
 ////////////////////////////////////////////////////////////
 void Thread::initialize()
 {
-	threadStack = (u32*)memalign(32, 4 * 1024);
+
 }
 
 
 ////////////////////////////////////////////////////////////
 Thread::~Thread()
 {
-    wait();
-	free(threadStack);
+    delete m_thread;
     delete m_entryPoint;
 }
 
@@ -50,51 +48,33 @@ Thread::~Thread()
 ////////////////////////////////////////////////////////////
 void Thread::launch()
 {
-    wait();
-	svcCreateThread(&m_thread, &Thread::entryPoint, (u32)this, &threadStack[1024], 0x3F, 0);
+    m_thread->launch();
 }
 
 
 ////////////////////////////////////////////////////////////
 void Thread::wait()
 {
-	// TODO: check that this isn't current thread asking to wait for itself
-    if (m_thread != NULL)
-	{
-		svcWaitSynchronization(m_thread, U64_MAX);
-		svcCloseHandle(m_thread);
-		m_thread = NULL;
-	}
+    m_thread->wait();
 }
 
 
 ////////////////////////////////////////////////////////////
 void Thread::terminate()
 {
-    if (m_thread != NULL)
-    {
-		// TODO: implement this
-    }
+    m_thread->terminate();
 }
 
 
 ////////////////////////////////////////////////////////////
 void Thread::run()
 {
-    m_entryPoint->run();
 }
 
 
 ////////////////////////////////////////////////////////////
 void Thread::entryPoint(void* userData)
 {
-	// The Thread instance is stored in the user data
-	Thread* owner = static_cast<Thread*>(userData);
-
-	// Forward to the owner
-	owner->run();
-
-	svcExitThread();
 }
 
 } // namespace cpp3ds

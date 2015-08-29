@@ -30,13 +30,16 @@
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/System/NonCopyable.hpp>
 #include <cstdlib>
-
+#ifdef EMULATION
+#include <SFML/System/Thread.hpp>
+#else
+#include <3ds.h>
+#endif
 
 namespace cpp3ds
 {
 namespace priv
 {
-//    class ThreadImpl;
     struct ThreadFunc;
 }
 
@@ -124,6 +127,8 @@ public :
     template <typename C>
     Thread(void(C::*function)(), C* object);
 
+	void initialize();
+
     ////////////////////////////////////////////////////////////
     /// \brief Destructor
     ///
@@ -172,7 +177,15 @@ public :
 
 private :
 
-//    friend class priv::ThreadImpl;
+	////////////////////////////////////////////////////////////
+	/// \brief Global entry point for all threads
+	///
+	/// \param userData User-defined data (contains the Thread instance)
+	///
+	/// \return Os specific error code
+	///
+	////////////////////////////////////////////////////////////
+	static void entryPoint(void* userData);
 
     ////////////////////////////////////////////////////////////
     /// \brief Internal entry point of the thread
@@ -185,8 +198,14 @@ private :
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-//    priv::ThreadImpl* m_impl;       ///< OS-specific implementation of the thread
     priv::ThreadFunc* m_entryPoint; ///< Abstraction of the function to run
+	bool              m_isActive; ///< Thread state (active or inactive)
+	#ifdef EMULATION
+	sf::Thread* m_thread;
+	#else
+	Handle  m_thread;
+	u32*    threadStack;
+	#endif
 };
 
 #include <cpp3ds/System/Thread.inl>
