@@ -6,6 +6,8 @@ include_directories(
 	${PROJECT_SOURCE_DIR}/include
 	${CPP3DS}/include
 	${CPP3DS}/extlibs/include
+	${DEVKITPRO}/portlibs/3ds/include
+	${DEVKITPRO}/portlibs/armv6k/include
 	${GL3DS}/include
     ${CTRULIB}/include
     ${ARM_INCLUDE_DIRECTORIES}
@@ -13,7 +15,7 @@ include_directories(
 link_directories(
 	${CPP3DS}/lib
     ${CTRULIB}/lib
-    ${DEVKITPRO}/portlibs/lib
+    ${DEVKITPRO}/portlibs/3ds/lib
     ${DEVKITPRO}/portlibs/armv6k/lib
     ${GL3DS}/lib
     ${ARM_LINK_DIRECTORIES}
