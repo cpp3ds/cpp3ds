@@ -69,7 +69,7 @@ Thread::Thread(F functor) :
 m_thread      (NULL),
 m_entryPoint(new priv::ThreadFunctor<F>(functor))
 {
-	#ifdef EMLATION
+	#ifdef EMULATION
 	m_thread = new sf::Thread(functor);
 	#endif
 	initialize();
@@ -82,7 +82,7 @@ Thread::Thread(F function, A argument) :
 m_thread      (NULL),
 m_entryPoint(new priv::ThreadFunctorWithArg<F, A>(function, argument))
 {
-	#ifdef EMLATION
+	#ifdef EMULATION
 	m_thread = new sf::Thread(function, argument);
 	#endif
 	initialize();
@@ -95,7 +95,7 @@ Thread::Thread(void(C::*function)(), C* object) :
 m_thread      (NULL),
 m_entryPoint(new priv::ThreadMemberFunc<C>(function, object))
 {
-	#ifdef EMLATION
+	#ifdef EMULATION
 	m_thread = new sf::Thread(function, object);
 	#endif
 	initialize();
