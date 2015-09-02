@@ -76,6 +76,8 @@ public :
     ////////////////////////////////////////////////////////////
     Sprite(const Texture& texture, const IntRect& rectangle);
 
+	~Sprite();
+
     ////////////////////////////////////////////////////////////
     /// \brief Change the source texture of the sprite
     ///
@@ -214,7 +216,7 @@ private :
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    Vertex         m_vertices[4]; ///< Vertices defining the sprite's geometry
+    Vertex*        m_vertices;    ///< Vertices defining the sprite's geometry
     const Texture* m_texture;     ///< Texture of the sprite
     IntRect        m_textureRect; ///< Rectangle defining the area of the source texture to display
 };

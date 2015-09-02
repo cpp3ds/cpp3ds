@@ -403,7 +403,7 @@ private:
         BlendMode lastBlendMode;  ///< Cached blending mode
         Uint64    lastTextureId;  ///< Cached texture
         bool      useVertexCache; ///< Did we previously use the vertex cache?
-        Vertex    vertexCache[VertexCacheSize]; ///< Pre-transformed vertices cache
+        Vertex*   vertexCache;    ///< Pre-transformed vertices cache
     };
 
     ////////////////////////////////////////////////////////////

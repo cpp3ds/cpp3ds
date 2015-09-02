@@ -29,6 +29,9 @@
 #include <cpp3ds/Graphics/Texture.hpp>
 #include <cpp3ds/Graphics/RenderTarget.hpp>
 #include <cstdlib>
+#ifndef EMULATION
+#include <3ds.h>
+#endif
 
 
 namespace cpp3ds
@@ -38,6 +41,7 @@ Sprite::Sprite() :
 m_texture    (NULL),
 m_textureRect()
 {
+	m_vertices = new Vertex[4];
 }
 
 
@@ -46,6 +50,7 @@ Sprite::Sprite(const Texture& texture) :
 m_texture    (NULL),
 m_textureRect()
 {
+	m_vertices = new Vertex[4];
     setTexture(texture);
 }
 
@@ -55,8 +60,16 @@ Sprite::Sprite(const Texture& texture, const IntRect& rectangle) :
 m_texture    (NULL),
 m_textureRect()
 {
+	m_vertices = new Vertex[4];
     setTexture(texture);
     setTextureRect(rectangle);
+}
+
+
+////////////////////////////////////////////////////////////
+Sprite::~Sprite()
+{
+	delete[] m_vertices;
 }
 
 

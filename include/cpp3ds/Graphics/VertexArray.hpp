@@ -32,6 +32,9 @@
 #include <cpp3ds/Graphics/PrimitiveType.hpp>
 #include <cpp3ds/Graphics/Rect.hpp>
 #include <cpp3ds/Graphics/Drawable.hpp>
+#ifndef EMULATION
+#include <cpp3ds/System/LinearAllocator.hpp>
+#endif
 #include <vector>
 
 
@@ -186,7 +189,11 @@ private:
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
+	#ifdef EMULATION
     std::vector<Vertex> m_vertices;      ///< Vertices contained in the array
+    #else
+    std::vector<Vertex, LinearAllocator<Vertex>> m_vertices;
+    #endif
     PrimitiveType       m_primitiveType; ///< Type of primitives to draw
 };
 
