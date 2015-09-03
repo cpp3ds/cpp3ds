@@ -1,0 +1,81 @@
+////////////////////////////////////////////////////////////
+// Headers
+////////////////////////////////////////////////////////////
+#include <cpp3ds/Graphics/Model.hpp>
+
+
+namespace cpp3ds
+{
+////////////////////////////////////////////////////////////
+Model::~Model()
+{
+}
+
+
+////////////////////////////////////////////////////////////
+unsigned int Model::getFaceCount() const
+{
+    return m_faces.size();
+}
+
+
+////////////////////////////////////////////////////////////
+Polyhedron::Face Model::getFace(unsigned int index) const
+{
+    Face face = {m_vertices[m_faces[index].index0],
+                 m_vertices[m_faces[index].index1],
+                 m_vertices[m_faces[index].index2]};
+
+    return face;
+}
+
+
+////////////////////////////////////////////////////////////
+Model::Model()
+{
+}
+
+
+////////////////////////////////////////////////////////////
+void Model::addVertex(const Vertex& vertex)
+{
+    m_vertices.push_back(vertex);
+}
+
+
+////////////////////////////////////////////////////////////
+void Model::setVertex(unsigned int index, const Vertex& vertex)
+{
+    m_vertices[index] = vertex;
+}
+
+
+////////////////////////////////////////////////////////////
+const Vertex& Model::getVertex(unsigned int index) const
+{
+    return m_vertices[index];
+}
+
+
+////////////////////////////////////////////////////////////
+unsigned int Model::getVertexCount() const
+{
+    return m_vertices.size();
+}
+
+
+////////////////////////////////////////////////////////////
+void Model::addFace(unsigned int index0, unsigned int index1, unsigned int index2)
+{
+    FaceIndices face = {index0, index1, index2};
+    m_faces.push_back(face);
+}
+
+
+////////////////////////////////////////////////////////////
+void Model::clearFaces()
+{
+    m_faces.clear();
+}
+
+} // namespace cpp3ds

@@ -36,12 +36,33 @@ z(0)
 
 ////////////////////////////////////////////////////////////
 template <typename T>
+inline Vector3<T>::Vector3(T X, T Y) :
+x(X),
+y(Y),
+z(0)
+{
+
+}
+
+
+////////////////////////////////////////////////////////////
+template <typename T>
 inline Vector3<T>::Vector3(T X, T Y, T Z) :
 x(X),
 y(Y),
 z(Z)
 {
 
+}
+
+
+////////////////////////////////////////////////////////////
+template <typename T>
+inline Vector3<T>::Vector3(const Vector2<T>& vector) :
+x(vector.x),
+y(vector.y),
+z(0)
+{
 }
 
 

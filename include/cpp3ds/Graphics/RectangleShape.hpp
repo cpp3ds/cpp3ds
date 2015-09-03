@@ -91,7 +91,7 @@ public :
     /// \return index-th point of the shape
     ///
     ////////////////////////////////////////////////////////////
-    virtual Vector2f getPoint(unsigned int index) const;
+    virtual Vector3f getPoint(unsigned int index) const;
 
 private :
 
@@ -101,7 +101,7 @@ private :
     Vector2f m_size; ///< Size of the rectangle
 };
 
-}
+} // namespace cpp3ds
 
 
 #endif

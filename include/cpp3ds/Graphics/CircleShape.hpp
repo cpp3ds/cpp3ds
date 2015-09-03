@@ -103,7 +103,7 @@ public :
     /// \return index-th point of the shape
     ///
     ////////////////////////////////////////////////////////////
-    virtual Vector2f getPoint(unsigned int index) const;
+    virtual Vector3f getPoint(unsigned int index) const;
 
 private :
 
@@ -114,7 +114,7 @@ private :
     unsigned int m_pointCount; ///< Number of points composing the circle
 };
 
-}
+} // namespace cpp3ds
 
 
 #endif

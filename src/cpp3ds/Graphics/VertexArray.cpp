@@ -33,14 +33,16 @@ namespace cpp3ds
 {
 ////////////////////////////////////////////////////////////
 VertexArray::VertexArray() :
+VertexContainer(0),
 m_vertices     (),
-m_primitiveType(Points)
+m_primitiveType(Triangles)
 {
 }
 
 
 ////////////////////////////////////////////////////////////
 VertexArray::VertexArray(PrimitiveType type, unsigned int vertexCount) :
+VertexContainer(0),
 m_vertices     (vertexCount),
 m_primitiveType(type)
 {
@@ -104,18 +106,20 @@ PrimitiveType VertexArray::getPrimitiveType() const
 
 
 ////////////////////////////////////////////////////////////
-FloatRect VertexArray::getBounds() const
+FloatBox VertexArray::getBounds() const
 {
     if (!m_vertices.empty())
     {
         float left   = m_vertices[0].position.x;
         float top    = m_vertices[0].position.y;
+        float front  = m_vertices[0].position.z;
         float right  = m_vertices[0].position.x;
         float bottom = m_vertices[0].position.y;
+        float back   = m_vertices[0].position.z;
 
         for (std::size_t i = 1; i < m_vertices.size(); ++i)
         {
-            Vector2f position = m_vertices[i].position;
+            Vector3f position = m_vertices[i].position;
 
             // Update left and right
             if (position.x < left)
@@ -128,14 +132,20 @@ FloatRect VertexArray::getBounds() const
                 top = position.y;
             else if (position.y > bottom)
                 bottom = position.y;
+
+            // Update front and back
+            if (position.z < front)
+                front = position.z;
+            else if (position.z > back)
+                back = position.z;
         }
 
-        return FloatRect(left, top, right - left, bottom - top);
+        return FloatBox(left, top, front, right - left, bottom - top, back - front);
     }
     else
     {
         // Array is empty
-        return FloatRect();
+        return FloatBox();
     }
 }
 
@@ -147,4 +157,4 @@ void VertexArray::draw(RenderTarget& target, RenderStates states) const
         target.draw(&m_vertices[0], static_cast<unsigned int>(m_vertices.size()), m_primitiveType, states);
 }
 
-}
+} // namespace cpp3ds

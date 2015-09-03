@@ -28,6 +28,10 @@
 
 namespace cpp3ds
 {
+
+template <typename T>
+class Vector3;
+
 ////////////////////////////////////////////////////////////
 /// \brief Utility template class for manipulating
 ///        2-dimensional vectors
@@ -54,6 +58,14 @@ public :
     ///
     ////////////////////////////////////////////////////////////
     Vector2(T X, T Y);
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Construct the vector by truncating a Vector3, discarding z
+    ///
+    /// \param vector Vector to convert
+    ///
+    ////////////////////////////////////////////////////////////
+    Vector2(const Vector3<T>& vector);
 
     ////////////////////////////////////////////////////////////
     /// \brief Construct the vector from another type of vector

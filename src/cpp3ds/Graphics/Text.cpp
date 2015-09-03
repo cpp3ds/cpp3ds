@@ -169,7 +169,7 @@ const Color& Text::getColor() const
 
 
 ////////////////////////////////////////////////////////////
-Vector2f Text::findCharacterPos(std::size_t index) const
+Vector3f Text::findCharacterPos(std::size_t index) const
 {
     // Make sure that we have a valid font
     if (!m_font)
@@ -201,6 +201,7 @@ Vector2f Text::findCharacterPos(std::size_t index) const
             case ' ' :  position.x += hspace;                 continue;
             case '\t' : position.x += hspace * 4;             continue;
             case '\n' : position.y += vspace; position.x = 0; continue;
+            case '\v' : position.y += vspace * 4;             continue;
         }
 
         // For regular characters, add the advance offset of the glyph
@@ -304,16 +305,16 @@ void Text::ensureGeometryUpdate() const
             float top = y + underlineOffset;
             float bottom = top + underlineThickness;
 
-            m_vertices.append(Vertex(Vector2f(0, top),    m_color, Vector2f(1, 1)));
-            m_vertices.append(Vertex(Vector2f(x, top),    m_color, Vector2f(1, 1)));
-            m_vertices.append(Vertex(Vector2f(0, bottom), m_color, Vector2f(1, 1)));
-            m_vertices.append(Vertex(Vector2f(0, bottom), m_color, Vector2f(1, 1)));
-            m_vertices.append(Vertex(Vector2f(x, top),    m_color, Vector2f(1, 1)));
-            m_vertices.append(Vertex(Vector2f(x, bottom), m_color, Vector2f(1, 1)));
-        }
+			m_vertices.append(Vertex(Vector2f(0, top),    m_color, Vector2f(1, 1)));
+			m_vertices.append(Vertex(Vector2f(0, bottom), m_color, Vector2f(1, 1)));
+			m_vertices.append(Vertex(Vector2f(x, bottom), m_color, Vector2f(1, 1)));
+			m_vertices.append(Vertex(Vector2f(0, top),    m_color, Vector2f(1, 1)));
+			m_vertices.append(Vertex(Vector2f(x, bottom), m_color, Vector2f(1, 1)));
+			m_vertices.append(Vertex(Vector2f(x, top),    m_color, Vector2f(1, 1)));
+		}
 
         // Handle special characters
-        if ((curChar == ' ') || (curChar == '\t') || (curChar == '\n'))
+        if ((curChar == ' ') || (curChar == '\t') || (curChar == '\n') || (curChar == '\v'))
         {
             // Update the current bounds (min coordinates)
             minX = std::min(minX, x);
@@ -324,6 +325,7 @@ void Text::ensureGeometryUpdate() const
                 case ' ' :  x += hspace;        break;
                 case '\t' : x += hspace * 4;    break;
                 case '\n' : y += vspace; x = 0; break;
+                case '\v' : y += vspace * 4;    break;
             }
 
             // Update the current bounds (max coordinates)
@@ -348,12 +350,12 @@ void Text::ensureGeometryUpdate() const
         float v2 = static_cast<float>(glyph.textureRect.top  + glyph.textureRect.height);
 
         // Add a quad for the current character
-        m_vertices.append(Vertex(Vector2f(x + left  - italic * top,    y + top),    m_color, Vector2f(u1, v1)));
-        m_vertices.append(Vertex(Vector2f(x + right - italic * top,    y + top),    m_color, Vector2f(u2, v1)));
-        m_vertices.append(Vertex(Vector2f(x + left  - italic * bottom, y + bottom), m_color, Vector2f(u1, v2)));
-        m_vertices.append(Vertex(Vector2f(x + left  - italic * bottom, y + bottom), m_color, Vector2f(u1, v2)));
-        m_vertices.append(Vertex(Vector2f(x + right - italic * top,    y + top),    m_color, Vector2f(u2, v1)));
-        m_vertices.append(Vertex(Vector2f(x + right - italic * bottom, y + bottom), m_color, Vector2f(u2, v2)));
+		m_vertices.append(Vertex(Vector2f(x + left  - italic * top,    y + top),    m_color, Vector2f(u1, v1)));
+		m_vertices.append(Vertex(Vector2f(x + left  - italic * bottom, y + bottom), m_color, Vector2f(u1, v2)));
+		m_vertices.append(Vertex(Vector2f(x + right - italic * bottom, y + bottom), m_color, Vector2f(u2, v2)));
+		m_vertices.append(Vertex(Vector2f(x + left  - italic * top,    y + top),    m_color, Vector2f(u1, v1)));
+		m_vertices.append(Vertex(Vector2f(x + right - italic * bottom, y + bottom), m_color, Vector2f(u2, v2)));
+		m_vertices.append(Vertex(Vector2f(x + right - italic * top,    y + top),    m_color, Vector2f(u2, v1)));
 
         // Update the current bounds
         minX = std::min(minX, x + left - italic * bottom);
@@ -371,13 +373,13 @@ void Text::ensureGeometryUpdate() const
         float top = y + underlineOffset;
         float bottom = top + underlineThickness;
 
-        m_vertices.append(Vertex(Vector2f(0, top),    m_color, Vector2f(1, 1)));
-        m_vertices.append(Vertex(Vector2f(x, top),    m_color, Vector2f(1, 1)));
-        m_vertices.append(Vertex(Vector2f(0, bottom), m_color, Vector2f(1, 1)));
-        m_vertices.append(Vertex(Vector2f(0, bottom), m_color, Vector2f(1, 1)));
-        m_vertices.append(Vertex(Vector2f(x, top),    m_color, Vector2f(1, 1)));
-        m_vertices.append(Vertex(Vector2f(x, bottom), m_color, Vector2f(1, 1)));
-    }
+		m_vertices.append(Vertex(Vector2f(0, top),    m_color, Vector2f(1, 1)));
+		m_vertices.append(Vertex(Vector2f(0, bottom), m_color, Vector2f(1, 1)));
+		m_vertices.append(Vertex(Vector2f(x, bottom), m_color, Vector2f(1, 1)));
+		m_vertices.append(Vertex(Vector2f(0, top),    m_color, Vector2f(1, 1)));
+		m_vertices.append(Vertex(Vector2f(x, bottom), m_color, Vector2f(1, 1)));
+		m_vertices.append(Vertex(Vector2f(x, top),    m_color, Vector2f(1, 1)));
+	}
 
     // Update the bounding rectangle
     m_bounds.left = minX;

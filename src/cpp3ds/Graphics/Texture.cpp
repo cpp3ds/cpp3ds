@@ -63,8 +63,8 @@ namespace
 		// initializing the shared context
 //		cpp3ds::Context context;
 
-		GLint size;
-		glCheck(glGetIntegerv(GL_MAX_TEXTURE_SIZE, &size));
+		GLint size = 1024;
+//		glCheck(glGetIntegerv(GL_MAX_TEXTURE_SIZE, &size));
 
 		return static_cast<unsigned int>(size);
 	}

@@ -30,7 +30,7 @@
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/Graphics/Drawable.hpp>
 #include <cpp3ds/Graphics/Transformable.hpp>
-#include <cpp3ds/Graphics/Vertex.hpp>
+#include <cpp3ds/Graphics/VertexContainer.hpp>
 #include <cpp3ds/Graphics/Rect.hpp>
 
 
@@ -75,8 +75,6 @@ public :
     ///
     ////////////////////////////////////////////////////////////
     Sprite(const Texture& texture, const IntRect& rectangle);
-
-	~Sprite();
 
     ////////////////////////////////////////////////////////////
     /// \brief Change the source texture of the sprite
@@ -190,7 +188,7 @@ public :
     ////////////////////////////////////////////////////////////
     FloatRect getGlobalBounds() const;
 
-private :
+protected :
 
     ////////////////////////////////////////////////////////////
     /// \brief Draw the sprite to a render target
@@ -200,6 +198,8 @@ private :
     ///
     ////////////////////////////////////////////////////////////
     virtual void draw(RenderTarget& target, RenderStates states) const;
+
+private :
 
     ////////////////////////////////////////////////////////////
     /// \brief Update the vertices' positions
@@ -216,12 +216,12 @@ private :
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    Vertex*        m_vertices;    ///< Vertices defining the sprite's geometry
-    const Texture* m_texture;     ///< Texture of the sprite
-    IntRect        m_textureRect; ///< Rectangle defining the area of the source texture to display
+    VertexContainer m_vertices;    ///< Vertices defining the sprite's geometry
+    const Texture*  m_texture;     ///< Texture of the sprite
+    IntRect         m_textureRect; ///< Rectangle defining the area of the source texture to display
 };
 
-}
+} // namespace cpp3ds
 
 
 #endif

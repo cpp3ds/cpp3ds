@@ -71,7 +71,7 @@ unsigned int CircleShape::getPointCount() const
 
 
 ////////////////////////////////////////////////////////////
-Vector2f CircleShape::getPoint(unsigned int index) const
+Vector3f CircleShape::getPoint(unsigned int index) const
 {
     static const float pi = 3.141592654f;
 
@@ -79,7 +79,7 @@ Vector2f CircleShape::getPoint(unsigned int index) const
     float x = std::cos(angle) * m_radius;
     float y = std::sin(angle) * m_radius;
 
-    return Vector2f(m_radius + x, m_radius + y);
+    return Vector3f(m_radius + x, m_radius + y);
 }
 
 } // namespace cpp3ds

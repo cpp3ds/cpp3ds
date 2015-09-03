@@ -53,7 +53,7 @@ unsigned int ConvexShape::getPointCount() const
 
 
 ////////////////////////////////////////////////////////////
-void ConvexShape::setPoint(unsigned int index, const Vector2f& point)
+void ConvexShape::setPoint(unsigned int index, const Vector3f& point)
 {
     m_points[index] = point;
     update();
@@ -61,7 +61,7 @@ void ConvexShape::setPoint(unsigned int index, const Vector2f& point)
 
 
 ////////////////////////////////////////////////////////////
-Vector2f ConvexShape::getPoint(unsigned int index) const
+Vector3f ConvexShape::getPoint(unsigned int index) const
 {
     return m_points[index];
 }

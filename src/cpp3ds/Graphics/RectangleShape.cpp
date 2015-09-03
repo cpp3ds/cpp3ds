@@ -61,15 +61,15 @@ unsigned int RectangleShape::getPointCount() const
 
 
 ////////////////////////////////////////////////////////////
-Vector2f RectangleShape::getPoint(unsigned int index) const
+Vector3f RectangleShape::getPoint(unsigned int index) const
 {
     switch (index)
     {
         default:
-        case 0: return Vector2f(0, 0);
-        case 1: return Vector2f(m_size.x, 0);
-        case 2: return Vector2f(m_size.x, m_size.y);
-        case 3: return Vector2f(0, m_size.y);
+        case 0: return Vector3f(0, 0);
+        case 1: return Vector3f(0, m_size.y);
+        case 2: return Vector3f(m_size.x, m_size.y);
+        case 3: return Vector3f(m_size.x, 0);
     }
 }
 

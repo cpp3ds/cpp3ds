@@ -34,6 +34,10 @@
 
 namespace cpp3ds
 {
+
+template <typename T>
+class Box;
+
 ////////////////////////////////////////////////////////////
 /// \brief Utility class for manipulating 2D axis aligned rectangles
 ///
@@ -77,6 +81,14 @@ public :
     ///
     ////////////////////////////////////////////////////////////
     Rect(const Vector2<T>& position, const Vector2<T>& size);
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Construct the rectangle from a box, discarding front and depth
+    ///
+    /// \param box Box to convert
+    ///
+    ////////////////////////////////////////////////////////////
+    Rect(const Box<T>& box);
 
     ////////////////////////////////////////////////////////////
     /// \brief Construct the rectangle from another type of rectangle

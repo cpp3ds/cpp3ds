@@ -33,10 +33,11 @@ namespace cpp3ds
 {
 ////////////////////////////////////////////////////////////
 Transformable::Transformable() :
-m_origin                    (0, 0),
-m_position                  (0, 0),
+m_origin                    (0, 0, 0),
+m_position                  (0, 0, 0),
 m_rotation                  (0),
-m_scale                     (1, 1),
+m_scale                     (1, 1, 1),
+m_rotation_transform        (),
 m_transform                 (),
 m_transformNeedUpdate       (true),
 m_inverseTransform          (),
@@ -52,19 +53,20 @@ Transformable::~Transformable()
 
 
 ////////////////////////////////////////////////////////////
-void Transformable::setPosition(float x, float y)
+void Transformable::setPosition(float x, float y, float z)
 {
     m_position.x = x;
     m_position.y = y;
+    m_position.z = z;
     m_transformNeedUpdate = true;
     m_inverseTransformNeedUpdate = true;
 }
 
 
 ////////////////////////////////////////////////////////////
-void Transformable::setPosition(const Vector2f& position)
+void Transformable::setPosition(const Vector3f& position)
 {
-    setPosition(position.x, position.y);
+    setPosition(position.x, position.y, position.z);
 }
 
 
@@ -75,47 +77,67 @@ void Transformable::setRotation(float angle)
     if (m_rotation < 0)
         m_rotation += 360.f;
 
+    m_rotation_transform = Transform::Identity;
+    m_rotation_transform.rotate(m_rotation, Vector3f(0.f, 0.f, 1.f));
+
     m_transformNeedUpdate = true;
     m_inverseTransformNeedUpdate = true;
 }
 
 
 ////////////////////////////////////////////////////////////
-void Transformable::setScale(float factorX, float factorY)
+void Transformable::setRotation(float angle, const Vector3f& axis)
+{
+	m_rotation = static_cast<float>(fmod(angle, 360));
+	if (m_rotation < 0)
+		m_rotation += 360.f;
+
+	m_rotation_transform = Transform::Identity;
+	m_rotation_transform.rotate(m_rotation, axis);
+
+	m_transformNeedUpdate = true;
+	m_inverseTransformNeedUpdate = true;
+}
+
+
+////////////////////////////////////////////////////////////
+void Transformable::setScale(float factorX, float factorY, float factorZ)
 {
     m_scale.x = factorX;
     m_scale.y = factorY;
+    m_scale.z = factorZ;
     m_transformNeedUpdate = true;
     m_inverseTransformNeedUpdate = true;
 }
 
 
 ////////////////////////////////////////////////////////////
-void Transformable::setScale(const Vector2f& factors)
+void Transformable::setScale(const Vector3f& factors)
 {
-    setScale(factors.x, factors.y);
+    setScale(factors.x, factors.y, factors.z);
 }
 
 
 ////////////////////////////////////////////////////////////
-void Transformable::setOrigin(float x, float y)
+void Transformable::setOrigin(float x, float y, float z)
 {
     m_origin.x = x;
     m_origin.y = y;
+    m_origin.z = z;
     m_transformNeedUpdate = true;
     m_inverseTransformNeedUpdate = true;
 }
 
 
 ////////////////////////////////////////////////////////////
-void Transformable::setOrigin(const Vector2f& origin)
+void Transformable::setOrigin(const Vector3f& origin)
 {
-    setOrigin(origin.x, origin.y);
+    setOrigin(origin.x, origin.y, origin.z);
 }
 
 
 ////////////////////////////////////////////////////////////
-const Vector2f& Transformable::getPosition() const
+const Vector3f& Transformable::getPosition() const
 {
     return m_position;
 }
@@ -129,30 +151,30 @@ float Transformable::getRotation() const
 
 
 ////////////////////////////////////////////////////////////
-const Vector2f& Transformable::getScale() const
+const Vector3f& Transformable::getScale() const
 {
     return m_scale;
 }
 
 
 ////////////////////////////////////////////////////////////
-const Vector2f& Transformable::getOrigin() const
+const Vector3f& Transformable::getOrigin() const
 {
     return m_origin;
 }
 
 
 ////////////////////////////////////////////////////////////
-void Transformable::move(float offsetX, float offsetY)
+void Transformable::move(float offsetX, float offsetY, float offsetZ)
 {
-    setPosition(m_position.x + offsetX, m_position.y + offsetY);
+    setPosition(m_position.x + offsetX, m_position.y + offsetY, m_position.z + offsetZ);
 }
 
 
 ////////////////////////////////////////////////////////////
-void Transformable::move(const Vector2f& offset)
+void Transformable::move(const Vector3f& offset)
 {
-    setPosition(m_position.x + offset.x, m_position.y + offset.y);
+    setPosition(m_position.x + offset.x, m_position.y + offset.y, m_position.z + offset.z);
 }
 
 
@@ -164,16 +186,27 @@ void Transformable::rotate(float angle)
 
 
 ////////////////////////////////////////////////////////////
-void Transformable::scale(float factorX, float factorY)
+void Transformable::rotate(float angle, const Vector3f& axis)
 {
-    setScale(m_scale.x * factorX, m_scale.y * factorY);
+	Transform new_rotation = Transform::Identity;
+	new_rotation.rotate(angle, axis);
+	m_rotation_transform = new_rotation * m_rotation_transform;
+
+	m_transformNeedUpdate = true;
 }
 
 
 ////////////////////////////////////////////////////////////
-void Transformable::scale(const Vector2f& factor)
+void Transformable::scale(float factorX, float factorY, float factorZ)
 {
-    setScale(m_scale.x * factor.x, m_scale.y * factor.y);
+    setScale(m_scale.x * factorX, m_scale.y * factorY, m_scale.z * factorZ);
+}
+
+
+////////////////////////////////////////////////////////////
+void Transformable::scale(const Vector3f& factor)
+{
+    setScale(m_scale.x * factor.x, m_scale.y * factor.y, m_scale.z * factor.z);
 }
 
 
@@ -190,12 +223,24 @@ const Transform& Transformable::getTransform() const
         float syc    = m_scale.y * cosine;
         float sxs    = m_scale.x * sine;
         float sys    = m_scale.y * sine;
+        float sz     = m_scale.z;
         float tx     = -m_origin.x * sxc - m_origin.y * sys + m_position.x;
         float ty     =  m_origin.x * sxs - m_origin.y * syc + m_position.y;
+        float tz     = -m_origin.z                          + m_position.z;
 
-        m_transform = Transform( sxc, sys, tx,
-                                -sxs, syc, ty,
-                                 0.f, 0.f, 1.f);
+        // Translation into origin
+        Transform origin_transform = Transform::Identity;
+        origin_transform.translate(-m_origin);
+
+        // Scale
+        Transform scale_transform = Transform::Identity;
+        scale_transform.scale(m_scale);
+
+        // Translate to position
+        Transform position_transform = Transform::Identity;
+        position_transform.translate(m_position);
+
+        m_transform = position_transform * scale_transform * m_rotation_transform * origin_transform;
         m_transformNeedUpdate = false;
     }
 
@@ -216,4 +261,4 @@ const Transform& Transformable::getInverseTransform() const
     return m_inverseTransform;
 }
 
-}
+} // namespace cpp3ds

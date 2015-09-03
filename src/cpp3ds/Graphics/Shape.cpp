@@ -259,13 +259,13 @@ void Shape::updateOutline()
         unsigned int index = i + 1;
 
         // Get the two segments shared by the current point
-        Vector2f p0 = (i == 0) ? m_vertices[count].position : m_vertices[index - 1].position;
-        Vector2f p1 = m_vertices[index].position;
-        Vector2f p2 = m_vertices[index + 1].position;
+        Vector3f p0 = (i == 0) ? m_vertices[count].position : m_vertices[index - 1].position;
+        Vector3f p1 = m_vertices[index].position;
+        Vector3f p2 = m_vertices[index + 1].position;
 
         // Compute their normal
-        Vector2f n1 = computeNormal(p0, p1);
-        Vector2f n2 = computeNormal(p1, p2);
+        Vector3f n1 = computeNormal(p0, p1);
+        Vector3f n2 = computeNormal(p1, p2);
 
         // Make sure that the normals point towards the outside of the shape
         // (this depends on the order in which the points were defined)
@@ -276,7 +276,7 @@ void Shape::updateOutline()
 
         // Combine them to get the extrusion direction
         float factor = 1.f + (n1.x * n2.x + n1.y * n2.y);
-        Vector2f normal = (n1 + n2) / factor;
+        Vector3f normal = (n1 + n2) / factor;
 
         // Update the outline points
         m_outlineVertices[i * 2 + 0].position = p1;

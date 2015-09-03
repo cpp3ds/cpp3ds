@@ -61,6 +61,17 @@ height(size.y)
 
 ////////////////////////////////////////////////////////////
 template <typename T>
+Rect<T>::Rect(const Box<T>& box) :
+left  (static_cast<T>(box.left)),
+top   (static_cast<T>(box.top)),
+width (static_cast<T>(box.width)),
+height(static_cast<T>(box.height))
+{
+}
+
+
+////////////////////////////////////////////////////////////
+template <typename T>
 template <typename U>
 Rect<T>::Rect(const Rect<U>& rectangle) :
 left  (static_cast<T>(rectangle.left)),

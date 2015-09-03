@@ -30,12 +30,13 @@
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/Graphics/Color.hpp>
 #include <cpp3ds/System/Vector2.hpp>
+#include <cpp3ds/System/Vector3.hpp>
 #include <new>
 
 namespace cpp3ds
 {
 ////////////////////////////////////////////////////////////
-/// \brief Define a point with color and texture coordinates
+/// \brief Define a point with a color, texture coordinate and normal
 ///
 ////////////////////////////////////////////////////////////
 class Vertex
@@ -56,7 +57,7 @@ public :
     /// \param thePosition Vertex position
     ///
     ////////////////////////////////////////////////////////////
-    Vertex(const Vector2f& thePosition);
+    Vertex(const Vector3f& thePosition);
 
     ////////////////////////////////////////////////////////////
     /// \brief Construct the vertex from its position and color
@@ -67,7 +68,7 @@ public :
     /// \param theColor    Vertex color
     ///
     ////////////////////////////////////////////////////////////
-    Vertex(const Vector2f& thePosition, const Color& theColor);
+    Vertex(const Vector3f& thePosition, const Color& theColor);
 
     ////////////////////////////////////////////////////////////
     /// \brief Construct the vertex from its position and texture coordinates
@@ -78,7 +79,7 @@ public :
     /// \param theTexCoords Vertex texture coordinates
     ///
     ////////////////////////////////////////////////////////////
-    Vertex(const Vector2f& thePosition, const Vector2f& theTexCoords);
+    Vertex(const Vector3f& thePosition, const Vector2f& theTexCoords);
 
     ////////////////////////////////////////////////////////////
     /// \brief Construct the vertex from its position, color and texture coordinates
@@ -88,7 +89,7 @@ public :
     /// \param theTexCoords Vertex texture coordinates
     ///
     ////////////////////////////////////////////////////////////
-    Vertex(const Vector2f& thePosition, const Color& theColor, const Vector2f& theTexCoords);
+    Vertex(const Vector3f& thePosition, const Color& theColor, const Vector2f& theTexCoords);
 
 	#ifndef EMULATION
 	static void* operator new (std::size_t size);
@@ -98,11 +99,23 @@ public :
 	#endif
 
     ////////////////////////////////////////////////////////////
+    /// \brief Construct the vertex from its position, color, texture coordinates and lighting normal
+    ///
+    /// \param thePosition  Vertex position
+    /// \param theColor     Vertex color
+    /// \param theTexCoords Vertex texture coordinates
+    /// \param theNormal    Lighting normal
+    ///
+    ////////////////////////////////////////////////////////////
+    Vertex(const Vector3f& thePosition, const Color& theColor, const Vector2f& theTexCoords, const Vector3f& theNormal);
+
+    ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    Vector2f  position;  ///< 2D position of the vertex
+    Vector3f  position;  ///< 3D position of the vertex
     Color     color;     ///< Color of the vertex
     Vector2f  texCoords; ///< Coordinates of the texture's pixel to map to the vertex
+    Vector3f  normal;    ///< Lighting normal
 };
 
 }
@@ -116,7 +129,7 @@ public :
 /// \ingroup graphics
 ///
 /// A vertex is an improved point. It has a position and other
-/// extra attributes that will be used for drawing: in SFML,
+/// extra attributes that will be used for drawing: in cpp3ds,
 /// vertices also have a color and a pair of texture coordinates.
 ///
 /// The vertex is the building block of drawing. Everything which
@@ -125,7 +138,7 @@ public :
 /// are grouped to create even more complex 2D entities such as
 /// sprites, texts, etc.
 ///
-/// If you use the graphical entities of SFML (sprite, text, shape)
+/// If you use the graphical entities of cpp3ds (sprite, text, shape)
 /// you won't have to deal with vertices directly. But if you want
 /// to define your own 2D entities, such as tiled maps or particle
 /// systems, using vertices will allow you to get maximum performances.
@@ -135,20 +148,22 @@ public :
 /// // define a 100x100 square, red, with a 10x10 texture mapped on it
 /// cpp3ds::Vertex vertices[] =
 /// {
-///     cpp3ds::Vertex(cpp3ds::Vector2f(  0,   0), cpp3ds::Color::Red, cpp3ds::Vector2f( 0,  0)),
-///     cpp3ds::Vertex(cpp3ds::Vector2f(  0, 100), cpp3ds::Color::Red, cpp3ds::Vector2f( 0, 10)),
-///     cpp3ds::Vertex(cpp3ds::Vector2f(100, 100), cpp3ds::Color::Red, cpp3ds::Vector2f(10, 10)),
-///     cpp3ds::Vertex(cpp3ds::Vector2f(100,   0), cpp3ds::Color::Red, cpp3ds::Vector2f(10,  0))
+///     cpp3ds::Vertex(cpp3ds::Vector3f(  0,   0, 0), cpp3ds::Color::Red, cpp3ds::Vector2f( 0,  0)),
+///     cpp3ds::Vertex(cpp3ds::Vector3f(  0, 100, 0), cpp3ds::Color::Red, cpp3ds::Vector2f( 0, 10)),
+///     cpp3ds::Vertex(cpp3ds::Vector3f(100, 100, 0), cpp3ds::Color::Red, cpp3ds::Vector2f(10, 10)),
+///     cpp3ds::Vertex(cpp3ds::Vector3f(  0,   0, 0), cpp3ds::Color::Red, cpp3ds::Vector2f( 0,  0)),
+///     cpp3ds::Vertex(cpp3ds::Vector3f(100, 100, 0), cpp3ds::Color::Red, cpp3ds::Vector2f(10, 10)),
+///     cpp3ds::Vertex(cpp3ds::Vector3f(100,   0, 0), cpp3ds::Color::Red, cpp3ds::Vector2f(10,  0))
 /// };
 ///
 /// // draw it
-/// window.draw(vertices, 4, cpp3ds::Quads);
+/// window.draw(vertices, 6, cpp3ds::Triangles);
 /// \endcode
 ///
 /// Note: although texture coordinates are supposed to be an integer
 /// amount of pixels, their type is float because of some buggy graphics
 /// drivers that are not able to process integer coordinates correctly.
 ///
-/// \see cpp3ds::VertexArray
+/// \see cpp3ds::VertexArray, cpp3ds::VertexBuffer, cpp3ds::VertexContainer
 ///
 ////////////////////////////////////////////////////////////

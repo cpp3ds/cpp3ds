@@ -1,29 +1,5 @@
-////////////////////////////////////////////////////////////
-//
-// SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2014 Laurent Gomila (laurent.gom@gmail.com)
-//
-// This software is provided 'as-is', without any express or implied warranty.
-// In no event will the authors be held liable for any damages arising from the use of this software.
-//
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it freely,
-// subject to the following restrictions:
-//
-// 1. The origin of this software must not be misrepresented;
-//    you must not claim that you wrote the original software.
-//    If you use this software in a product, an acknowledgment
-//    in the product documentation would be appreciated but is not required.
-//
-// 2. Altered source versions must be plainly marked as such,
-//    and must not be misrepresented as being the original software.
-//
-// 3. This notice may not be removed or altered from any source distribution.
-//
-////////////////////////////////////////////////////////////
-
-#ifndef CPP3DS_VERTEXARRAY_HPP
-#define CPP3DS_VERTEXARRAY_HPP
+#ifndef CPP3DS_VERTEXCONTAINER_HPP
+#define CPP3DS_VERTEXCONTAINER_HPP
 
 ////////////////////////////////////////////////////////////
 // Headers
@@ -32,47 +8,58 @@
 #include <cpp3ds/Graphics/PrimitiveType.hpp>
 #include <cpp3ds/Graphics/Rect.hpp>
 #include <cpp3ds/Graphics/Box.hpp>
-#include <cpp3ds/Graphics/VertexContainer.hpp>
-#ifndef EMULATION
-#include <cpp3ds/System/LinearAllocator.hpp>
-#endif
+#include <cpp3ds/Graphics/Drawable.hpp>
 #include <vector>
 
 
 namespace cpp3ds
 {
 ////////////////////////////////////////////////////////////
-/// \brief Define a set of one or more 2D primitives
+/// \brief Define a set of one or more primitives
 ///
 ////////////////////////////////////////////////////////////
-class VertexArray : public VertexContainer
+class VertexContainer : public Drawable
 {
 public :
 
     ////////////////////////////////////////////////////////////
     /// \brief Default constructor
     ///
-    /// Creates an empty vertex array.
+    /// Creates an empty vertex container.
     ///
     ////////////////////////////////////////////////////////////
-    VertexArray();
+    VertexContainer();
 
     ////////////////////////////////////////////////////////////
-    /// \brief Construct the vertex array with a type and an initial number of vertices
+    /// \brief Construct the vertex container with a type and an initial number of vertices
     ///
     /// \param type        Type of primitives
-    /// \param vertexCount Initial number of vertices in the array
+    /// \param vertexCount Initial number of vertices in the container
     ///
     ////////////////////////////////////////////////////////////
-    explicit VertexArray(PrimitiveType type, unsigned int vertexCount = 0);
+    explicit VertexContainer(PrimitiveType type, unsigned int vertexCount = 0);
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Copy constructor
+    ///
+    /// \param copy instance to copy
+    ///
+    ////////////////////////////////////////////////////////////
+    VertexContainer(const VertexContainer& copy);
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Destructor
+    ///
+    ////////////////////////////////////////////////////////////
+    ~VertexContainer();
 
     ////////////////////////////////////////////////////////////
     /// \brief Return the vertex count
     ///
-    /// \return Number of vertices in the array
+    /// \return Number of vertices in the container
     ///
     ////////////////////////////////////////////////////////////
-    unsigned int getVertexCount() const;
+    virtual unsigned int getVertexCount() const;
 
     ////////////////////////////////////////////////////////////
     /// \brief Get a read-write access to a vertex by its index
@@ -88,7 +75,7 @@ public :
     /// \see getVertexCount
     ///
     ////////////////////////////////////////////////////////////
-    Vertex& operator [](unsigned int index);
+    virtual Vertex& operator [](unsigned int index);
 
     ////////////////////////////////////////////////////////////
     /// \brief Get a read-only access to a vertex by its index
@@ -104,40 +91,40 @@ public :
     /// \see getVertexCount
     ///
     ////////////////////////////////////////////////////////////
-    const Vertex& operator [](unsigned int index) const;
+    virtual const Vertex& operator [](unsigned int index) const;
 
     ////////////////////////////////////////////////////////////
-    /// \brief Clear the vertex array
+    /// \brief Clear the vertex container
     ///
-    /// This function removes all the vertices from the array.
+    /// This function removes all the vertices from the container.
     /// It doesn't deallocate the corresponding memory, so that
     /// adding new vertices after clearing doesn't involve
     /// reallocating all the memory.
     ///
     ////////////////////////////////////////////////////////////
-    void clear();
+    virtual void clear();
 
     ////////////////////////////////////////////////////////////
-    /// \brief Resize the vertex array
+    /// \brief Resize the vertex container
     ///
     /// If \a vertexCount is greater than the current size, the previous
     /// vertices are kept and new (default-constructed) vertices are
     /// added.
     /// If \a vertexCount is less than the current size, existing vertices
-    /// are removed from the array.
+    /// are removed from the container.
     ///
-    /// \param vertexCount New size of the array (number of vertices)
+    /// \param vertexCount New size of the container (number of vertices)
     ///
     ////////////////////////////////////////////////////////////
-    void resize(unsigned int vertexCount);
+    virtual void resize(unsigned int vertexCount);
 
     ////////////////////////////////////////////////////////////
-    /// \brief Add a vertex to the array
+    /// \brief Add a vertex to the container
     ///
     /// \param vertex Vertex to add
     ///
     ////////////////////////////////////////////////////////////
-    void append(const Vertex& vertex);
+    virtual void append(const Vertex& vertex);
 
     ////////////////////////////////////////////////////////////
     /// \brief Set the type of primitives to draw
@@ -153,31 +140,51 @@ public :
     /// \param type Type of primitive
     ///
     ////////////////////////////////////////////////////////////
-    void setPrimitiveType(PrimitiveType type);
+    virtual void setPrimitiveType(PrimitiveType type);
 
     ////////////////////////////////////////////////////////////
-    /// \brief Get the type of primitives drawn by the vertex array
+    /// \brief Get the type of primitives drawn by the vertex container
     ///
     /// \return Primitive type
     ///
     ////////////////////////////////////////////////////////////
-    PrimitiveType getPrimitiveType() const;
+    virtual PrimitiveType getPrimitiveType() const;
 
     ////////////////////////////////////////////////////////////
-    /// \brief Compute the bounding box of the vertex array
+    /// \brief Compute the bounding box of the vertex container
     ///
     /// This function returns the axis-aligned box that
-    /// contains all the vertices of the array.
+    /// contains all the vertices of the container.
     ///
-    /// \return Bounding box of the vertex array
+    /// \return Bounding box of the vertex container
     ///
     ////////////////////////////////////////////////////////////
-    FloatBox getBounds() const;
+    virtual FloatBox getBounds() const;
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Overload of assignment operator
+    ///
+    /// \param right Instance to assign
+    ///
+    /// \return Reference to self
+    ///
+    ////////////////////////////////////////////////////////////
+    VertexContainer& operator =(const VertexContainer& right);
+
+protected :
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Special constructor for derived classes
+    ///
+    /// This function is meant for internal use only.
+    ///
+    ////////////////////////////////////////////////////////////
+    VertexContainer(int);
 
 private :
 
     ////////////////////////////////////////////////////////////
-    /// \brief Draw the vertex array to a render target
+    /// \brief Draw the vertex container to a render target
     ///
     /// \param target Render target to draw to
     /// \param states Current render states
@@ -185,34 +192,32 @@ private :
     ////////////////////////////////////////////////////////////
     virtual void draw(RenderTarget& target, RenderStates states) const;
 
-private:
-
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-	#ifdef EMULATION
-    std::vector<Vertex> m_vertices;      ///< Vertices contained in the array
-    #else
-    std::vector<Vertex, LinearAllocator<Vertex>> m_vertices;
-    #endif
-    PrimitiveType       m_primitiveType; ///< Type of primitives to draw
+    VertexContainer* m_impl; ///< Platform/hardware specific implementation
 };
 
 } // namespace cpp3ds
 
 
-#endif
+#endif // CPP3DS_VERTEXCONTAINER_HPP
 
 
 ////////////////////////////////////////////////////////////
-/// \class cpp3ds::VertexArray
+/// \class cpp3ds::VertexContainer
 /// \ingroup graphics
 ///
-/// cpp3ds::VertexArray is a very simple wrapper around a dynamic
-/// array of vertices and a primitives type.
+/// cpp3ds::VertexContainer is a very simple wrapper around a dynamic
+/// container of vertices and a primitives type.
 ///
 /// It inherits cpp3ds::Drawable, but unlike other drawables it
 /// is not transformable.
+///
+/// cpp3ds::VertexContainer is a simple proxy class that automatically
+/// selects the best method of vertex storage. It will make use
+/// of an cpp3ds::VertexBuffer if it is available and fall back
+/// to cpp3ds::VertexArray if not.
 ///
 /// Be aware of the order when specifying vertices. By default,
 /// outward facing faces have counter-clockwise winding and as
@@ -221,7 +226,7 @@ private:
 ///
 /// Example:
 /// \code
-/// cpp3ds::VertexArray lines(cpp3ds::LinesStrip, 4);
+/// cpp3ds::VertexContainer lines(cpp3ds::LinesStrip, 4);
 /// lines[0].position = cpp3ds::Vector3f(10, 0, 0);
 /// lines[1].position = cpp3ds::Vector3f(20, 0, 0);
 /// lines[2].position = cpp3ds::Vector3f(30, 5, 0);
@@ -230,6 +235,6 @@ private:
 /// window.draw(lines);
 /// \endcode
 ///
-/// \see cpp3ds::Vertex, cpp3ds::VertexBuffer, cpp3ds::VertexContainer
+/// \see cpp3ds::Vertex, cpp3ds::VertexArray, cpp3ds::VertexBuffer
 ///
 ////////////////////////////////////////////////////////////

@@ -38,38 +38,31 @@ namespace cpp3ds
 {
 ////////////////////////////////////////////////////////////
 Sprite::Sprite() :
+m_vertices   (TrianglesStrip, 4),
 m_texture    (NULL),
 m_textureRect()
 {
-	m_vertices = new Vertex[4];
 }
 
 
 ////////////////////////////////////////////////////////////
 Sprite::Sprite(const Texture& texture) :
+m_vertices   (TrianglesStrip, 4),
 m_texture    (NULL),
 m_textureRect()
 {
-	m_vertices = new Vertex[4];
     setTexture(texture);
 }
 
 
 ////////////////////////////////////////////////////////////
 Sprite::Sprite(const Texture& texture, const IntRect& rectangle) :
+m_vertices   (TrianglesStrip, 4),
 m_texture    (NULL),
 m_textureRect()
 {
-	m_vertices = new Vertex[4];
     setTexture(texture);
     setTextureRect(rectangle);
-}
-
-
-////////////////////////////////////////////////////////////
-Sprite::~Sprite()
-{
-	delete[] m_vertices;
 }
 
 
@@ -153,7 +146,7 @@ void Sprite::draw(RenderTarget& target, RenderStates states) const
     {
         states.transform *= getTransform();
         states.texture = m_texture;
-        target.draw(m_vertices, 4, TrianglesStrip, states);
+        target.draw(m_vertices, states);
     }
 }
 

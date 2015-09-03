@@ -45,6 +45,15 @@ y(Y)
 
 ////////////////////////////////////////////////////////////
 template <typename T>
+inline Vector2<T>::Vector2(const Vector3<T>& vector) :
+x(vector.x),
+y(vector.y)
+{
+}
+
+
+////////////////////////////////////////////////////////////
+template <typename T>
 template <typename U>
 inline Vector2<T>::Vector2(const Vector2<U>& vector) :
 x(static_cast<T>(vector.x)),

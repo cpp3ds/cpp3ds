@@ -30,8 +30,8 @@
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/Graphics/Drawable.hpp>
 #include <cpp3ds/Graphics/Transformable.hpp>
-#include <cpp3ds/Graphics/VertexArray.hpp>
-#include <cpp3ds/System/Vector2.hpp>
+#include <cpp3ds/Graphics/VertexContainer.hpp>
+#include <cpp3ds/System/Vector3.hpp>
 
 
 namespace cpp3ds
@@ -209,7 +209,7 @@ public :
     /// \see getPointCount
     ///
     ////////////////////////////////////////////////////////////
-    virtual Vector2f getPoint(unsigned int index) const = 0;
+    virtual Vector3f getPoint(unsigned int index) const = 0;
 
     ////////////////////////////////////////////////////////////
     /// \brief Get the local bounding rectangle of the entity
@@ -297,18 +297,18 @@ private :
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    const Texture* m_texture;          ///< Texture of the shape
-    IntRect        m_textureRect;      ///< Rectangle defining the area of the source texture to display
-    Color          m_fillColor;        ///< Fill color
-    Color          m_outlineColor;     ///< Outline color
-    float          m_outlineThickness; ///< Thickness of the shape's outline
-    VertexArray    m_vertices;         ///< Vertex array containing the fill geometry
-    VertexArray    m_outlineVertices;  ///< Vertex array containing the outline geometry
-    FloatRect      m_insideBounds;     ///< Bounding rectangle of the inside (fill)
-    FloatRect      m_bounds;           ///< Bounding rectangle of the whole shape (outline + fill)
+    const Texture*  m_texture;          ///< Texture of the shape
+    IntRect         m_textureRect;      ///< Rectangle defining the area of the source texture to display
+    Color           m_fillColor;        ///< Fill color
+    Color           m_outlineColor;     ///< Outline color
+    float           m_outlineThickness; ///< Thickness of the shape's outline
+    VertexContainer m_vertices;         ///< Vertex array containing the fill geometry
+    VertexContainer m_outlineVertices;  ///< Vertex array containing the outline geometry
+    FloatRect       m_insideBounds;     ///< Bounding rectangle of the inside (fill)
+    FloatRect       m_bounds;           ///< Bounding rectangle of the whole shape (outline + fill)
 };
 
-}
+} // namespace cpp3ds
 
 
 #endif
