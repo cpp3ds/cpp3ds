@@ -90,12 +90,12 @@ bool Shader::loadFromMemory(const std::string& vertexShader, const std::string& 
 
 
 ////////////////////////////////////////////////////////////
-bool Shader::loadFromResource(const std::string& vertexShader, Type type, bool compiled)
+bool Shader::loadFromResource(const std::string& shader, Type type, bool compiled)
 {
     if (compiled) {
-        return loadBinary(priv::resources[vertexShader].data, priv::resources[vertexShader].size);
+        return loadBinary(priv::resources[shader].data, priv::resources[shader].size, type);
     } else {
-        return compile(vertexShader.c_str(), nullptr);
+        return compile(shader.c_str(), nullptr);
     }
 }
 
@@ -351,24 +351,21 @@ bool Shader::compile(const char* vertexShaderCode, const char* fragmentShaderCod
 
 
 ////////////////////////////////////////////////////////////
-bool Shader::loadBinary(const Uint8* data, const Uint32 size)
+bool Shader::loadBinary(const Uint8* data, const Uint32 size, Type type)
 {
-    if (m_shaderProgram) {
-        glCheck(glDeleteProgram(m_shaderProgram));
-        m_shaderProgram = 0;
-    }
+	if (!m_shaderProgram)
+		m_shaderProgram = glCreateProgram();
 
     // Reset the internal state
     m_currentTexture = -1;
     m_textures.clear();
     m_params.clear();
 
-    m_shaderProgram = glCreateProgram();
-    glProgramBinary(m_shaderProgram, GL_VERTEX_SHADER_BINARY, data, (GLsizei)size);
-//    shaderProgramInit(&shader);
-//
-//    dvlb = DVLB_ParseFile((u32*)data, size);
-//    shaderProgramSetVsh(&shader, &dvlb->DVLE[0]);
+	if (type == Vertex)
+    	glProgramBinary(m_shaderProgram, GL_VERTEX_SHADER_BINARY, data, (GLsizei)size);
+	else if (type == Geometry)
+		glProgramBinary(m_shaderProgram, GL_GEOMETRY_SHADER_BINARY, data, (GLsizei)size);
+
     return true;
 }
 

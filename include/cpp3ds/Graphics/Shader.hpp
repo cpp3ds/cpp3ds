@@ -181,9 +181,9 @@ public :
     ////////////////////////////////////////////////////////////
     bool loadFromMemory(const std::string& vertexShader, const std::string& fragmentShader);
 
-    bool loadFromResource(const std::string& vertexShader, Type type, bool compiled = true);
+    bool loadFromResource(const std::string& shader, Type type, bool compiled = true);
 
-	bool loadBinary(const Uint8* data, const Uint32 size);
+	bool loadBinary(const Uint8* data, const Uint32 size, Type type);
 
     ////////////////////////////////////////////////////////////
     /// \brief Load either the vertex or fragment shader from a custom stream
