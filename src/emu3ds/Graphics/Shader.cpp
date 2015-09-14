@@ -26,6 +26,7 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
+#include <cpp3ds/Resources.hpp>
 #include <cpp3ds/Graphics/Shader.hpp>
 #include <cpp3ds/Graphics/Texture.hpp>
 #include <cpp3ds/System/InputStream.hpp>
@@ -61,6 +62,7 @@ Shader::~Shader()
 ////////////////////////////////////////////////////////////
 bool Shader::loadFromResource(const std::string& filename, Type type, bool compiled)
 {
+//	priv::ResourceInfo res = priv::resources["glsl_" + filename];
     return false;
 }
 
@@ -73,7 +75,7 @@ bool Shader::loadFromFile(const std::string& filename, Type type)
 
 
 ////////////////////////////////////////////////////////////
-bool Shader::loadFromFile(const std::string& vertexShaderFilename, const std::string& fragmentShaderFilename)
+bool Shader::loadFromFile(const std::string& vertexShaderFilename, const std::string& fragmentShaderFilename, const std::string& geometryShaderFilename)
 {
     return false;
 }
@@ -87,7 +89,7 @@ bool Shader::loadFromMemory(const std::string& shader, Type type)
 
 
 ////////////////////////////////////////////////////////////
-bool Shader::loadFromMemory(const std::string& vertexShader, const std::string& fragmentShader)
+bool Shader::loadFromMemory(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader)
 {
     return false;
 }
@@ -108,62 +110,75 @@ bool Shader::loadFromStream(InputStream& vertexShaderStream, InputStream& fragme
 
 
 ////////////////////////////////////////////////////////////
-void Shader::setParameter(const std::string& name, float x)
+void Shader::setParameter(const std::string& name, int x) const
 {
 }
 
 
 ////////////////////////////////////////////////////////////
-void Shader::setParameter(const std::string& name, float x, float y)
+void Shader::setParameter(const std::string& name, float x) const
 {
 }
 
 
 ////////////////////////////////////////////////////////////
-void Shader::setParameter(const std::string& name, float x, float y, float z)
+void Shader::setParameter(const std::string& name, float x, float y) const
 {
 }
 
 
 ////////////////////////////////////////////////////////////
-void Shader::setParameter(const std::string& name, float x, float y, float z, float w)
+void Shader::setParameter(const std::string& name, float x, float y, float z) const
 {
 }
 
 
 ////////////////////////////////////////////////////////////
-void Shader::setParameter(const std::string& name, const Vector2f& v)
+void Shader::setParameter(const std::string& name, float x, float y, float z, float w) const
 {
 }
 
 
 ////////////////////////////////////////////////////////////
-void Shader::setParameter(const std::string& name, const Vector3f& v)
+void Shader::setParameter(const std::string& name, const Vector2f& v) const
 {
 }
 
 
 ////////////////////////////////////////////////////////////
-void Shader::setParameter(const std::string& name, const Color& color)
+void Shader::setParameter(const std::string& name, const Vector3f& v) const
 {
 }
 
 
 ////////////////////////////////////////////////////////////
-void Shader::setParameter(const std::string& name, const cpp3ds::Transform& transform)
+void Shader::setParameter(const std::string& name, const Color& color) const
 {
 }
 
 
 ////////////////////////////////////////////////////////////
-void Shader::setParameter(const std::string& name, const Texture& texture)
+void Shader::setParameter(const std::string& name, const cpp3ds::Transform& transform) const
 {
 }
 
 
 ////////////////////////////////////////////////////////////
-void Shader::setParameter(const std::string& name, CurrentTextureType)
+void Shader::setParameter(const std::string& name, const Texture& texture) const
 {
+}
+
+
+////////////////////////////////////////////////////////////
+void Shader::setParameter(const std::string& name, CurrentTextureType) const
+{
+}
+
+
+////////////////////////////////////////////////////////////
+int Shader::getVertexAttributeLocation(const std::string& name) const
+{
+	return -1;
 }
 
 
@@ -181,9 +196,33 @@ bool Shader::isAvailable()
 
 
 ////////////////////////////////////////////////////////////
-bool Shader::compile(const char* vertexShaderCode, const char* fragmentShaderCode)
+bool Shader::compile(const char* vertexShaderCode, const char* fragmentShaderCode, const char* geometryShaderCode)
 {
     return false;
+}
+
+
+////////////////////////////////////////////////////////////
+bool Shader::isGeometryShaderAvailable()
+{
+	return isAvailable();
+//	return isAvailable() && GLEW_VERSION_3_2;
+}
+
+
+////////////////////////////////////////////////////////////
+std::string Shader::getSupportedVersion()
+{
+	return "";
+}
+
+
+////////////////////////////////////////////////////////////
+unsigned int Shader::getMaximumUniformComponents()
+{
+	if (!isAvailable())
+		return 0;
+	return 10;
 }
 
 
