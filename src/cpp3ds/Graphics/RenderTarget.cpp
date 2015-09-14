@@ -147,12 +147,11 @@ void RenderTarget::enableDepthTest(bool enable)
 {
 	m_depthTest = enable;
 
-	if(enable)
-	{
+	if(enable) {
 		glCheck(glEnable(GL_DEPTH_TEST));
+	} else {
+		glCheck(glDisable(GL_DEPTH_TEST));
 	}
-	else
-	glCheck(glDisable(GL_DEPTH_TEST));
 }
 
 
@@ -625,7 +624,7 @@ void RenderTarget::draw(const Vertex* vertices, unsigned int vertexCount,
 						(u32 *) osConvertVirtToPhys((u32) vertices),
 						GPU_ATTRIBFMT(0, 3, GPU_FLOAT) | GPU_ATTRIBFMT(1, 4, GPU_UNSIGNED_BYTE) |
 						GPU_ATTRIBFMT(2, 2, GPU_FLOAT) | GPU_ATTRIBFMT(3, 3, GPU_FLOAT),
-						0xFF8, //0b1100
+						0xFFF << 4, //0b1100
 						0x3210,
 						1, //number of buffers
 						bufferOffsets,
@@ -843,7 +842,7 @@ void RenderTarget::initialize()
     m_cache.glStatesSet = false;
 
     // Try to set up non-legacy pipeline if available
-    setupNonLegacyPipeline();
+//    setupNonLegacyPipeline();
 }
 
 
