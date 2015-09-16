@@ -9,8 +9,10 @@
 namespace cpp3ds {
 
 enum ServiceName {
-	NETWORK    = 0x0001,
-	AUDIO      = 0x0002,
+	NETWORK    = 1 << 0,
+	AUDIO      = 1 << 1,
+	CONFIG     = 1 << 2,
+	ROMFS      = 1 << 3,
 
 	ALL        = 0xFFFF
 };

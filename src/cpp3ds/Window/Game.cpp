@@ -2,6 +2,7 @@
 #include <cpp3ds/Resources.hpp>
 #include <cpp3ds/System/Service.hpp>
 #include <cpp3ds/Window/Game.hpp>
+#include <cpp3ds/System/I18n.hpp>
 
 
 namespace cpp3ds {
@@ -12,7 +13,7 @@ static aptHookCookie apt_hook_cookie;
 
 static void apt_clock_hook(int hook, void* param)
 {
-	if (hook == APTHOOK_ONRESTORE) {
+	if (hook == APTHOOK_ONRESTORE || hook == APTHOOK_ONWAKEUP) {
 		Clock* clock = (Clock*) param;
 		clock->restart();
 	}
@@ -22,8 +23,9 @@ static void apt_clock_hook(int hook, void* param)
 Game::Game()
 {
 	gfxInitDefault();
-	initCfgu();
-	Console::initialize();
+	Service::enable(ROMFS);
+	Console::initialize(); // Initialize console if it hasn't been already
+	I18n::getInstance();   // Init and load localization file(s)
 
 	windowTop.create(ContextSettings(TopScreen));
 	windowBottom.create(ContextSettings(BottomScreen));
@@ -40,10 +42,9 @@ Game::~Game()
 void Game::console(Screen screen, bool enable, bool visible)
 {
 	m_consoleEnabled = enable;
-	m_consoleScreen = screen;
 	m_console.setVisible(visible);
 	if (enable)
-		m_console.create();
+		m_console.create(screen);
 }
 
 
@@ -51,17 +52,23 @@ void Game::render()
 {
 	windowTop.setActive(true);
 	renderTopScreen(windowTop);
-	if (m_consoleEnabled && m_consoleScreen == TopScreen)
+	if (m_consoleEnabled && m_console.getScreen() == TopScreen)
 		windowTop.draw(m_console);
 	windowTop.display();
 
 	windowBottom.setActive(true);
 	renderBottomScreen(windowBottom);
-	if (m_consoleEnabled && m_consoleScreen == BottomScreen)
+	if (m_consoleEnabled && m_console.getScreen() == BottomScreen)
 		windowBottom.draw(m_console);
 	windowBottom.display();
 
 	gl3ds_swapBuffers();
+}
+
+
+void Game::exit()
+{
+	m_triggerExit = true;
 }
 
 
@@ -78,7 +85,7 @@ void Game::run()
 	// Use default shader if one isn't provided by user
 	if (m_shader.getNativeHandle() == NULL) {
 		priv::ResourceInfo defaultShader = priv::core_resources["default_shader.vsh"];
-		if (!m_shader.loadBinary(defaultShader.data, defaultShader.size)){
+		if (!m_shader.loadBinary(defaultShader.data, defaultShader.size, Shader::Vertex)){
 			// No shader, just give up! :(
 			return;
 		}
@@ -98,6 +105,9 @@ void Game::run()
 			processEvent(event);
 		}
 		deltaTime = clock.restart();
+
+		if (m_triggerExit)
+			break;
 
 		if (m_consoleEnabled)
 			m_console.update(deltaTime.asSeconds());

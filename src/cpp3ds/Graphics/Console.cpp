@@ -78,7 +78,7 @@ void Console::initialize()
 
 
 ////////////////////////////////////////////////////////////
-void Console::create()
+void Console::create(Screen screen)
 {
 	initialize();
 	priv::ResourceInfo font = priv::core_resources["opensans.ttf"];
@@ -87,6 +87,7 @@ void Console::create()
 	m_memoryText.setFont(m_font);
 	m_memoryText.setCharacterSize(12);
 
+	m_screen = screen;
 	m_limit = 1000;
 }
 
@@ -105,8 +106,17 @@ void Console::update(float delta)
 	std::ostringstream ss;
 	ss << (__linear_heap_size - linearSpaceFree()) / 1024 << "kb / " << __linear_heap_size / 1024 << "kb";
 	m_memoryText.setString(ss.str());
-	m_memoryText.setPosition(395 - m_memoryText.getGlobalBounds().width, 5);
+	m_memoryText.setPosition((m_screen == TopScreen ? 395 : 315) - m_memoryText.getGlobalBounds().width, 5);
 	#endif
+
+	int h = 240;
+	int i = m_lines.size();
+
+	while (h > 0 && i > 0) {
+		Text& text = m_lines[--i];
+		h -= text.getGlobalBounds().height;
+		text.setPosition(0, h);
+	}
 }
 
 
@@ -141,6 +151,19 @@ void Console::setVisible(bool visible)
 
 
 ////////////////////////////////////////////////////////////
+void Console::setScreen(Screen screen)
+{
+	m_screen = screen;
+}
+
+////////////////////////////////////////////////////////////
+Screen Console::getScreen()
+{
+	return m_screen;
+}
+
+
+////////////////////////////////////////////////////////////
 void Console::draw(RenderTarget& target, RenderStates states) const
 {
 	if (!m_visible)
@@ -150,9 +173,9 @@ void Console::draw(RenderTarget& target, RenderStates states) const
 	int i = m_lines.size();
 
 	while (h > 0 && i > 0) {
-		Text text = m_lines[--i];
+		const Text& text = m_lines[--i];
 		h -= text.getGlobalBounds().height;
-		text.setPosition(0, h);
+//		text.setPosition(0, h);
 		target.draw(text);
 	}
 

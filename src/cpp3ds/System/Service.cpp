@@ -13,28 +13,41 @@ bool Service::enable(ServiceName service) {
 	if (isEnabled(service))
 		return true;
 
-	if (service == ALL)
-		return enable(NETWORK) && enable(AUDIO);
+	bool success = false;
 
-	if (service == NETWORK) {
-		socBuffer = (u32*) memalign(0x1000, 0x100000);
-		if (!socBuffer)
-			return false;
-		Result socResult = SOC_Initialize(socBuffer, 0x100000);
-		if (socResult != 0) {
-			free(socBuffer);
-			socBuffer = NULL;
-			return false;
-		}
+	switch (service) {
+		case ALL:
+			return enable(NETWORK) && enable(AUDIO) &&
+			       enable(CONFIG) && enable(ROMFS);
+		case NETWORK:
+			socBuffer = (u32*) memalign(0x1000, 0x100000);
+			if (!socBuffer)
+				break;
+			if (SOC_Initialize(socBuffer, 0x100000) != 0) {
+				free(socBuffer);
+				socBuffer = NULL;
+				break;
+			}
+			success = true;
+			break;
+		case AUDIO:
+			success = csndInit() == 0;
+			break;
+		case CONFIG:
+			initCfgu();
+			success = true;
+			break;
+		case ROMFS:
+			romfsInit();
+			success = true;
+			break;
+		default:
+			break;
+	}
+
+	if (success)
 		m_enabledServices |= service;
-		return true;
-	}
-
-	if (service == AUDIO) {
-		return csndInit() == 0;
-	}
-
-	return false;
+	return success;
 }
 
 
@@ -42,22 +55,35 @@ bool Service::disable(ServiceName service) {
 	if (service & ~m_enabledServices)
 		return true;
 
-	if (service == ALL)
-		return disable(NETWORK);
+	bool success = true;
 
-	if (service == NETWORK) {
-		SOC_Shutdown();
-		free(socBuffer);
-		socBuffer = NULL;
+	switch (service) {
+		case ALL:
+			return disable(NETWORK) && disable(AUDIO) &&
+			       disable(CONFIG) && disable(ROMFS);
+		case NETWORK:
+			SOC_Shutdown();
+			free(socBuffer);
+			socBuffer = NULL;
+			break;
+		case AUDIO:
+			// TODO: Stop all audio
+			csndExecCmds(true);
+			csndExit();
+			break;
+		case CONFIG:
+			exitCfgu();
+			break;
+		case ROMFS:
+			romfsExit();
+			break;
+		default:
+			break;
 	}
 
-	if (service == AUDIO) {
-		// Stop all audio
-//		CSND_SetPlayStateR(1, 0);
-//		CSND_SetPlayStateR(2, 0);
-		csndExecCmds(true);
-		csndExit();
-	}
+	if (success)
+		m_enabledServices &= ~service;
+	return success;
 }
 
 

@@ -24,13 +24,14 @@ public:
 	void console(Screen screen = BottomScreen, bool enable = true, bool visible = true);
     void render();
 	void run();
+	void exit();
 	Game();
 	virtual ~Game();
 protected:
     Window windowTop, windowBottom;
 private:
 	bool m_consoleEnabled;
-	Screen m_consoleScreen;
+	bool m_triggerExit;
 	Console m_console;
     #ifdef EMULATION
         sf::RenderTexture m_frameTextureTop, m_frameTextureBottom;

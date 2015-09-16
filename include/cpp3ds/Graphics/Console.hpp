@@ -8,6 +8,7 @@
 #include <cpp3ds/Graphics/Drawable.hpp>
 #include <cpp3ds/Graphics/Font.hpp>
 #include <cpp3ds/Graphics/Text.hpp>
+#include <cpp3ds/Window/ContextSettings.hpp>
 
 namespace cpp3ds
 {
@@ -40,7 +41,7 @@ public:
 
 public:
 
-	void create();
+	void create(Screen screen = BottomScreen);
 
 	void update(float delta);
 
@@ -51,6 +52,10 @@ public:
 	void setVisible(bool visible);
 
 	static void initialize();
+
+	void setScreen(Screen screen);
+
+	Screen getScreen();
 
 private:
 
@@ -72,6 +77,7 @@ private:
 	unsigned int m_limit;
 	static bool m_initialized;
 	bool m_visible;
+	Screen m_screen;
 };
 
 } // namespace cpp3ds

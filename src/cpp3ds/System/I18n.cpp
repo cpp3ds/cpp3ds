@@ -5,6 +5,7 @@
 #include <cpp3ds/System/Err.hpp>
 #include <cpp3ds/System/I18n.hpp>
 #include <cpp3ds/System/String.hpp>
+#include <cpp3ds/System/Service.hpp>
 
 #define TOKEN_COMMENT  '#'
 
@@ -44,7 +45,7 @@ I18n& I18n::getInstance()
 I18n::I18n()
 {
 	Uint8 langcode;
-	// TODO: use Service class to enable CFGU here
+	Service::enable(CONFIG);
 #ifdef EMULATION
 	langcode = 1; // TODO: get actual locale of PC
 #else

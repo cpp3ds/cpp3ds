@@ -33,6 +33,12 @@ void Game::console(Screen screen, bool enable, bool visible)
 }
 
 
+void Game::exit()
+{
+	m_triggerExit = true;
+}
+
+
 void Game::render()
 {
     _emulator->screen->clear();
@@ -80,6 +86,10 @@ void Game::run()
 			processEvent(event);
 		}
 		deltaTime = clock.restart();
+
+		if (m_triggerExit)
+			break;
+
 		Keyboard::update();
 		update(deltaTime.asSeconds());
 	}
