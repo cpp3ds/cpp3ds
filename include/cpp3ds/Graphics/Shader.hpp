@@ -181,8 +181,6 @@ public :
     ////////////////////////////////////////////////////////////
     bool loadFromMemory(const std::string& vertexShader, const std::string& fragmentShader);
 
-    bool loadFromResource(const std::string& shader, Type type, bool compiled = true);
-
 	bool loadBinary(const Uint8* data, const Uint32 size, Type type);
 
     ////////////////////////////////////////////////////////////

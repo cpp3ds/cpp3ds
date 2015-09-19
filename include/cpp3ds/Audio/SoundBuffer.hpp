@@ -102,8 +102,6 @@ public:
     ////////////////////////////////////////////////////////////
     bool loadFromMemory(const void* data, std::size_t sizeInBytes);
 
-	bool loadFromResource(const std::string& filename);
-
     ////////////////////////////////////////////////////////////
     /// \brief Load the sound buffer from a custom stream
     ///

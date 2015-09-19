@@ -93,13 +93,6 @@ bool SoundBuffer::loadFromFile(const std::string& filename)
 
 
 ////////////////////////////////////////////////////////////
-bool SoundBuffer::loadFromResource(const std::string& filename)
-{
-	return loadFromMemory(priv::resources[filename].data, priv::resources[filename].size);
-}
-
-
-////////////////////////////////////////////////////////////
 bool SoundBuffer::loadFromMemory(const void* data, std::size_t sizeInBytes)
 {
     InputSoundFile file;

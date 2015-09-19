@@ -1,6 +1,7 @@
 include(arm-toolchain)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 include_directories(
 	${PROJECT_SOURCE_DIR}/include
@@ -20,15 +21,17 @@ link_directories(
     ${GL3DS}/lib
     ${ARM_LINK_DIRECTORIES}
 )
-set_source_files_properties(${RESOURCE_OUTPUT} PROPERTIES GENERATED TRUE)
 
-add_executable(${PROJECT_NAME}.elf
-	${SOURCE_FILES}
-	${RESOURCE_OUTPUT}
-)
+compile_shaders(SHADER_OUTPUT ${SHADER_FILES})
+set_source_files_properties(${SHADER_OUTPUT} PROPERTIES GENERATED TRUE)
+file(GLOB_RECURSE ROMFS_FILES ${PROJECT_SOURCE_DIR}/res/romfs/*)
 
-add_dependencies(${PROJECT_NAME}.elf ${PROJECT_NAME}-res)
+add_executable(${PROJECT_NAME}.elf ${SOURCE_FILES})
+
 target_link_libraries(${PROJECT_NAME}.elf ${CPP3DS_ARM_LIBS})
-set_target_properties(${PROJECT_NAME}.elf PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${CPP3DS_ARM_FLAGS}")
-set_target_properties(${PROJECT_NAME}.elf PROPERTIES LINK_FLAGS "-specs=3dsx.specs -g -march=armv6k -mtune=mpcore -mfloat-abi=hard")
+set_target_properties(${PROJECT_NAME}.elf PROPERTIES COMPILE_FLAGS "${CPP3DS_ARM_FLAGS}")
+set_target_properties(${PROJECT_NAME}.elf PROPERTIES LINK_FLAGS "-specs=3dsx.specs -march=armv6k -mtune=mpcore -mfloat-abi=hard -gc-sections")
 SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
+
+add_3dsx_target(${PROJECT_NAME}.elf)
+add_cia_target(${PROJECT_NAME}.elf ${PROJECT_SOURCE_DIR}/res/app/cia.rsf ${BANNER_IMAGE} ${BANNER_SOUND})

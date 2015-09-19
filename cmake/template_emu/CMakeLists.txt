@@ -1,8 +1,7 @@
 find_package(Qt5Widgets REQUIRED)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
-set_source_files_properties(${RESOURCE_OUTPUT} PROPERTIES GENERATED TRUE)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 include_directories(
 	${PROJECT_SOURCE_DIR}/include
@@ -15,13 +14,9 @@ link_directories(
 	${EMU_LINK_DIRECTORIES}
 )
 
-add_executable(${PROJECT_NAME}-emu
-	${SOURCE_FILES}
-	${RESOURCE_OUTPUT}
-)
+add_executable(${PROJECT_NAME}-emu ${SOURCE_FILES})
 
 qt5_use_modules(${PROJECT_NAME}-emu Core Gui Widgets)
-add_dependencies(${PROJECT_NAME}-emu ${PROJECT_NAME}-res)
 
 target_link_libraries(${PROJECT_NAME}-emu ${CPP3DS_EMU_LIBS})
 

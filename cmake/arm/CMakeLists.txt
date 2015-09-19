@@ -1,8 +1,8 @@
 include(arm-toolchain)
 
 set_source_files_properties(${CFILES} PROPERTIES LANGUAGE C)
-set_source_files_properties(${CPP3DS_SOURCE_3DS} PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${CPP3DS_ARM_FLAGS}")
-set_source_files_properties(${RESOURCE_OUTPUT} PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${CPP3DS_ARM_FLAGS}")
+set_source_files_properties(${CPP3DS_SOURCE_3DS} PROPERTIES COMPILE_FLAGS "${CPP3DS_ARM_FLAGS}")
+set_source_files_properties(${RESOURCE_OUTPUT} PROPERTIES COMPILE_FLAGS "${CPP3DS_ARM_FLAGS}")
 set_source_files_properties(${CFILES} PROPERTIES COMPILE_FLAGS "-g ${ARCH}")
 set_source_files_properties(${RESOURCE_OUTPUT} PROPERTIES GENERATED TRUE)
 

@@ -59,13 +59,6 @@ Shader::~Shader()
 
 
 ////////////////////////////////////////////////////////////
-bool Shader::loadFromResource(const std::string& filename, Type type, bool compiled)
-{
-    return false;
-}
-
-
-////////////////////////////////////////////////////////////
 bool Shader::loadFromFile(const std::string& filename, Type type)
 {
     return false;

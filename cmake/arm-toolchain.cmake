@@ -1,8 +1,6 @@
 # the name of the target operating system
 SET(CMAKE_SYSTEM_NAME Generic)
 
-#include(cpp3ds)
-
 # which compilers to use for C and C++
 SET(CMAKE_C_COMPILER ${DEVKITARM}/bin/arm-none-eabi-gcc)
 SET(CMAKE_CXX_COMPILER ${DEVKITARM}/bin/arm-none-eabi-g++)

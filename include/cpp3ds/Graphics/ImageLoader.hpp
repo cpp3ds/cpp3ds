@@ -69,8 +69,6 @@ public :
     ////////////////////////////////////////////////////////////
     bool loadImageFromFile(const std::string& filename, std::vector<Uint8>& pixels, Vector2u& size);
 
-    bool loadImageFromResource(const std::string& resourcename, std::vector<Uint8>& pixels, Vector2u& size);
-
     ////////////////////////////////////////////////////////////
     /// \brief Load an image from a file in memory
     ///

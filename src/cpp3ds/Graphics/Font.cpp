@@ -37,6 +37,7 @@
 #include FT_BITMAP_H
 #include <cstdlib>
 #include <cstring>
+#include <cpp3ds/System/FileSystem.hpp>
 
 
 namespace
@@ -120,18 +121,12 @@ bool Font::loadFromFile(const std::string& filename)
 
     // Load the new font face from the specified file
     FT_Face face;
-#ifdef EMULATION
-	std::string rel_filename = "res/sdmc/" + filename;
-    if (FT_New_Face(static_cast<FT_Library>(m_library), rel_filename.c_str(), 0, &face) != 0)
-#else
-	if (FT_New_Face(static_cast<FT_Library>(m_library), filename.c_str(), 0, &face) != 0)
-#endif
-    {
-        err() << "Failed to load font \"" << filename << "\" (failed to create the font face)" << std::endl;
-        return false;
-    }
-
-    // Select the unicode character map
+	if (FT_New_Face(static_cast<FT_Library>(m_library), FileSystem::getFilePath(filename).c_str(), 0, &face) != 0)
+	{
+		err() << "Failed to load font \"" << filename << "\" (failed to create the font face)" << std::endl;
+		return false;
+	}
+	// Select the unicode character map
     if (FT_Select_Charmap(face, FT_ENCODING_UNICODE) != 0)
     {
         err() << "Failed to load font \"" << filename << "\" (failed to set the Unicode character set)" << std::endl;
@@ -146,13 +141,6 @@ bool Font::loadFromFile(const std::string& filename)
     m_info.family = face->family_name ? face->family_name : std::string();
 
     return true;
-}
-
-
-////////////////////////////////////////////////////////////
-bool Font::loadFromResource(const std::string& filename)
-{
-	return loadFromMemory(priv::resources[filename].data, priv::resources[filename].size);
 }
 
 

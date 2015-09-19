@@ -64,6 +64,11 @@ Shader::~Shader()
 ////////////////////////////////////////////////////////////
 bool Shader::loadFromFile(const std::string& filename, Type type)
 {
+//	if (compiled) {
+//		return loadBinary(priv::resources[shader].data, priv::resources[shader].size, type);
+//	} else {
+//		return compile(shader.c_str(), nullptr);
+//	}
     return false;
 }
 
@@ -86,17 +91,6 @@ bool Shader::loadFromMemory(const std::string& shader, Type type)
 bool Shader::loadFromMemory(const std::string& vertexShader, const std::string& fragmentShader)
 {
     return false;
-}
-
-
-////////////////////////////////////////////////////////////
-bool Shader::loadFromResource(const std::string& shader, Type type, bool compiled)
-{
-    if (compiled) {
-        return loadBinary(priv::resources[shader].data, priv::resources[shader].size, type);
-    } else {
-        return compile(shader.c_str(), nullptr);
-    }
 }
 
 

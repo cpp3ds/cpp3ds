@@ -126,9 +126,6 @@ public :
     ////////////////////////////////////////////////////////////
     bool loadFromFile(const std::string& filename, const IntRect& area = IntRect());
 
-
-    bool loadFromResource(const std::string& filename, const IntRect& area = IntRect());
-
     ////////////////////////////////////////////////////////////
     /// \brief Load the texture from a file in memory
     ///

@@ -11,6 +11,17 @@ find_package(Freetype REQUIRED)
 
 include_directories(${FREETYPE_INCLUDE_DIRS})
 
+option(BUILD_EXAMPLES "Build all cpp3ds example projects" ON)
+option(ENABLE_OGG "Build all cpp3ds example projects" ON)
+option(ENABLE_FLAC "Build all cpp3ds example projects" OFF)
+
+if(ENABLE_OGG)
+	add_definitions(-DCPP3DS_ENABLE_OGG)
+endif()
+if(ENABLE_FLAC)
+	add_definitions(-DCPP3DS_ENABLE_FLAC)
+endif()
+
 # C++11 support
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
@@ -48,7 +59,7 @@ set(SHADER_FILES ${PROJECT_SOURCE_DIR}/res/core_resource/default_shader.vsh)
 set(RESOURCE_FILES ${PROJECT_SOURCE_DIR}/res/core_resource/opensans.ttf)
 set(RESOURCE_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/core_resource.cpp)
 
-compile_shaders(SHADER_OUTPUT ${PROJECT_SOURCE_DIR}/res/core_resource/ ${SHADER_FILES})
+compile_core_shaders(SHADER_OUTPUT ${PROJECT_SOURCE_DIR}/res/core_resource/ ${SHADER_FILES})
 
 compile_resources(
 	"core_resources"
@@ -69,7 +80,7 @@ add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake/cmake_uninstall.cmake)
 
 # disable the rpath stuff
-#set(CMAKE_SKIP_BUILD_RPATH TRUE)
+set(CMAKE_SKIP_BUILD_RPATH TRUE)
 
 # set the output directory for cpp3ds libraries and binaries
 set(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/lib")
@@ -77,13 +88,13 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 
 # compile flags
 set(ARCH "-march=armv6k -mtune=mpcore -mfloat-abi=hard")
-set(CPP3DS_ARM_FLAGS "-Wall -pedantic -O0 ${ARCH} -fno-rtti -fno-exceptions")
-set(CPP3DS_TEST_FLAGS "-g -Wall -pedantic -O0")
-set(CPP3DS_EMU_FLAGS "-g -Wall -pedantic -O0")
+set(CPP3DS_ARM_FLAGS "-g -O2 ${ARCH} -fno-rtti -fno-exceptions -ffunction-sections -fdata-sections")
+set(CPP3DS_TEST_FLAGS "-g -O2")
+set(CPP3DS_EMU_FLAGS "-g -O2")
 
-#if(CPP3DS_BUILD_EXAMPLES)
+if(BUILD_EXAMPLES)
     add_subdirectory(examples)
-#endif()
+endif()
 
 add_subdirectory(cmake/arm)
 add_subdirectory(cmake/emu)

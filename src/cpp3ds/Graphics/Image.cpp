@@ -112,13 +112,6 @@ bool Image::loadFromFile(const std::string& filename)
 
 
 ////////////////////////////////////////////////////////////
-bool Image::loadFromResource(const std::string& filename)
-{
-    return priv::ImageLoader::getInstance().loadImageFromResource(filename, m_pixels, m_size);
-}
-
-
-////////////////////////////////////////////////////////////
 bool Image::loadFromMemory(const void* data, std::size_t size)
 {
     return priv::ImageLoader::getInstance().loadImageFromMemory(data, size, m_pixels, m_size);
