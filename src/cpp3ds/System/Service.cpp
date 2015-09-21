@@ -2,6 +2,8 @@
 #include <cpp3ds/System/Service.hpp>
 #include <3ds.h>
 #include <malloc.h>
+#include <sys/unistd.h>
+#include <string.h>
 
 namespace cpp3ds {
 
@@ -39,7 +41,7 @@ bool Service::enable(ServiceName service) {
 			break;
 		case ROMFS:
 			romfsInit();
-			success = true;
+			success = strcmp(getcwd(NULL,0), "romfs:/") == 0;
 			break;
 		default:
 			break;
