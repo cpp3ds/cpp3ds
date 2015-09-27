@@ -30,17 +30,48 @@
 #include <cpp3ds/Graphics/Texture.hpp>
 #include <cpp3ds/Resources.hpp>
 #include <cpp3ds/OpenGL.hpp>
+#include <cpp3ds/OpenGL/GLExtensions.hpp>
 #include <cpp3ds/System/InputStream.hpp>
 #include <cpp3ds/System/Err.hpp>
+#ifndef EMULATION
 #include <3ds.h>
+#endif
 #include <fstream>
 #include <vector>
+
+
+namespace
+{
+	// Read the contents of a file into an array of char
+	bool getFileContents(const std::string& filename, std::vector<char>& buffer)
+	{
+		std::ifstream file(filename.c_str(), std::ios_base::binary);
+		if (file)
+		{
+			file.seekg(0, std::ios_base::end);
+			std::streamsize size = file.tellg();
+			if (size > 0)
+			{
+				file.seekg(0, std::ios_base::beg);
+				buffer.resize(static_cast<std::size_t>(size));
+				file.read(&buffer[0], size);
+			}
+			buffer.push_back('\0');
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+}
 
 
 namespace cpp3ds
 {
 ////////////////////////////////////////////////////////////
 Shader::CurrentTextureType Shader::CurrentTexture;
+Shader Shader::Default;
 
 
 ////////////////////////////////////////////////////////////
@@ -64,12 +95,30 @@ Shader::~Shader()
 ////////////////////////////////////////////////////////////
 bool Shader::loadFromFile(const std::string& filename, Type type)
 {
-//	if (compiled) {
-//		return loadBinary(priv::resources[shader].data, priv::resources[shader].size, type);
-//	} else {
-//		return compile(shader.c_str(), nullptr);
-//	}
-    return false;
+	std::string shaderfile;
+#ifdef EMULATION
+	// TODO: check for sdmc:/ filenames
+	shaderfile = "../res/glsl/" + filename + ".glsl";
+#else
+	shaderfile = filename + ".shbin";
+#endif
+
+	// Read the file
+	if (!getFileContents(shaderfile, m_shaderData))
+	{
+		err() << "Failed to open shader file \"" << shaderfile << "\"" << std::endl;
+		return false;
+	}
+
+#ifdef EMULATION
+	// Compile the shader program
+    if (type == Vertex)
+        return compile(&m_shaderData[0], NULL);
+    else
+        return compile(NULL, &m_shaderData[0]);
+#else
+	return loadBinary(reinterpret_cast<Uint8*>(&m_shaderData[0]), m_shaderData.size(), type);
+#endif
 }
 
 
@@ -324,8 +373,16 @@ void Shader::bind(const Shader* shader)
     }
     else
     {
-        // Bind no shader
-        glCheck(glUseProgram(0));
+#ifdef EMULATION
+		//Bind no shader
+		glCheck(glUseProgram(0));
+#else
+        // Bind default shader
+        glCheck(glUseProgram(Default.m_shaderProgram));
+
+		// Bind the textures
+		shader->bindTextures();
+#endif
     }
 }
 
@@ -340,13 +397,90 @@ bool Shader::isAvailable()
 ////////////////////////////////////////////////////////////
 bool Shader::compile(const char* vertexShaderCode, const char* fragmentShaderCode)
 {
-    return false;
+	// First make sure that we can use shaders
+	if (!isAvailable())
+	{
+		err() << "Failed to create a shader: your system doesn't support shaders "
+		<< "(you should test Shader::isAvailable() before trying to use the Shader class)" << std::endl;
+		return false;
+	}
+#ifdef EMULATION
+	// Destroy the shader if it was already created
+	if (m_shaderProgram)
+	{
+		glCheck(glDeleteObjectARB(m_shaderProgram));
+		m_shaderProgram = 0;
+	}
+
+	// Reset the internal state
+	m_currentTexture = -1;
+	m_textures.clear();
+	m_params.clear();
+
+	// Create the program
+	GLhandleARB shaderProgram;
+	glCheck(shaderProgram = glCreateProgramObjectARB());
+
+	// Create the vertex shader if needed
+	if (vertexShaderCode)
+	{
+		// Create and compile the shader
+		GLhandleARB vertexShader;
+		glCheck(vertexShader = glCreateShaderObjectARB(GL_VERTEX_SHADER));
+		glCheck(glShaderSource(vertexShader, 1, &vertexShaderCode, NULL));
+		glCheck(glCompileShader(vertexShader));
+
+		// Check the compile log
+		GLint success;
+		glCheck(glGetObjectParameterivARB(vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &success));
+		if (success == GL_FALSE)
+		{
+			char log[1024];
+			glCheck(glGetInfoLogARB(vertexShader, sizeof(log), 0, log));
+			err() << "Failed to compile vertex shader:" << std::endl
+			<< log << std::endl;
+			glCheck(glDeleteObjectARB(vertexShader));
+			glCheck(glDeleteObjectARB(shaderProgram));
+			return false;
+		}
+
+		// Attach the shader to the program, and delete it (not needed anymore)
+		glCheck(glAttachObjectARB(shaderProgram, vertexShader));
+		glCheck(glDeleteObjectARB(vertexShader));
+	}
+
+	// Link the program
+	glCheck(glLinkProgram(shaderProgram));
+
+	// Check the link log
+	GLint success;
+	glCheck(glGetObjectParameterivARB(shaderProgram, GL_OBJECT_LINK_STATUS_ARB, &success));
+	if (success == GL_FALSE)
+	{
+		char log[1024];
+		glCheck(glGetInfoLogARB(shaderProgram, sizeof(log), 0, log));
+		err() << "Failed to link shader:" << std::endl
+		<< log << std::endl;
+		glCheck(glDeleteObjectARB(shaderProgram));
+		return false;
+	}
+
+	m_shaderProgram = shaderProgram;
+
+	// Force an OpenGL flush, so that the shader will appear updated
+	// in all contexts immediately (solves problems in multi-threaded apps)
+	glCheck(glFlush());
+
+	return true;
+#endif
+	return false;
 }
 
 
 ////////////////////////////////////////////////////////////
 bool Shader::loadBinary(const Uint8* data, const Uint32 size, Type type)
 {
+#ifndef EMULATION
 	if (!m_shaderProgram)
 		m_shaderProgram = glCreateProgram();
 
@@ -359,6 +493,7 @@ bool Shader::loadBinary(const Uint8* data, const Uint32 size, Type type)
     	glProgramBinary(m_shaderProgram, GL_VERTEX_SHADER_BINARY, data, (GLsizei)size);
 	else if (type == Geometry)
 		glProgramBinary(m_shaderProgram, GL_GEOMETRY_SHADER_BINARY, data, (GLsizei)size);
+#endif
 
     return true;
 }

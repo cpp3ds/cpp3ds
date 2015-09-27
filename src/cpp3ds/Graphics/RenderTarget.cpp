@@ -262,8 +262,8 @@ void RenderTarget::draw(const Vertex* vertices, unsigned int vertexCount,
             applyTexture(states.texture);
 
         // Apply the shader
-//        if (states.shader)
-//            applyShader(states.shader);
+        if (states.shader)
+            applyShader(states.shader);
 
         // If we pre-transform the vertices, we must use our internal vertex cache
         if (useVertexCache)
@@ -311,8 +311,8 @@ void RenderTarget::draw(const Vertex* vertices, unsigned int vertexCount,
         glCheck(glDrawArrays(mode, 0, vertexCount));
 
         // Unbind the shader, if any
-//        if (states.shader)
-//            applyShader(NULL);
+        if (states.shader)
+            applyShader(NULL);
 
         // Update the cache
         m_cache.useVertexCache = useVertexCache;
@@ -402,8 +402,8 @@ void RenderTarget::resetGLStates()
         applyBlendMode(BlendAlpha);
         applyTransform(Transform::Identity);
         applyTexture(NULL);
-//        if (shaderAvailable)
-//            applyShader(NULL);
+        if (shaderAvailable)
+            applyShader(NULL);
 
         m_cache.useVertexCache = false;
 

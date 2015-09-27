@@ -54,15 +54,16 @@ class Shader : NonCopyable
 {
 public :
 
+	static Shader Default;
+
     ////////////////////////////////////////////////////////////
     /// \brief Types of shaders
     ///
     ////////////////////////////////////////////////////////////
     enum Type
     {
-        Vertex,  ///< Vertex shader
+        Vertex,   ///< Vertex shader
         Geometry, ///< Geometry shader
-        Fragment ///< Fragment (pixel) shader
     };
 
     ////////////////////////////////////////////////////////////
@@ -556,6 +557,7 @@ private :
     int          m_currentTexture; ///< Location of the current texture in the shader
     TextureTable m_textures;       ///< Texture variables in the shader, mapped to their location
     ParamTable   m_params;         ///< Parameters location cache
+	std::vector<char> m_shaderData;
 
     #ifndef EMULATION
     //shader structure

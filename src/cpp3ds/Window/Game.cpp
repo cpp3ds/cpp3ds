@@ -29,6 +29,12 @@ Game::Game()
 
 	windowTop.create(ContextSettings(TopScreen));
 	windowBottom.create(ContextSettings(BottomScreen));
+
+	// Use default shader if one isn't provided by user.
+	priv::ResourceInfo defaultShader = priv::core_resources["default_shader.vsh"];
+	if (!Shader::Default.loadBinary(defaultShader.data, defaultShader.size, Shader::Vertex)){
+		err() << "Failed to load default_shader.vsh from cpp3ds core.";
+	}
 }
 
 
@@ -81,16 +87,6 @@ void Game::run()
 
 	// Hook for clock
 	aptHook(&apt_hook_cookie, apt_clock_hook, &clock);
-
-	// Use default shader if one isn't provided by user
-	if (m_shader.getNativeHandle() == NULL) {
-		priv::ResourceInfo defaultShader = priv::core_resources["default_shader.vsh"];
-		if (!m_shader.loadBinary(defaultShader.data, defaultShader.size, Shader::Vertex)){
-			// No shader, just give up! :(
-			return;
-		}
-		glCheck(glUseProgram(m_shader.getNativeHandle())); // TODO: use it differently
-	}
 
 	while (aptMainLoop())
 	{
