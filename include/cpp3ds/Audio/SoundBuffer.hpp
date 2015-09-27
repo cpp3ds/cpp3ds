@@ -30,6 +30,8 @@
 ////////////////////////////////////////////////////////////
 #ifdef EMULATION
 #include <SFML/Audio.hpp>
+#else
+#include <cpp3ds/System/LinearAllocator.hpp>
 #endif
 #include <cpp3ds/System/Time.hpp>
 #include <string>
@@ -273,9 +275,6 @@ private:
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    unsigned int       m_buffer;   ///< OpenAL buffer identifier
-    Int16*             m_samples;  ///< Samples buffer
-	Uint64             m_sampleCount;
     Time               m_duration; ///< Sound duration
     mutable SoundList  m_sounds;   ///< List of sounds that are using this buffer
 
@@ -283,6 +282,8 @@ private:
 	unsigned int m_channelCount;
 	#ifdef EMULATION
 	sf::SoundBuffer m_soundBuffer;
+	#else
+	std::vector<Int16, LinearAllocator<Int16>> m_samples;  ///< Samples buffer
 	#endif
 };
 

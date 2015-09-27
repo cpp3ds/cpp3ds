@@ -42,8 +42,6 @@ namespace cpp3ds
 {
 ////////////////////////////////////////////////////////////
 SoundBuffer::SoundBuffer() :
-m_buffer  (0),
-m_sampleCount (0),
 m_duration()
 {
 }
@@ -51,9 +49,7 @@ m_duration()
 
 ////////////////////////////////////////////////////////////
 SoundBuffer::SoundBuffer(const SoundBuffer& copy) :
-m_buffer  (0),
 m_samples (copy.m_samples),
-m_sampleCount (copy.m_sampleCount),
 m_duration(copy.m_duration),
 m_sounds  () // don't copy the attached sounds
 {
@@ -74,10 +70,6 @@ SoundBuffer::~SoundBuffer()
     // Detach the buffer from the sounds that use it (to avoid OpenAL errors)
     for (SoundList::const_iterator it = sounds.begin(); it != sounds.end(); ++it)
         (*it)->resetBuffer();
-
-    // Destroy the buffer
-	if (m_samples)
-		linearFree(m_samples);
 }
 
 
@@ -117,30 +109,26 @@ bool SoundBuffer::loadFromStream(InputStream& stream)
 ////////////////////////////////////////////////////////////
 bool SoundBuffer::loadFromSamples(const Int16* samples, Uint64 sampleCount, unsigned int channelCount, unsigned int sampleRate)
 {
-    if (samples && sampleCount && channelCount && sampleRate)
-    {
-        // Copy the new audio samples
-		if (m_samples)
-			linearFree(m_samples);
-		m_samples = (Int16*)linearAlloc(sizeof(Int16) * sampleCount);
-		memcpy(m_samples, samples, sizeof(Int16) * sampleCount);
-		m_sampleCount = sampleCount;
+	if (samples && sampleCount && channelCount && sampleRate)
+	{
+		// Copy the new audio samples
+		m_samples.assign(samples, samples + sampleCount);
 
-        // Update the internal buffer with the new samples
-        return update(channelCount, sampleRate);
-    }
-    else
-    {
-        // Error...
-        err() << "Failed to load sound buffer from samples ("
-              << "array: "      << samples      << ", "
-              << "count: "      << sampleCount  << ", "
-              << "channels: "   << channelCount << ", "
-              << "samplerate: " << sampleRate   << ")"
-              << std::endl;
+		// Update the internal buffer with the new samples
+		return update(channelCount, sampleRate);
+	}
+	else
+	{
+		// Error...
+		err() << "Failed to load sound buffer from samples ("
+		<< "array: "      << samples      << ", "
+		<< "count: "      << sampleCount  << ", "
+		<< "channels: "   << channelCount << ", "
+		<< "samplerate: " << sampleRate   << ")"
+		<< std::endl;
 
-        return false;
-    }
+		return false;
+	}
 }
 
 
@@ -152,7 +140,7 @@ bool SoundBuffer::saveToFile(const std::string& filename) const
     if (file.openFromFile(filename, getSampleRate(), getChannelCount()))
     {
         // Write the samples to the opened file
-        file.write(m_samples, m_sampleCount);
+        file.write(&m_samples[0], m_samples.size());
 
         return true;
     }
@@ -166,14 +154,14 @@ bool SoundBuffer::saveToFile(const std::string& filename) const
 ////////////////////////////////////////////////////////////
 const Int16* SoundBuffer::getSamples() const
 {
-    return m_sampleCount == 0 ? NULL : m_samples;
+    return m_samples.empty() ? NULL : &m_samples[0];
 }
 
 
 ////////////////////////////////////////////////////////////
 Uint64 SoundBuffer::getSampleCount() const
 {
-    return m_sampleCount;
+    return m_samples.size();
 }
 
 
@@ -204,8 +192,6 @@ SoundBuffer& SoundBuffer::operator =(const SoundBuffer& right)
     SoundBuffer temp(right);
 
     std::swap(m_samples,     temp.m_samples);
-    std::swap(m_sampleCount, temp.m_sampleCount);
-    std::swap(m_buffer,      temp.m_buffer);
     std::swap(m_duration,    temp.m_duration);
     std::swap(m_sounds,      temp.m_sounds); // swap sounds too, so that they are detached when temp is destroyed
 
@@ -220,25 +206,18 @@ bool SoundBuffer::initialize(InputSoundFile& file)
     Uint64       sampleCount  = file.getSampleCount();
     unsigned int channelCount = file.getChannelCount();
     unsigned int sampleRate   = file.getSampleRate();
-	m_channelCount = channelCount;
-	m_sampleRate = sampleRate;
-
-    // Resize sample array to be filled
-	if (m_samples)
-		linearFree(m_samples);
-	m_samples = (Int16*)linearAlloc(sizeof(Int16) * sampleCount);
 
 	// Read the samples from the provided file
-    if (file.read(m_samples, sampleCount) == sampleCount)
-    {
-		m_sampleCount = sampleCount;
-        // Update the internal buffer with the new samples
-        return update(channelCount, sampleRate);
-    }
-    else
-    {
-        return false;
-    }
+	m_samples.resize(static_cast<std::size_t>(sampleCount));
+	if (file.read(&m_samples[0], sampleCount) == sampleCount)
+	{
+		// Update the internal buffer with the new samples
+		return update(channelCount, sampleRate);
+	}
+	else
+	{
+		return false;
+	}
 }
 
 
@@ -246,7 +225,7 @@ bool SoundBuffer::initialize(InputSoundFile& file)
 bool SoundBuffer::update(unsigned int channelCount, unsigned int sampleRate)
 {
     // Check parameters
-    if (!channelCount || !sampleRate || m_sampleCount == 0)
+    if (!channelCount || !sampleRate || m_samples.empty())
         return false;
 
     // Check if the format is valid
@@ -266,7 +245,7 @@ bool SoundBuffer::update(unsigned int channelCount, unsigned int sampleRate)
         (*it)->resetBuffer();
 
     // Compute the duration
-    m_duration = seconds(static_cast<float>(m_sampleCount) / sampleRate / channelCount);
+    m_duration = seconds(static_cast<float>(m_samples.size()) / sampleRate / channelCount);
 
     // Now reattach the buffer to the sounds that use it
     for (SoundList::const_iterator it = sounds.begin(); it != sounds.end(); ++it)

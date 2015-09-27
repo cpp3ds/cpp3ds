@@ -36,23 +36,19 @@
 #include <cpp3ds/System/Err.hpp>
 #include <memory>
 #include <cpp3ds/Resources.hpp>
+#include <cpp3ds/System/FileSystem.hpp>
 
 
 namespace cpp3ds
 {
 ////////////////////////////////////////////////////////////
-SoundBuffer::SoundBuffer() :
-m_buffer  (0),
-m_duration()
+SoundBuffer::SoundBuffer()
 {
 }
 
 
 ////////////////////////////////////////////////////////////
 SoundBuffer::SoundBuffer(const SoundBuffer& copy) :
-m_buffer  (0),
-m_samples (copy.m_samples),
-m_duration(copy.m_duration),
 m_sounds  () // don't copy the attached sounds
 {
 }
@@ -67,7 +63,7 @@ SoundBuffer::~SoundBuffer()
 ////////////////////////////////////////////////////////////
 bool SoundBuffer::loadFromFile(const std::string& filename)
 {
-	return m_soundBuffer.loadFromFile(filename);
+	return m_soundBuffer.loadFromFile(FileSystem::getFilePath(filename));
 }
 
 
@@ -101,7 +97,7 @@ bool SoundBuffer::saveToFile(const std::string& filename) const
     if (file.openFromFile(filename, getSampleRate(), getChannelCount()))
     {
         // Write the samples to the opened file
-        file.write(&m_samples[0], m_samples.size());
+//        file.write(&m_samples[0], m_samples.size());
 
         return true;
     }
@@ -152,9 +148,7 @@ SoundBuffer& SoundBuffer::operator =(const SoundBuffer& right)
 {
     SoundBuffer temp(right);
 
-    std::swap(m_samples,  temp.m_samples);
-    std::swap(m_buffer,   temp.m_buffer);
-    std::swap(m_duration, temp.m_duration);
+	std::swap(m_soundBuffer, temp.m_soundBuffer);
     std::swap(m_sounds,   temp.m_sounds); // swap sounds too, so that they are detached when temp is destroyed
 
     return *this;
@@ -178,12 +172,14 @@ bool SoundBuffer::update(unsigned int channelCount, unsigned int sampleRate)
 ////////////////////////////////////////////////////////////
 void SoundBuffer::attachSound(Sound* sound) const
 {
+	m_sounds.insert(sound);
 }
 
 
 ////////////////////////////////////////////////////////////
 void SoundBuffer::detachSound(Sound* sound) const
 {
+	m_sounds.erase(sound);
 }
 
 } // namespace cpp3ds
