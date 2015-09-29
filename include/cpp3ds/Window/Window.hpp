@@ -44,7 +44,7 @@ class Event;
 /// \brief Window that serves as a target for OpenGL rendering
 ///
 ////////////////////////////////////////////////////////////
-class Window : public RenderTexture
+class Window : public RenderTarget, GlResource
 {
 public :
 
@@ -64,6 +64,20 @@ public :
     ///
     ////////////////////////////////////////////////////////////
     virtual ~Window();
+
+	////////////////////////////////////////////////////////////
+	/// \brief Create (or recreate) the window
+	///
+	/// If the window was already created, it closes it first.
+	///
+	/// The parameter is an optional structure specifying
+	/// advanced OpenGL context settings such as antialiasing,
+	/// depth-buffer bits, etc.
+	///
+	/// \param settings Additional settings for the underlying OpenGL context
+	///
+	////////////////////////////////////////////////////////////
+	void create(const ContextSettings& settings = ContextSettings());
 
     ////////////////////////////////////////////////////////////
 	/// \brief Close the window and destroy all the attached resources
@@ -89,58 +103,18 @@ public :
 	////////////////////////////////////////////////////////////
 	bool isOpen() const;
 
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Pop the event on top of the event queue, if any, and return it
-    ///
-    /// This function is not blocking: if there's no pending event then
-    /// it will return false and leave \a event unmodified.
-    /// Note that more than one event may be present in the event queue,
-    /// thus you should always call this function in a loop
-    /// to make sure that you process every pending event.
-    /// \code
-    /// cpp3ds::Event event;
-    /// while (window.pollEvent(event))
-    /// {
-    ///    // process event...
-    /// }
-    /// \endcode
-    ///
-    /// \param event Event to be returned
-    ///
-    /// \return True if an event was returned, or false if the event queue was empty
-    ///
-    /// \see waitEvent
-    ///
-    ////////////////////////////////////////////////////////////
-    bool pollEvent(Event& event);
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Wait for an event and return it
-    ///
-    /// This function is blocking: if there's no pending event then
-    /// it will wait until an event is received.
-    /// After this function returns (and no error occured),
-    /// the \a event object is always valid and filled properly.
-    /// This function is typically used when you have a thread that
-    /// is dedicated to events handling: you want to make this thread
-    /// sleep as long as no new event is received.
-    /// \code
-    /// cpp3ds::Event event;
-    /// if (window.waitEvent(event))
-    /// {
-    ///    // process event...
-    /// }
-    /// \endcode
-    ///
-    /// \param event Event to be returned
-    ///
-    /// \return False if any error occured
-    ///
-    /// \see pollEvent
-    ///
-    ////////////////////////////////////////////////////////////
-    bool waitEvent(Event& event);
+	////////////////////////////////////////////////////////////
+	/// \brief Get the settings of the OpenGL context of the window
+	///
+	/// Note that these settings may be different from what was
+	/// passed to the constructor or the create() function,
+	/// if one or more settings were not supported. In this case,
+	/// SFML chose the closest match.
+	///
+	/// \return Structure containing the OpenGL context settings
+	///
+	////////////////////////////////////////////////////////////
+	const ContextSettings& getSettings() const;
 
     ////////////////////////////////////////////////////////////
     /// \brief Get the size of the rendering region of the window
@@ -153,9 +127,9 @@ public :
     /// \see setSize
     ///
     ////////////////////////////////////////////////////////////
-    Vector2u getSize() const;
+    virtual Vector2u getSize() const;
 
-    ////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////
     /// \brief Enable or disable vertical synchronization
     ///
     /// Activating vertical synchronization will limit the number
@@ -169,30 +143,6 @@ public :
     ///
     ////////////////////////////////////////////////////////////
     void setVerticalSyncEnabled(bool enabled);
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Show or hide the mouse cursor
-    ///
-    /// The mouse cursor is visible by default.
-    ///
-    /// \param visible True to show the mouse cursor, false to hide it
-    ///
-    ////////////////////////////////////////////////////////////
-    void setMouseCursorVisible(bool visible);
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Enable or disable automatic key-repeat
-    ///
-    /// If key repeat is enabled, you will receive repeated
-    /// KeyPressed events while keeping a key pressed. If it is disabled,
-    /// you will only get a single event when the key is pressed.
-    ///
-    /// Key repeat is enabled by default.
-    ///
-    /// \param enabled True to enable, false to disable
-    ///
-    ////////////////////////////////////////////////////////////
-    void setKeyRepeatEnabled(bool enabled);
 
     ////////////////////////////////////////////////////////////
     /// \brief Limit the framerate to a maximum fixed frequency
@@ -210,19 +160,6 @@ public :
     ///
     ////////////////////////////////////////////////////////////
     void setFramerateLimit(unsigned int limit);
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Change the joystick threshold
-    ///
-    /// The joystick threshold is the value below which
-    /// no JoystickMoved event will be generated.
-    ///
-    /// The threshold value is 0.1 by default.
-    ///
-    /// \param threshold New threshold, in the range [0, 100]
-    ///
-    ////////////////////////////////////////////////////////////
-    void setJoystickThreshold(float threshold);
 
     ////////////////////////////////////////////////////////////
     /// \brief Activate or deactivate the window as the current target
@@ -251,21 +188,35 @@ public :
     ////////////////////////////////////////////////////////////
     void display();
 
-protected:
+	////////////////////////////////////////////////////////////
+	/// \brief Copy the current contents of the window to an image
+	///
+	/// This is a slow operation, whose main purpose is to make
+	/// screenshots of the application. If you want to update an
+	/// image with the contents of the window and then use it for
+	/// drawing, you should rather use a sf::Texture and its
+	/// update(Window&) function.
+	/// You can also draw things directly to a texture with the
+	/// sf::RenderTexture class.
+	///
+	/// \return Image containing the captured contents
+	///
+	////////////////////////////////////////////////////////////
+	Image capture() const;
 
-    ////////////////////////////////////////////////////////////
-    /// \brief Processes an event before it is sent to the user
-    ///
-    /// This function is called every time an event is received
-    /// from the internal window (through pollEvent or waitEvent).
-    /// It filters out unwanted events, and performs whatever internal
-    /// stuff the window needs before the event is returned to the
-    /// user.
-    ///
-    /// \param event Event to filter
-    ///
-    ////////////////////////////////////////////////////////////
-    bool filterEvent(const Event& event);
+private:
+
+	////////////////////////////////////////////////////////////
+	/// \brief Activate the target for rendering
+	///
+	/// \param active True to make the target active, false to deactivate it
+	///
+	/// \return True if the function succeeded
+	///
+	////////////////////////////////////////////////////////////
+	virtual bool activate(bool active);
+
+protected:
 
     ////////////////////////////////////////////////////////////
     /// \brief Perform some common internal initializations
@@ -276,6 +227,7 @@ protected:
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
+	priv::GlContext*  m_context;        ///< Platform-specific implementation of the OpenGL context
     Clock             m_clock;          ///< Clock for measuring the elapsed time between frames
     Time              m_frameTimeLimit; ///< Current framerate limit
     Vector2u          m_size;           ///< Current size of the window

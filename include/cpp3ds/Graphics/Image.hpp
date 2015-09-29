@@ -102,8 +102,6 @@ public :
     ////////////////////////////////////////////////////////////
     bool loadFromFile(const std::string& filename);
 
-    bool loadFromResource(const std::string& filename);
-
     ////////////////////////////////////////////////////////////
     /// \brief Load the image from a file in memory
     ///

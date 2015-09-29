@@ -28,6 +28,7 @@
 #include <cpp3ds/Window/Window.hpp>
 #include <cpp3ds/System/Sleep.hpp>
 #include <cpp3ds/System/Err.hpp>
+#include <cpp3ds/Window/GlContext.hpp>
 
 
 namespace cpp3ds
@@ -35,11 +36,10 @@ namespace cpp3ds
 ////////////////////////////////////////////////////////////
 Window::Window() :
 m_frameTimeLimit(Time::Zero),
-m_size          (400, 240)
+m_size          (0, 0)
 {
 	// Perform common initializations
 	initialize();
-	RenderTarget::initialize();
 }
 
 
@@ -47,6 +47,26 @@ m_size          (400, 240)
 Window::~Window()
 {
     close();
+}
+
+
+////////////////////////////////////////////////////////////
+void Window::create(const ContextSettings& settings)
+{
+	// Destroy the previous window implementation
+	close();
+
+	unsigned int width  = settings.screen == TopScreen ? 400 : 400;
+	unsigned int height = 240;
+
+	m_size.x = width;
+	m_size.y = height;
+
+	// Recreate the context
+	m_context = priv::GlContext::create(settings, width, height);
+
+	// Perform common initializations
+	initialize();
 }
 
 
@@ -59,36 +79,46 @@ void Window::close()
 ////////////////////////////////////////////////////////////
 bool Window::isOpen() const
 {
-//    return m_impl != NULL;
-	return true;
+    return m_context != NULL;
+//	return true;
 }
 
 
 ////////////////////////////////////////////////////////////
-bool Window::pollEvent(Event& event)
+const ContextSettings& Window::getSettings() const
 {
-//    if (m_impl && m_impl->popEvent(event, false))
-//    {
-//        return filterEvent(event);
-//    }
-//    else
-//    {
-        return false;
-//    }
+	static const ContextSettings empty(TopScreen, 0, 0, 0);
+
+	return m_context ? m_context->getSettings() : empty;
 }
 
 
 ////////////////////////////////////////////////////////////
-bool Window::waitEvent(Event& event)
+bool Window::activate(bool active)
 {
-//    if (m_impl && m_impl->popEvent(event, true))
-//    {
-//        return filterEvent(event);
-//    }
-//    else
-//    {
-        return false;
-//    }
+	return setActive(active);
+}
+
+
+////////////////////////////////////////////////////////////
+bool Window::setActive(bool active) const
+{
+	if (m_context)
+	{
+		if (m_context->setActive(active))
+		{
+			return true;
+		}
+		else
+		{
+			err() << "Failed to activate the window's context" << std::endl;
+			return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
 }
 
 
@@ -96,7 +126,31 @@ bool Window::waitEvent(Event& event)
 Vector2u Window::getSize() const
 {
 	return m_size;
-//    return RenderTexture::getSize();
+}
+
+
+////////////////////////////////////////////////////////////
+Image Window::capture() const
+{
+	Image image;
+	if (setActive())
+	{
+		int width = static_cast<int>(getSize().x);
+		int height = static_cast<int>(getSize().y);
+
+		// copy rows one by one and flip them (OpenGL's origin is bottom while SFML's origin is top)
+		std::vector<Uint8> pixels(width * height * 4);
+		for (int i = 0; i < height; ++i)
+		{
+			Uint8* ptr = &pixels[i * width * 4];
+			// TODO: implement glReadPixels in gl3ds
+//			glCheck(glReadPixels(0, height - i - 1, width, 1, GL_RGBA, GL_UNSIGNED_BYTE, ptr));
+		}
+
+		image.create(width, height, &pixels[0]);
+	}
+
+	return image;
 }
 
 
@@ -105,22 +159,6 @@ void Window::setVerticalSyncEnabled(bool enabled)
 {
 //    if (setActive())
 //        m_context->setVerticalSyncEnabled(enabled);
-}
-
-
-////////////////////////////////////////////////////////////
-void Window::setMouseCursorVisible(bool visible)
-{
-//    if (m_impl)
-//        m_impl->setMouseCursorVisible(visible);
-}
-
-
-////////////////////////////////////////////////////////////
-void Window::setKeyRepeatEnabled(bool enabled)
-{
-//    if (m_impl)
-//        m_impl->setKeyRepeatEnabled(enabled);
 }
 
 
@@ -135,18 +173,11 @@ void Window::setFramerateLimit(unsigned int limit)
 
 
 ////////////////////////////////////////////////////////////
-void Window::setJoystickThreshold(float threshold)
-{
-//    if (m_impl)
-//        m_impl->setJoystickThreshold(threshold);
-}
-
-
-////////////////////////////////////////////////////////////
 void Window::display()
 {
-    // Display the backbuffer on screen
-    RenderTexture::display();
+	// Display the backbuffer on screen
+	if (setActive())
+		m_context->display();
 
     // Limit the framerate if needed
     if (m_frameTimeLimit != Time::Zero)
@@ -158,37 +189,17 @@ void Window::display()
 
 
 ////////////////////////////////////////////////////////////
-bool Window::filterEvent(const Event& event)
-{
-//    // Notify resize events to the derived class
-//    if (event.type == Event::Resized)
-//    {
-//        // Cache the new size
-//        m_size.x = event.size.width;
-//        m_size.y = event.size.height;
-//
-//        // Notify the derived class
-//        onResize();
-//    }
-
-    return true;
-}
-
-
-////////////////////////////////////////////////////////////
 void Window::initialize()
 {
     // Setup default behaviours (to get a consistent behaviour across different implementations)
-    setMouseCursorVisible(true);
     setVerticalSyncEnabled(false);
-    setKeyRepeatEnabled(false);
     setFramerateLimit(0);
-
-    // Get and cache the initial size of the window
-//    m_size = m_impl->getSize();
 
     // Reset frame time
     m_clock.restart();
+
+	// Just initialize the render target part
+	RenderTarget::initialize();
 }
 
 } // namespace cpp3ds

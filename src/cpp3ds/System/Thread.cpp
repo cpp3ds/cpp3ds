@@ -26,61 +26,75 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/System/Thread.hpp>
-
-
-//#if defined(SFML_SYSTEM_WINDOWS)
-//    #include <SFML/System/Win32/ThreadImpl.hpp>
-//#else
-//    #include <SFML/System/Unix/ThreadImpl.hpp>
-//#endif
+#include <malloc.h>
 
 
 namespace cpp3ds
 {
 ////////////////////////////////////////////////////////////
+void Thread::initialize()
+{
+	threadStack = (u32*)memalign(32, sizeof(u32) * THREAD_STACK_SIZE);
+}
+
+
+////////////////////////////////////////////////////////////
 Thread::~Thread()
 {
-//    wait();
-//    delete m_entryPoint;
+    wait();
+	free(threadStack);
+    delete m_entryPoint;
 }
 
 
 ////////////////////////////////////////////////////////////
 void Thread::launch()
 {
-//    wait();
-//    m_impl = new priv::ThreadImpl(this);
+    wait();
+	svcCreateThread(&m_thread, &Thread::entryPoint, (u32)this, &threadStack[THREAD_STACK_SIZE/sizeof(u32)], 0x3F, 0);
 }
 
 
 ////////////////////////////////////////////////////////////
 void Thread::wait()
 {
-//    if (m_impl)
-//    {
-//        m_impl->wait();
-//        delete m_impl;
-//        m_impl = NULL;
-//    }
+	// TODO: check that this isn't current thread asking to wait for itself
+    if (m_thread != 0)
+	{
+		svcWaitSynchronization(m_thread, U64_MAX);
+		svcCloseHandle(m_thread);
+		m_thread = 0;
+	}
 }
 
 
 ////////////////////////////////////////////////////////////
 void Thread::terminate()
 {
-//    if (m_impl)
-//    {
-//        m_impl->terminate();
-//        delete m_impl;
-//        m_impl = NULL;
-//    }
+    if (m_thread != 0)
+    {
+		// TODO: implement this
+    }
 }
 
 
 ////////////////////////////////////////////////////////////
 void Thread::run()
 {
-//    m_entryPoint->run();
+    m_entryPoint->run();
+}
+
+
+////////////////////////////////////////////////////////////
+void Thread::entryPoint(void* userData)
+{
+	// The Thread instance is stored in the user data
+	Thread* owner = static_cast<Thread*>(userData);
+
+	// Forward to the owner
+	owner->run();
+
+	svcExitThread();
 }
 
 } // namespace cpp3ds

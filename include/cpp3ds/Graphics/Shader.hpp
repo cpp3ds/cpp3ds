@@ -54,15 +54,16 @@ class Shader : NonCopyable
 {
 public :
 
+	static Shader Default;
+
     ////////////////////////////////////////////////////////////
     /// \brief Types of shaders
     ///
     ////////////////////////////////////////////////////////////
     enum Type
     {
-        Vertex,  ///< Vertex shader
+        Vertex,   ///< Vertex shader
         Geometry, ///< Geometry shader
-        Fragment ///< Fragment (pixel) shader
     };
 
     ////////////////////////////////////////////////////////////
@@ -140,7 +141,7 @@ public :
     ////////////////////////////////////////////////////////////
     bool loadFromFile(const std::string& vertexShaderFilename, const std::string& fragmentShaderFilename);
 
-    ////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////
     /// \brief Load either the vertex or fragment shader from a source code in memory
     ///
     /// This function loads a single shader, either vertex or
@@ -181,7 +182,7 @@ public :
     ////////////////////////////////////////////////////////////
     bool loadFromMemory(const std::string& vertexShader, const std::string& fragmentShader);
 
-    bool loadFromResource(const std::string& vertexShader, Type type, bool compiled = true);
+	bool loadBinary(const Uint8* data, const Uint32 size, Type type);
 
     ////////////////////////////////////////////////////////////
     /// \brief Load either the vertex or fragment shader from a custom stream
@@ -524,8 +525,6 @@ private :
     ////////////////////////////////////////////////////////////
     bool compile(const char* vertexShaderCode, const char* fragmentShaderCode);
 
-    bool loadProgram(const Uint8* data, const Uint32 size);
-
     ////////////////////////////////////////////////////////////
     /// \brief Bind all the textures used by the shader
     ///
@@ -558,6 +557,7 @@ private :
     int          m_currentTexture; ///< Location of the current texture in the shader
     TextureTable m_textures;       ///< Texture variables in the shader, mapped to their location
     ParamTable   m_params;         ///< Parameters location cache
+	std::vector<char> m_shaderData;
 
     #ifndef EMULATION
     //shader structure

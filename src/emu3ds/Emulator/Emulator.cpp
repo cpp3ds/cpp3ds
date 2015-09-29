@@ -17,6 +17,8 @@ namespace cpp3ds {
 		verticalLayout->addWidget(screen, 0, Qt::AlignCenter);
 //		centralwidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 		screen->setFramerateLimit(60);
+		screen->setKeyRepeatEnabled(false);
+
 
 		// Add 3D slider in toolbar
 		slider3D = new QSlider();
@@ -45,6 +47,10 @@ namespace cpp3ds {
 		delete screen;
 		delete spacer;
 		delete slider3D;
+	}
+
+	void Emulator::showEvent(QShowEvent *){
+		actionPlay_Pause->trigger();
 	}
 
 	// Meant to be run in another thread or will block the GUI.
@@ -113,8 +119,8 @@ namespace cpp3ds {
 	}
 
 	void Emulator::saveScreenshot(){
-		if (state == EMU_PLAYING)
-			actionPlay_Pause->trigger();
+        updatePausedFrame();
+        pausedFrameTexture.copyToImage().saveToFile("test.png");
 //		saveDialog->set_current_name("screenshot.png");
 //		if (saveDialog->run() == Gtk::RESPONSE_OK){
 //			sf::Image screenie = screen->renderWindow.capture();
@@ -164,9 +170,7 @@ namespace cpp3ds {
 	}
 
 	void Emulator::on_actionScreenshot_triggered(bool checked) {
-//		this->adjustSize();
-//		std::cout << slider3D->value() << std::endl;
-		drawPausedFrame();
+        saveScreenshot();
 	}
 
 	void Emulator::on_actionToggle_3D_triggered(bool checked) {

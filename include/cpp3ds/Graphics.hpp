@@ -4,6 +4,7 @@
 #include <cpp3ds/Window.hpp>
 #include <cpp3ds/Graphics/BlendMode.hpp>
 #include <cpp3ds/Graphics/Color.hpp>
+#include <cpp3ds/Graphics/Console.hpp>
 #include <cpp3ds/Graphics/Font.hpp>
 #include <cpp3ds/Graphics/Glyph.hpp>
 #include <cpp3ds/Graphics/Image.hpp>

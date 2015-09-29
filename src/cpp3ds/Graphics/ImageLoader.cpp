@@ -38,6 +38,7 @@ extern "C"
     #include <jerror.h>
 }
 #include <cctype>
+#include <cpp3ds/System/FileSystem.hpp>
 
 
 namespace
@@ -104,12 +105,7 @@ bool ImageLoader::loadImageFromFile(const std::string& filename, std::vector<Uin
 
     // Load the image and get a pointer to the pixels in memory
     int width, height, channels;
-	#ifdef EMULATION
-		std::string rel_filename = "res/sdmc/" + filename;
-		unsigned char* ptr = stbi_load(rel_filename.c_str(), &width, &height, &channels, STBI_rgb_alpha);
-	#else
-		unsigned char* ptr = stbi_load(filename.c_str(), &width, &height, &channels, STBI_rgb_alpha);
-	#endif
+	unsigned char* ptr = stbi_load(FileSystem::getFilePath(filename).c_str(), &width, &height, &channels, STBI_rgb_alpha);
 
 	if (ptr && width && height)
     {
@@ -133,13 +129,6 @@ bool ImageLoader::loadImageFromFile(const std::string& filename, std::vector<Uin
 
         return false;
     }
-}
-
-
-////////////////////////////////////////////////////////////
-bool ImageLoader::loadImageFromResource(const std::string& resourcename, std::vector<Uint8>& pixels, Vector2u& size)
-{
-    return loadImageFromMemory(resources[resourcename].data, resources[resourcename].size, pixels, size);
 }
 
 

@@ -10,6 +10,7 @@
 #include <cpp3ds/System/Mutex.hpp>
 #include <cpp3ds/System/Sleep.hpp>
 #include <cpp3ds/System/String.hpp>
+#include <cpp3ds/System/Service.hpp>
 #include <cpp3ds/System/Thread.hpp>
 #include <cpp3ds/System/ThreadLocal.hpp>
 #include <cpp3ds/System/ThreadLocalPtr.hpp>

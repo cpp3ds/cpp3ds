@@ -28,8 +28,8 @@ public :
     ///
     ////////////////////////////////////////////////////////////
     struct JoystickMoveEvent {
-        Joystick::Axis axis;       ///< Axis on which the joystick moved
-        float          position;   ///< New position on the axis (in range [-100 .. 100])
+        int x;   ///< New position on the x-axis (in range [-100 .. 100])
+		int y;   ///< New position on the y-axis (in range [-100 .. 100])
     };
 
     ////////////////////////////////////////////////////////////
@@ -52,6 +52,14 @@ public :
 		float z;           ///< Current value of the sensor on Z axis
     };
 
+	////////////////////////////////////////////////////////////
+	/// \brief Slider event parameters (Slider3DChanged, SliderVolumeChanged)
+	///
+	////////////////////////////////////////////////////////////
+	struct SliderEvent {
+		float value;       ///< Current value of the slider [0-1] range
+	};
+
     ////////////////////////////////////////////////////////////
     /// \brief Enumeration of the different types of events
     ///
@@ -65,6 +73,8 @@ public :
         TouchEnded,             ///< A touch event ended (data in event.touch)
         TouchSwiped,
         SensorChanged,          ///< A sensor value changed (data in event.sensor)
+		Slider3DChanged,
+		SliderVolumeChanged,
 
         Count                   ///< Keep last -- the total number of event types
     };
@@ -79,7 +89,8 @@ public :
         JoystickMoveEvent    joystickMove;    ///< Joystick move event parameters (Event::JoystickMoved)
         TouchEvent           touch;           ///< Touch events parameters (Event::TouchBegan, Event::TouchMoved, Event::TouchEnded)
         SensorEvent          sensor;          ///< Sensor event parameters (Event::SensorChanged)
-    };
+    	SliderEvent          slider;
+	};
 };
 
 }

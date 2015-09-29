@@ -32,8 +32,7 @@
 #include <cpp3ds/Graphics/VertexArray.hpp>
 #include <cpp3ds/OpenGL.hpp>
 #include <cpp3ds/System/Err.hpp>
-#include <iostream>
-#include <string.h>
+
 
 namespace
 {
@@ -63,8 +62,8 @@ namespace
         switch (blendEquation)
         {
             default:
-            case cpp3ds::BlendMode::Add:             return GLEXT_GL_FUNC_ADD;
-            case cpp3ds::BlendMode::Subtract:        return GLEXT_GL_FUNC_SUBTRACT;
+            case cpp3ds::BlendMode::Add:             return GL_FUNC_ADD;
+            case cpp3ds::BlendMode::Subtract:        return GL_FUNC_SUBTRACT;
         }
     }
 }
@@ -72,20 +71,21 @@ namespace
 
 namespace cpp3ds
 {
-    extern void *sf2d_pool_malloc(u32 size);
 ////////////////////////////////////////////////////////////
 RenderTarget::RenderTarget() :
 m_defaultView(),
 m_view       (),
 m_cache      ()
 {
-    m_cache.glStatesSet = false;
+	m_cache.vertexCache = new Vertex[StatesCache::VertexCacheSize];
+	m_cache.glStatesSet = false;
 }
 
 
 ////////////////////////////////////////////////////////////
 RenderTarget::~RenderTarget()
 {
+	delete[] m_cache.vertexCache;
 }
 
 
@@ -100,8 +100,8 @@ void RenderTarget::clear(const Color& color)
         #ifdef EMULATION
             glCheck(glClearColor(color.r / 255.f, color.g / 255.f, color.b / 255.f, color.a / 255.f));
         #else
-            // Use non-standard glClearColori to avoid unnecessary conversion
-            glCheck(glClearColori(color.r, color.g, color.b, color.a));
+            // Use glClearColorIiEXT to avoid unnecessary float conversion
+            glCheck(glClearColorIiEXT(color.r, color.g, color.b, color.a));
         #endif
         glCheck(glClear(GL_COLOR_BUFFER_BIT));
     }
@@ -202,15 +202,23 @@ void RenderTarget::draw(const Vertex* vertices, unsigned int vertexCount,
     // Nothing to draw?
     if (!vertices || (vertexCount == 0))
         return;
-    // GL_QUADS is unavailable on OpenGL ES
-    #ifndef EMULATION
-        if (type == Quads)
-        {
-            err() << "cpp3ds::Quads primitive type is not supported on OpenGL ES platforms, drawing skipped" << std::endl;
-            return;
-        }
-        #define GL_QUADS 0
-    #endif
+
+	// Vertices allocated in the stack (common) can't be converted to physical address
+	#ifndef EMULATION
+	if (osConvertVirtToPhys((u32)vertices) == 0)
+	{
+		err() << "RenderTarget::draw() called with vertex array in inaccessible memory space." << std::endl;
+		return;
+	}
+	#endif
+
+	// GL_QUADS is unavailable on OpenGL ES
+	if (type == Quads)
+	{
+		err() << "cpp3ds::Quads primitive type is not supported on OpenGL ES platforms, drawing skipped" << std::endl;
+		return;
+	}
+	#define GL_QUADS 0
 
     if (activate(true))
     {
@@ -241,12 +249,12 @@ void RenderTarget::draw(const Vertex* vertices, unsigned int vertexCount,
         }
 
         // Apply the view
-//        if (m_cache.viewChanged)
-//            applyCurrentView();
+        if (m_cache.viewChanged)
+            applyCurrentView();
 
         // Apply the blend mode
-//        if (states.blendMode != m_cache.lastBlendMode)
-//            applyBlendMode(states.blendMode);
+        if (states.blendMode != m_cache.lastBlendMode)
+            applyBlendMode(states.blendMode);
 
         // Apply the texture
         Uint64 textureId = states.texture ? states.texture->m_cacheId : 0;
@@ -254,8 +262,8 @@ void RenderTarget::draw(const Vertex* vertices, unsigned int vertexCount,
             applyTexture(states.texture);
 
         // Apply the shader
-//        if (states.shader)
-//            applyShader(states.shader);
+        if (states.shader)
+            applyShader(states.shader);
 
         // If we pre-transform the vertices, we must use our internal vertex cache
         if (useVertexCache)
@@ -266,7 +274,7 @@ void RenderTarget::draw(const Vertex* vertices, unsigned int vertexCount,
             else
                 vertices = NULL;
         }
-        GLuint vbuf;
+
         // Setup the pointers to the vertices' components
         if (vertices)
         {
@@ -276,11 +284,24 @@ void RenderTarget::draw(const Vertex* vertices, unsigned int vertexCount,
                 glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Vertex), data + 8)); // 8 = sizeof(Vector2f)
                 glCheck(glTexCoordPointer(2, GL_FLOAT, sizeof(Vertex), data + 12)); // 12 = 8 + sizeof(Color)
             #else
-//                const char* data = reinterpret_cast<const char*>(vertices);
-                Vertex* data = (Vertex*)sf2d_pool_malloc(vertexCount*sizeof(Vertex));
-                memcpy(data, &vertices[0], vertexCount* sizeof(Vertex));
+				// Temorary workaround until gl3ds can get VAO gl*Pointer functions working
+				u32 bufferOffsets[] = {0};
+				u64 bufferPermutations[] = {0x210};
+				u8 bufferAttribCounts[] = {3};
+				GPU_SetAttributeBuffers(
+					3, // number of attributes
+					(u32*)osConvertVirtToPhys((u32)vertices),
+					GPU_ATTRIBFMT(0, 2, GPU_FLOAT) | GPU_ATTRIBFMT(1, 4, GPU_UNSIGNED_BYTE) | GPU_ATTRIBFMT(2, 2, GPU_FLOAT),
+					0xFF8, //0b1100
+					0x210,
+					1, //number of buffers
+					bufferOffsets,
+					bufferPermutations,
+					bufferAttribCounts // number of attributes for each buffer
+				);
             #endif
         }
+
         // Find the OpenGL primitive type
         static const GLenum modes[] = {GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES,
                                        GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_QUADS};
@@ -290,8 +311,8 @@ void RenderTarget::draw(const Vertex* vertices, unsigned int vertexCount,
         glCheck(glDrawArrays(mode, 0, vertexCount));
 
         // Unbind the shader, if any
-//        if (states.shader)
-//            applyShader(NULL);
+        if (states.shader)
+            applyShader(NULL);
 
         // Update the cache
         m_cache.useVertexCache = useVertexCache;
@@ -315,24 +336,15 @@ void RenderTarget::pushGLStates()
             }
         #endif
 
-        #ifdef EMULATION
-            glCheck(glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS));
-            glCheck(glPushAttrib(GL_ALL_ATTRIB_BITS));
+		glCheck(glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS));
+		glCheck(glPushAttrib(GL_ALL_ATTRIB_BITS));
 
-            glCheck(glMatrixMode(GL_MODELVIEW));
-            glCheck(glPushMatrix());
-            glCheck(glMatrixMode(GL_PROJECTION));
-            glCheck(glPushMatrix());
-            glCheck(glMatrixMode(GL_TEXTURE));
-            glCheck(glPushMatrix());
-        #else
-//            glCheck(glMatrixMode(GL_MODELVIEW));
-//            glCheck(glPushMatrix());
-//            glCheck(glMatrixMode(GL_PROJECTION));
-//            glCheck(glPushMatrix());
-//            glCheck(glMatrixMode(GL_TEXTURE));
-//            glCheck(glPushMatrix());
-        #endif
+		glCheck(glMatrixMode(GL_MODELVIEW));
+		glCheck(glPushMatrix());
+		glCheck(glMatrixMode(GL_PROJECTION));
+		glCheck(glPushMatrix());
+		glCheck(glMatrixMode(GL_TEXTURE));
+		glCheck(glPushMatrix());
     }
     resetGLStates();
 }
@@ -343,24 +355,15 @@ void RenderTarget::popGLStates()
 {
     if (activate(true))
     {
-        #ifdef EMULATION
-            glCheck(glMatrixMode(GL_PROJECTION));
-            glCheck(glPopMatrix());
-            glCheck(glMatrixMode(GL_MODELVIEW));
-            glCheck(glPopMatrix());
-            glCheck(glMatrixMode(GL_TEXTURE));
-            glCheck(glPopMatrix());
+		glCheck(glMatrixMode(GL_PROJECTION));
+		glCheck(glPopMatrix());
+		glCheck(glMatrixMode(GL_MODELVIEW));
+		glCheck(glPopMatrix());
+		glCheck(glMatrixMode(GL_TEXTURE));
+		glCheck(glPopMatrix());
 
-            glCheck(glPopClientAttrib());
-            glCheck(glPopAttrib());
-        #else
-//            glCheck(glMatrixMode(GL_PROJECTION));
-//            glCheck(glPopMatrix());
-//            glCheck(glMatrixMode(GL_MODELVIEW));
-//            glCheck(glPopMatrix());
-//            glCheck(glMatrixMode(GL_TEXTURE));
-//            glCheck(glPopMatrix());
-        #endif
+		glCheck(glPopClientAttrib());
+		glCheck(glPopAttrib());
     }
 }
 
@@ -373,29 +376,26 @@ void RenderTarget::resetGLStates()
 
     if (activate(true))
     {
-        // Make sure that extensions are initialized
-//        priv::ensureExtensionsInit();
-
         // Make sure that the texture unit which is active is the number 0
-//        if (GLEXT_multitexture)
-//        {
-//            glCheck(GLEXT_glClientActiveTexture(GLEXT_GL_TEXTURE0));
-//            glCheck(GLEXT_glActiveTexture(GLEXT_GL_TEXTURE0));
-//        }
+        if (GLEXT_multitexture)
+        {
+            glCheck(GLEXT_glClientActiveTexture(GLEXT_GL_TEXTURE0));
+            glCheck(GLEXT_glActiveTexture(GLEXT_GL_TEXTURE0));
+        }
 
         // Define the default OpenGL states
         glCheck(glDisable(GL_CULL_FACE));
-//        glCheck(glDisable(GL_LIGHTING));
         glCheck(glDisable(GL_DEPTH_TEST));
         glCheck(glDisable(GL_ALPHA_TEST));
         glCheck(glEnable(GL_TEXTURE_2D));
         glCheck(glEnable(GL_BLEND));
-//        glCheck(glMatrixMode(GL_MODELVIEW));
+        glCheck(glMatrixMode(GL_MODELVIEW));
         #ifdef EMULATION
-            glCheck(glEnableClientState(GL_VERTEX_ARRAY));
-            glCheck(glEnableClientState(GL_COLOR_ARRAY));
-            glCheck(glEnableClientState(GL_TEXTURE_COORD_ARRAY));
-        #endif
+        	glCheck(glDisable(GL_LIGHTING));
+		#endif
+		glCheck(glEnableClientState(GL_VERTEX_ARRAY));
+		glCheck(glEnableClientState(GL_COLOR_ARRAY));
+		glCheck(glEnableClientState(GL_TEXTURE_COORD_ARRAY));
         m_cache.glStatesSet = true;
 
         // Apply the default SFML states
@@ -433,9 +433,9 @@ void RenderTarget::applyCurrentView()
     int top = getSize().y - (viewport.top + viewport.height);
     glCheck(glViewport(viewport.left, top, viewport.width, viewport.height));
 
-    // Set the projection matrix
+	// Set the projection matrix
     glCheck(glMatrixMode(GL_PROJECTION));
-    glCheck(glLoadMatrixf(m_view.getTransform().getMatrix()));
+	glCheck(glLoadMatrixf(m_view.getTransform().getMatrix()));
 
     // Go back to model-view mode
     glCheck(glMatrixMode(GL_MODELVIEW));
@@ -447,32 +447,15 @@ void RenderTarget::applyCurrentView()
 ////////////////////////////////////////////////////////////
 void RenderTarget::applyBlendMode(const BlendMode& mode)
 {
-	/*
-    // Apply the blend mode, falling back to the non-separate versions if necessary
-    if (GLEXT_blend_func_separate)
-    {
-        glCheck(GLEXT_glBlendFuncSeparate(
-            factorToGlConstant(mode.colorSrcFactor), factorToGlConstant(mode.colorDstFactor),
-            factorToGlConstant(mode.alphaSrcFactor), factorToGlConstant(mode.alphaDstFactor)));
-    }
-    else
-    {
-        glCheck(glBlendFunc(
-            factorToGlConstant(mode.colorSrcFactor),
-            factorToGlConstant(mode.colorDstFactor)));
-    }
+    // Apply the blend mode
+	glCheck(glBlendFuncSeparate(
+		factorToGlConstant(mode.colorSrcFactor), factorToGlConstant(mode.colorDstFactor),
+		factorToGlConstant(mode.alphaSrcFactor), factorToGlConstant(mode.alphaDstFactor)));
 
-    if (GLEXT_blend_equation_separate)
-    {
-        glCheck(GLEXT_glBlendEquationSeparate(
-            equationToGlConstant(mode.colorEquation),
-            equationToGlConstant(mode.alphaEquation)));
-    }
-    else
-    {
-        glCheck(GLEXT_glBlendEquation(equationToGlConstant(mode.colorEquation)));
-    }
-    */
+	glCheck(glBlendEquationSeparate(
+		equationToGlConstant(mode.colorEquation),
+		equationToGlConstant(mode.alphaEquation)));
+
     m_cache.lastBlendMode = mode;
 }
 

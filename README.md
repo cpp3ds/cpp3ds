@@ -7,6 +7,10 @@ cpp3ds is essentially a barebones port of SFML with a parallel native 3ds emulat
 
 Won't be stable and usable until v1.0
 
+Installation
+------------
+Coming soon.
+
 Documentation
 -------------
 Will be released with v1.0 stable
@@ -16,6 +20,7 @@ Requirements
  
 - DevkitARM
 - ctrulib
+- [gl3ds](https://github.com/cpp3ds/gl3ds)
 
 For emulator:
 
@@ -28,6 +33,7 @@ For unit tests:
 
 Credit and Thanks
 -----------------
-- [Kevin Lee](https://github.com/kleemedia) - tween engine port
+- [Laurent Gomila](https://github.com/LaurentGomila) and SFML team
 - [smealum](https://github.com/smealum) - ctrulib
-- [minexew](https://github.com/minexew) - ctrgl
+- [Lectem](https://github.com/Lectem) - some CMake stuff
+- Everyone on EFNet #3dsdev

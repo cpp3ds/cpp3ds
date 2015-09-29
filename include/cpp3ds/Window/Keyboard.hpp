@@ -1,22 +1,17 @@
-#ifdef EMULATION
-#include <cpp3ds/Window/Keyboard_emu.hpp>
-#endif
-
 #ifndef CPP3DS_KEYBOARD_HPP
 #define CPP3DS_KEYBOARD_HPP
 
-namespace cpp3ds {
+#ifndef EMULATION
+#include <3ds.h>
+#endif
 
-#define HID 0x10146000          ///< Address at which to get button states
-#define SLIDERSTATE 0x10144000  ///< Address at which to access 3D slider
+namespace cpp3ds {
 
 ////////////////////////////////////////////////////////////
 /// \brief Give access to the real-time state of the keyboard
 ///
 ////////////////////////////////////////////////////////////
 class Keyboard {
-protected:
-	static float m_slider;
 public :
 
 	////////////////////////////////////////////////////////////
@@ -24,24 +19,47 @@ public :
 	///
 	////////////////////////////////////////////////////////////
 	enum Key {
-		A      = 1,     ///< The A button
-		B      = 2,     ///< The B button
-		X      = 1024,  ///< The X button
-		Y      = 2048,  ///< The Y button
-		Up     = 64,    ///< The Up button
-		Down   = 128,   ///< The Down button
-		Left   = 32,    ///< The Left button
-		Right  = 16,    ///< The Right button
-		L      = 512,   ///< The L button
-		R      = 256,   ///< The R button
-		Start  = 8,     ///< The Start button
-		Select = 4,     ///< The Select button
-
-		KeyCount = 12   ///< Keep last -- the total number of keyboard keys
+		A           = 1,                     ///< The A button
+		B           = 1 << 1,                ///< The B button
+		Select      = 1 << 2,                ///< The Select button
+		Start       = 1 << 3,                ///< The Start button
+		DPadRight   = 1 << 4,
+		DPadLeft    = 1 << 5,
+		DPadUp      = 1 << 6,
+		DPadDown    = 1 << 7,
+		R           = 1 << 8,                ///< The R button
+		L           = 1 << 9,                ///< The L button
+		X           = 1 << 10,               ///< The X button
+		Y           = 1 << 11,               ///< The Y button
+		ZL          = 1 << 14,               ///< The ZL button (New 3DS only)
+		ZR          = 1 << 15,               ///< The ZR button (New 3DS only)
+		Touchpad    = 1 << 20,
+		CStickRight = 1 << 24,
+		CStickLeft  = 1 << 25,
+		CStickUp    = 1 << 26,
+		CStickDown  = 1 << 27,
+		CPadRight   = 1 << 28,
+		CPadLeft    = 1 << 29,
+		CPadUp      = 1 << 30,
+		CPadDown    = 1 << 31,
+		Up          = DPadUp    | CPadUp,    ///< Either DPadUp or CPadUp
+		Down        = DPadDown  | CPadDown,  ///< Either DPadDown or CPadDown
+		Left        = DPadLeft  | CPadLeft,  ///< Either DPadLeft or CPadLeft
+		Right       = DPadRight | CPadRight, ///< Either DPadRight or CPadRight
 	};
 
 	////////////////////////////////////////////////////////////
-	/// \brief Check if a key is pressed
+	/// \brief Check if a key is still being pressed
+	///
+	/// \param key Key to check
+	///
+	/// \return True if the key is pressed, false otherwise
+	///
+	////////////////////////////////////////////////////////////
+	static bool isKeyDown(Key key);
+
+	////////////////////////////////////////////////////////////
+	/// \brief Check if a key is now being pressed
 	///
 	/// \param key Key to check
 	///
@@ -51,18 +69,36 @@ public :
 	static bool isKeyPressed(Key key);
 
 	////////////////////////////////////////////////////////////
-	/// \brief Get current value of 3D slider
+	/// \brief Check if a key is now being released
 	///
-	/// \return float value from 0 to 1.0 (0 being completely off)
+	/// \param key Key to check
+	///
+	/// \return True if the key is pressed, false otherwise
 	///
 	////////////////////////////////////////////////////////////
-	static float get3DSlider();
+	static bool isKeyReleased(Key key);
+
+	static float getSlider3D();
+
+	static float getSliderVolume();
 
 	////////////////////////////////////////////////////////////
 	/// \brief Update cache values for input
 	////////////////////////////////////////////////////////////
 	static void update();
+
+private:
+
+	static float m_slider3d;
+	static float m_sliderVolume;
+
+	#ifndef EMULATION
+	static u32 m_keysHeld;
+	static u32 m_keysPressed;
+	static u32 m_keysReleased;
+	#endif
 };
+
 
 }
 
@@ -90,7 +126,7 @@ public :
 ///
 /// Usage example:
 /// \code
-/// if (cpp3ds::Keyboard::isKeyPressed(csf::Mouse, pp3ds::Keyboard::Left))
+/// if (cpp3ds::Keyboard::isKeyPressed(cpp3ds::Mouse, cpp3ds::Keyboard::Left))
 /// {
 ///     // move left...
 /// }

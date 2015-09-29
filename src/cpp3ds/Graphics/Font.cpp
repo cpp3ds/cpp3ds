@@ -26,6 +26,7 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/Graphics/Font.hpp>
+#include <cpp3ds/Resources.hpp>
 #include <cpp3ds/OpenGL.hpp>
 #include <cpp3ds/System/InputStream.hpp>
 #include <cpp3ds/System/Err.hpp>
@@ -36,6 +37,7 @@
 #include FT_BITMAP_H
 #include <cstdlib>
 #include <cstring>
+#include <cpp3ds/System/FileSystem.hpp>
 
 
 namespace
@@ -70,9 +72,7 @@ m_streamRec(NULL),
 m_refCount (NULL),
 m_info     ()
 {
-    #ifdef SFML_SYSTEM_ANDROID
-        m_stream = NULL;
-    #endif
+
 }
 
 
@@ -86,10 +86,6 @@ m_info       (copy.m_info),
 m_pages      (copy.m_pages),
 m_pixelBuffer(copy.m_pixelBuffer)
 {
-    #ifdef SFML_SYSTEM_ANDROID
-        m_stream = NULL;
-    #endif
-
     // Note: as FreeType doesn't provide functions for copying/cloning,
     // we must share all the FreeType pointers
 
@@ -102,21 +98,12 @@ m_pixelBuffer(copy.m_pixelBuffer)
 Font::~Font()
 {
     cleanup();
-
-    #ifdef SFML_SYSTEM_ANDROID
-
-    if (m_stream)
-        delete (priv::ResourceStream*)m_stream;
-
-    #endif
 }
 
 
 ////////////////////////////////////////////////////////////
 bool Font::loadFromFile(const std::string& filename)
 {
-    #ifndef SFML_SYSTEM_ANDROID
-
     // Cleanup the previous resources
     cleanup();
     m_refCount = new int(1);
@@ -134,13 +121,12 @@ bool Font::loadFromFile(const std::string& filename)
 
     // Load the new font face from the specified file
     FT_Face face;
-    if (FT_New_Face(static_cast<FT_Library>(m_library), filename.c_str(), 0, &face) != 0)
-    {
-        err() << "Failed to load font \"" << filename << "\" (failed to create the font face)" << std::endl;
-        return false;
-    }
-
-    // Select the unicode character map
+	if (FT_New_Face(static_cast<FT_Library>(m_library), FileSystem::getFilePath(filename).c_str(), 0, &face) != 0)
+	{
+		err() << "Failed to load font \"" << filename << "\" (failed to create the font face)" << std::endl;
+		return false;
+	}
+	// Select the unicode character map
     if (FT_Select_Charmap(face, FT_ENCODING_UNICODE) != 0)
     {
         err() << "Failed to load font \"" << filename << "\" (failed to set the Unicode character set)" << std::endl;
@@ -155,16 +141,6 @@ bool Font::loadFromFile(const std::string& filename)
     m_info.family = face->family_name ? face->family_name : std::string();
 
     return true;
-
-    #else
-
-    if (m_stream)
-        delete (priv::ResourceStream*)m_stream;
-
-    m_stream = new priv::ResourceStream(filename);
-    return loadFromStream(*(priv::ResourceStream*)m_stream);
-
-    #endif
 }
 
 
@@ -538,11 +514,7 @@ Glyph Font::loadGlyph(Uint32 codePoint, unsigned int characterSize, bool bold) c
 
     // Force an OpenGL flush, so that the font's texture will appear updated
     // in all contexts immediately (solves problems in multi-threaded apps)
-    #ifdef EMULATION
-        glCheck(glFlush());
-    #else
-        // TODO: glFlush
-    #endif
+//    glCheck(glFlush());
 
     // Done :)
     return glyph;

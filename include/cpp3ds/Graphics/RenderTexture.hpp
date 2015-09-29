@@ -28,6 +28,7 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
+#include <cpp3ds/Window/Context.hpp>
 #include <cpp3ds/Graphics/Texture.hpp>
 #include <cpp3ds/Graphics/RenderTarget.hpp>
 
@@ -202,6 +203,10 @@ private :
     Texture                  m_texture; ///< Target texture to draw on
     unsigned int m_width;   ///< Width of the P-Buffer
     unsigned int m_height;  ///< Height of the P-Buffer
+
+	Context*     m_context;     ///< Needs a separate OpenGL context for not messing up the other ones
+	unsigned int m_frameBuffer; ///< OpenGL frame buffer object
+	unsigned int m_depthBuffer; ///< Optional depth buffer attached to the frame buffer
 };
 
 }

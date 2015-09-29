@@ -26,6 +26,10 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/Graphics/Vertex.hpp>
+#ifndef EMULATION
+#include <3ds.h>
+#include <bits/functexcept.h>
+#endif
 
 
 namespace cpp3ds
@@ -73,5 +77,37 @@ color    (theColor),
 texCoords(theTexCoords)
 {
 }
+
+#ifndef EMULATION
+////////////////////////////////////////////////////////////
+void* Vertex::operator new (std::size_t size)
+{
+	void *p = linearAlloc(size);
+	if (!p)
+		std::__throw_bad_alloc();
+	return p;
+}
+
+////////////////////////////////////////////////////////////
+void Vertex::operator delete (void *p)
+{
+	linearFree(p);
+}
+
+////////////////////////////////////////////////////////////
+void* Vertex::operator new[] (std::size_t size)
+{
+	void *p = linearAlloc(size);
+	if (!p)
+		std::__throw_bad_alloc();
+	return p;
+}
+
+////////////////////////////////////////////////////////////
+void Vertex::operator delete[] (void *p)
+{
+	linearFree(p);
+}
+#endif
 
 }

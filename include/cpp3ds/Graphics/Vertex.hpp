@@ -30,6 +30,7 @@
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/Graphics/Color.hpp>
 #include <cpp3ds/System/Vector2.hpp>
+#include <new>
 
 namespace cpp3ds
 {
@@ -88,6 +89,13 @@ public :
     ///
     ////////////////////////////////////////////////////////////
     Vertex(const Vector2f& thePosition, const Color& theColor, const Vector2f& theTexCoords);
+
+	#ifndef EMULATION
+	static void* operator new (std::size_t size);
+	static void* operator new[] (std::size_t size);
+	static void operator delete (void *p);
+	static void operator delete[] (void *p);
+	#endif
 
     ////////////////////////////////////////////////////////////
     // Member data

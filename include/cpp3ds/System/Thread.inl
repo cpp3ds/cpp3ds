@@ -66,25 +66,37 @@ struct ThreadMemberFunc : ThreadFunc
 ////////////////////////////////////////////////////////////
 template <typename F>
 Thread::Thread(F functor) :
-m_impl      (NULL),
+m_thread      (0),
 m_entryPoint(new priv::ThreadFunctor<F>(functor))
 {
+	#ifdef EMULATION
+	m_thread = new sf::Thread(functor);
+	#endif
+	initialize();
 }
 
 
 ////////////////////////////////////////////////////////////
 template <typename F, typename A>
 Thread::Thread(F function, A argument) :
-m_impl      (NULL),
+m_thread      (0),
 m_entryPoint(new priv::ThreadFunctorWithArg<F, A>(function, argument))
 {
+	#ifdef EMULATION
+	m_thread = new sf::Thread(function, argument);
+	#endif
+	initialize();
 }
 
 
 ////////////////////////////////////////////////////////////
 template <typename C>
 Thread::Thread(void(C::*function)(), C* object) :
-m_impl      (NULL),
+m_thread      (0),
 m_entryPoint(new priv::ThreadMemberFunc<C>(function, object))
 {
+	#ifdef EMULATION
+	m_thread = new sf::Thread(function, object);
+	#endif
+	initialize();
 }

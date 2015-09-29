@@ -1,15 +1,26 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(CPP3DS)
+project(cpp3ds)
 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+set(CPP3DS ${PROJECT_SOURCE_DIR})
+set(CMAKE_MODULE_PATH "${CPP3DS}/cmake" ${CMAKE_MODULE_PATH})
+include(cpp3ds)
+
 find_package(Qt5Widgets REQUIRED)
 find_package(Freetype REQUIRED)
 
-set(INCROOT ${PROJECT_SOURCE_DIR}/include/cpp3ds)
-set(SRCROOT ${PROJECT_SOURCE_DIR}/src)
-
 include_directories(${FREETYPE_INCLUDE_DIRS})
+
+option(BUILD_EXAMPLES "Build all cpp3ds example projects" ON)
+option(ENABLE_OGG "Build all cpp3ds example projects" ON)
+option(ENABLE_FLAC "Build all cpp3ds example projects" OFF)
+
+if(ENABLE_OGG)
+	add_definitions(-DCPP3DS_ENABLE_OGG)
+endif()
+if(ENABLE_FLAC)
+	add_definitions(-DCPP3DS_ENABLE_FLAC)
+endif()
 
 # C++11 support
 include(CheckCXXCompilerFlag)
@@ -24,13 +35,13 @@ else()
 endif()
 
 # Fetch all source files.
-FILE(GLOB_RECURSE CFILES ${SRCROOT}/cpp3ds/*.[cS]) # Put asm .S files with C files
-FILE(GLOB_RECURSE CPPFILES ${SRCROOT}/cpp3ds/*.cpp)
-FILE(GLOB_RECURSE SRC_EMU ${SRCROOT}/emu3ds/*.cpp)
-set(SRC_ARM ${CPPFILES})
+FILE(GLOB_RECURSE CFILES ${PROJECT_SOURCE_DIR}/src/cpp3ds/*.[cS]) # Put asm .S files with C files
+FILE(GLOB_RECURSE CPPFILES ${PROJECT_SOURCE_DIR}/src/cpp3ds/*.cpp)
+FILE(GLOB_RECURSE CPP3DS_SOURCE_EMU ${PROJECT_SOURCE_DIR}/src/emu3ds/*.cpp)
+set(CPP3DS_SOURCE_3DS ${CPPFILES})
 
 # Remove duplicate (override) files for emulator
-foreach(emufile ${SRC_EMU})
+foreach(emufile ${CPP3DS_SOURCE_EMU})
     get_filename_component(emufilename ${emufile} NAME)
     foreach(file ${CPPFILES})
         get_filename_component(filename ${file} NAME)
@@ -39,13 +50,25 @@ foreach(emufile ${SRC_EMU})
         endif()
     endforeach(file)
 endforeach(emufile)
-list(APPEND SRC_EMU ${CPPFILES})
-#list(REMOVE_ITEM SRC_EMU ${SRCROOT}/cpp3ds/syscalls.cpp)
-#list(REMOVE_ITEM SRC_EMU ${SRCROOT}/cpp3ds/cpp3ds.cpp)
-#list(REMOVE_ITEM CPPFILES_TEST ${SRCROOT}/cpp3ds/cpp3ds.cpp)
-set(SRC_TEST ${SRC_EMU})
+list(APPEND CPP3DS_SOURCE_EMU ${CPPFILES})
+set(CPP3DS_SOURCE_TEST ${CPP3DS_SOURCE_EMU})
 
-#MESSAGE(STATUS "\nFound following source files:\n ${SRC}\n")
+# Fetch all core_resources bundled with all software using cpp3ds.
+# Shaders are defined separately because they need compiling first.
+set(SHADER_FILES ${PROJECT_SOURCE_DIR}/res/core_resource/default_shader.vsh)
+set(RESOURCE_FILES ${PROJECT_SOURCE_DIR}/res/core_resource/opensans.ttf)
+set(RESOURCE_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/core_resource.cpp)
+
+compile_core_shaders(SHADER_OUTPUT ${PROJECT_SOURCE_DIR}/res/core_resource/ ${SHADER_FILES})
+
+compile_resources(
+	"core_resources"
+	"${PROJECT_SOURCE_DIR}/res/core_resource"
+	${RESOURCE_OUTPUT}
+	${RESOURCE_FILES} ${SHADER_OUTPUT}
+)
+
+add_custom_target(cpp3ds-res ALL DEPENDS ${RESOURCE_OUTPUT} ${SHADER_OUTPUT})
 
 # uninstall target
 configure_file(
@@ -56,9 +79,8 @@ configure_file(
 add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake/cmake_uninstall.cmake)
 
-
 # disable the rpath stuff
-#set(CMAKE_SKIP_BUILD_RPATH TRUE)
+set(CMAKE_SKIP_BUILD_RPATH TRUE)
 
 # set the output directory for cpp3ds libraries and binaries
 set(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/lib")
@@ -66,18 +88,13 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 
 # compile flags
 set(ARCH "-march=armv6k -mtune=mpcore -mfloat-abi=hard")
-set(CPP3DS_ARM_FLAGS "-Wall -pedantic -O0 ${ARCH} -fno-rtti -fno-exceptions")
-set(CPP3DS_TEST_FLAGS "-g -Wall -pedantic -O0")
-set(CPP3DS_EMU_FLAGS "-g -Wall -pedantic -O0")
+set(CPP3DS_ARM_FLAGS "-g -O2 ${ARCH} -fno-rtti -fno-exceptions -ffunction-sections -fdata-sections")
+set(CPP3DS_TEST_FLAGS "-g -O2")
+set(CPP3DS_EMU_FLAGS "-g -O2")
 
-#set_source_files_properties(${ASMFILES} PROPERTIES COMPILE_FLAGS "-g ${ARCH}")
-#set_source_files_properties(${CFILES} PROPERTIES COMPILE_FLAGS "")
-#set_source_files_properties(${SRC_ARM} PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${CPP3DS_ARM_FLAGS}")
-#set_source_files_properties(${SRC_EMU} PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${CPP3DS_EMU_FLAGS}")
-
-#if(CPP3DS_BUILD_EXAMPLES)
-    add_subdirectory(examples/cube)
-#endif()
+if(BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()
 
 add_subdirectory(cmake/arm)
 add_subdirectory(cmake/emu)
