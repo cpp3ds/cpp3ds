@@ -34,7 +34,7 @@ namespace cpp3ds
 ////////////////////////////////////////////////////////////
 void Thread::initialize()
 {
-	threadStack = (u32*)memalign(32, 4 * 1024);
+	threadStack = (u32*)memalign(32, sizeof(u32) * THREAD_STACK_SIZE);
 }
 
 
@@ -51,7 +51,7 @@ Thread::~Thread()
 void Thread::launch()
 {
     wait();
-	svcCreateThread(&m_thread, &Thread::entryPoint, (u32)this, &threadStack[1024], 0x3F, 0);
+	svcCreateThread(&m_thread, &Thread::entryPoint, (u32)this, &threadStack[THREAD_STACK_SIZE/sizeof(u32)], 0x3F, 0);
 }
 
 
@@ -59,11 +59,11 @@ void Thread::launch()
 void Thread::wait()
 {
 	// TODO: check that this isn't current thread asking to wait for itself
-    if (m_thread != NULL)
+    if (m_thread != 0)
 	{
 		svcWaitSynchronization(m_thread, U64_MAX);
 		svcCloseHandle(m_thread);
-		m_thread = NULL;
+		m_thread = 0;
 	}
 }
 
@@ -71,7 +71,7 @@ void Thread::wait()
 ////////////////////////////////////////////////////////////
 void Thread::terminate()
 {
-    if (m_thread != NULL)
+    if (m_thread != 0)
     {
 		// TODO: implement this
     }

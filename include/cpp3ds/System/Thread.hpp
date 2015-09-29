@@ -36,6 +36,9 @@
 #include <3ds.h>
 #endif
 
+// Stack size (in byte)
+#define THREAD_STACK_SIZE 16384
+
 namespace cpp3ds
 {
 namespace priv
