@@ -1,11 +1,39 @@
+os:
+  - linux
+
 language: cpp
-compiler:
- - gcc
+
+sudo: false
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - kalakris-cmake
+      - boost-latest
+    packages:
+      - gcc-4.9
+      - g++-4.9
+      - libsfml-dev
+      - libgtest-dev
+      - cmake
+      - libboost1.55-all-dev
+
 before_install:
- - export DEVKITPRO=/home/travis/devkitPro
- - export DEVKITARM=${DEVKITPRO}/devkitARM
- - export CTRULIB=${DEVKITPRO}/libctru
- - export GL3DS=/home/travis/gl3ds
- - sh .travis-deps.sh
+  - source .build-deps.sh
+
 script:
- - sh .travis-build.sh
+  - source .build.sh
+
+before_deploy:
+  - source .deploy-prepare.sh
+
+deploy:
+  provider: releases
+  api_key:
+    secure: B+KWmLSo9LDh4P+8JGZF6RUPu5WQCV6RwXg87X44UXswDdbqYvBMA884KU8bWxDq70CtQKw1AwzK8z5KFDCLGG0jL41d1BEblXHNi4Xu+vm3SCG+EQ5M9wFV/9rX8vXC+UKMSzFeagL33ATa0tBm1BcpR6JtdHoWGNYjeG29a2o=
+  file: $RELEASE_FILENAME
+  skip_cleanup: true
+  on:
+    tags: true
+    repo: cpp3ds/cpp3ds

@@ -6,11 +6,7 @@ set(CPP3DS ${PROJECT_SOURCE_DIR})
 set(CMAKE_MODULE_PATH "${CPP3DS}/cmake" ${CMAKE_MODULE_PATH})
 include(cpp3ds)
 
-find_package(Qt5Widgets REQUIRED)
-find_package(Freetype REQUIRED)
-
-include_directories(${FREETYPE_INCLUDE_DIRS})
-
+option(BUILD_EMULATOR "Build cpp3ds emulator (Qt5 required)" ON)
 option(BUILD_EXAMPLES "Build all cpp3ds example projects" ON)
 option(ENABLE_OGG "Build all cpp3ds example projects" ON)
 option(ENABLE_FLAC "Build all cpp3ds example projects" OFF)
@@ -34,31 +30,13 @@ else()
 	message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
-# Fetch all source files.
-FILE(GLOB_RECURSE CFILES ${PROJECT_SOURCE_DIR}/src/cpp3ds/*.[cS]) # Put asm .S files with C files
-FILE(GLOB_RECURSE CPPFILES ${PROJECT_SOURCE_DIR}/src/cpp3ds/*.cpp)
-FILE(GLOB_RECURSE CPP3DS_SOURCE_EMU ${PROJECT_SOURCE_DIR}/src/emu3ds/*.cpp)
-set(CPP3DS_SOURCE_3DS ${CPPFILES})
-
-# Remove duplicate (override) files for emulator
-foreach(emufile ${CPP3DS_SOURCE_EMU})
-    get_filename_component(emufilename ${emufile} NAME)
-    foreach(file ${CPPFILES})
-        get_filename_component(filename ${file} NAME)
-        if(${emufilename} STREQUAL ${filename})
-            list(REMOVE_ITEM CPPFILES ${file})
-        endif()
-    endforeach(file)
-endforeach(emufile)
-list(APPEND CPP3DS_SOURCE_EMU ${CPPFILES})
-set(CPP3DS_SOURCE_TEST ${CPP3DS_SOURCE_EMU})
-
 # Fetch all core_resources bundled with all software using cpp3ds.
 # Shaders are defined separately because they need compiling first.
 set(SHADER_FILES ${PROJECT_SOURCE_DIR}/res/core_resource/default_shader.vsh)
 set(RESOURCE_FILES ${PROJECT_SOURCE_DIR}/res/core_resource/opensans.ttf)
 set(RESOURCE_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/core_resource.cpp)
 
+set(SHADER_AS nihstro)
 compile_core_shaders(SHADER_OUTPUT ${PROJECT_SOURCE_DIR}/res/core_resource/ ${SHADER_FILES})
 
 compile_resources(
@@ -96,6 +74,4 @@ if(BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()
 
-add_subdirectory(cmake/arm)
-add_subdirectory(cmake/emu)
-#add_subdirectory(cmake/test)
+add_subdirectory(src)

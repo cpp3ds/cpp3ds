@@ -1,10 +1,9 @@
+include(CMakeParseArguments)
+
 # DevkitPro Paths are broken on windows, so we have to fix those
 macro(msys_to_cmake_path MsysPath ResultingPath)
     string(REGEX REPLACE "^/([a-zA-Z])/" "\\1:/" ${ResultingPath} "${MsysPath}")
 endmacro()
-
-msys_to_cmake_path("$ENV{CPP3DS}" CPP3DS)
-msys_to_cmake_path("$ENV{GL3DS}" GL3DS)
 
 msys_to_cmake_path("$ENV{DEVKITPRO}" DEVKITPRO)
 if(NOT IS_DIRECTORY ${DEVKITPRO})
@@ -17,6 +16,7 @@ if(NOT IS_DIRECTORY ${DEVKITARM})
 endif()
 
 find_package(CTRULIB)
+set(GL3DS "$ENV{GL3DS}")
 
 
 ##############
@@ -133,20 +133,31 @@ endif()
 
 
 function(compile_shaders output)
-    if(SHADER_AS)
-        foreach(shader ${ARGN})
-            get_filename_component(filename ${shader} NAME)
-            list(APPEND ${output} "${shader}.shbin")
-            add_custom_command(
-                    OUTPUT ${shader}.shbin
-                    COMMAND $ENV{NIHSTRO}/nihstro-assemble ${shader} -o ${shader}.shbin
-                    DEPENDS ${shader}
-                    COMMENT "Compiling shader ${filename}"
-            )
-        endforeach(shader)
-    else()
-        message(ERROR "Called compile_shaders() without any compiler detected.")
-    endif()
+    foreach(shader ${ARGN})
+        get_filename_component(filename ${shader} NAME)
+        if(SHADER_AS STREQUAL "picasso")
+            if(PICASSO_EXE)
+                set(COMPILE_COMMAND ${PICASSO_EXE} -o ${shader}.shbin ${shader})
+            else()
+                message(FATAL_ERROR "SHADER_AS was set to 'picasso' but picasso assembler was not found.")
+            endif()
+        elseif(SHADER_AS STREQUAL "nihstro")
+            if(NIHSTRO_AS)
+                set(COMPILE_COMMAND ${NIHSTRO_AS} ${shader} -o ${shader}.shbin)
+            else()
+                message(FATAL_ERROR "SHADER_AS was set to 'nihstro' but nihstro assembler was not found.")
+            endif()
+        else()
+            message(FATAL_ERROR "Called compile_shaders() without setting SHADER_AS to 'picasso' or 'nihstro'.")
+        endif()
+        list(APPEND ${output} "${shader}.shbin")
+        add_custom_command(
+                OUTPUT ${shader}.shbin
+                COMMAND ${COMPILE_COMMAND}
+                DEPENDS ${shader}
+                COMMENT "Compiling shader ${filename}"
+        )
+    endforeach(shader)
     set(${output} ${${output}} PARENT_SCOPE)
 endfunction()
 
@@ -156,19 +167,19 @@ function(compile_core_shaders output directory)
 	if(SHADER_AS)
 		foreach(shader ${ARGN})
 			get_filename_component(filename ${shader} NAME)
-			get_filename_component(dir ${shader} DIRECTORY)
+			get_filename_component(dir ${shader} PATH)
 			string(REPLACE ${directory} "" newdir ${dir})
 			file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}${newdir})
 			list(APPEND ${output} "${CMAKE_CURRENT_BINARY_DIR}${newdir}/${filename}")
 			add_custom_command(
 				OUTPUT ${CMAKE_CURRENT_BINARY_DIR}${newdir}/${filename}
-				COMMAND $ENV{NIHSTRO}/nihstro-assemble ${shader} -o ${CMAKE_CURRENT_BINARY_DIR}${newdir}/${filename}
+				COMMAND ${NIHSTRO_AS} ${shader} -o ${CMAKE_CURRENT_BINARY_DIR}${newdir}/${filename}
 				DEPENDS ${shader}
 				COMMENT "Compiling shader ${filename}"
 			)
 		endforeach(shader)
 	else()
-		message(ERROR "Called compile_shaders() without any compiler detected.")
+		message(ERROR "Called compile_shaders() without nihstro detected.")
 	endif()
 	set(${output} ${${output}} PARENT_SCOPE)
 endfunction()
@@ -306,7 +317,7 @@ function(add_cia_target target RSF IMAGE SOUND )
     __add_ncch_banner(${target_we}.bnr ${IMAGE} ${SOUND})
     add_custom_command(OUTPUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.cia
             COMMAND ${STRIP} -o $<TARGET_FILE:${target}>-stripped $<TARGET_FILE:${target}>
-            COMMAND ${MAKEROM}     -f cia
+            COMMAND ${MAKEROM} -f cia
             -target t
             -exefslogo
             -o ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.cia
@@ -338,4 +349,20 @@ macro(add_netload_target name target)
             COMMAND ${_3DSLINK} ${FILE} ${__NETLOAD_IP_OPTION}
             DEPENDS  ${FILE}
     )
+endmacro()
+
+
+macro(add_cpp3ds_library target)
+    # parse the arguments
+    cmake_parse_arguments(THIS "" "" "SOURCES;DEPENDS;EXTERNAL_LIBS" ${ARGN})
+
+    set_source_files_properties(${THIS_SOURCES} PROPERTIES COMPILE_FLAGS "${CPP3DS_ARM_FLAGS}")
+
+    # create the target
+    add_library(${target} STATIC ${THIS_SOURCES})
+
+    if(THIS_DEPENDS)
+        add_dependencies(${target} ${THIS_DEPENDS})
+    endif()
+
 endmacro()
