@@ -316,12 +316,11 @@ function(add_cia_target target RSF IMAGE SOUND )
     endif()
     __add_ncch_banner(${target_we}.bnr ${IMAGE} ${SOUND})
     add_custom_command(OUTPUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.cia
-            COMMAND ${STRIP} -o $<TARGET_FILE:${target}>-stripped $<TARGET_FILE:${target}>
             COMMAND ${MAKEROM} -f cia
             -target t
             -exefslogo
             -o ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.cia
-            -elf $<TARGET_FILE:${target}>-stripped
+            -elf $<TARGET_FILE:${target}>
             -rsf ${RSF}
             -banner ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.bnr
             -icon ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.smdh

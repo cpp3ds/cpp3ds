@@ -29,6 +29,9 @@ set(SRC
     ${SRCROOT}/View.cpp
 )
 
+unset(JPEG_INCLUDE_DIR CACHE)
+unset(FREETYPE_INCLUDE_DIRS CACHE)
+
 find_package(JPEG REQUIRED)
 find_package(Freetype REQUIRED)
 
