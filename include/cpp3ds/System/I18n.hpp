@@ -9,7 +9,7 @@
 #include <map>
 #include <cstring>
 #include <memory>
-#include <cpp3ds/Config.hpp>
+#include <cpp3ds/System/String.hpp>
 
 #define _(key, ...) (cpp3ds::I18n::getInstance().translate(key, ##__VA_ARGS__))
 
@@ -17,12 +17,15 @@
 namespace {
 
 	template<typename ... Args>
-	std::string string_format( const std::string& format, Args ... args )
+	cpp3ds::String string_format( const std::string& format, Args ... args )
 	{
 		size_t size = snprintf( nullptr, 0, format.c_str(), args ... ) + 1; // Extra space for '\0'
 		std::unique_ptr<char[]> buf( new char[ size ] );
 		snprintf( buf.get(), size, format.c_str(), args ... );
-		return std::string( buf.get(), buf.get() + size - 1 ); // We don't want the '\0' inside
+		std::string stringUtf8( buf.get(), buf.get() + size - 1 ); // We don't want the '\0' inside
+		std::wstring stringUtf32;
+		cpp3ds::Utf8::toUtf32(stringUtf8.begin(), stringUtf8.end(), std::back_inserter(stringUtf32));
+		return cpp3ds::String(stringUtf32);
 	}
 }
 
@@ -56,7 +59,7 @@ public:
 	static Language getLanguage();
 
 	template<typename ... Args>
-	const std::string translate(const char* key, Args ... args) const {
+	const String translate(const char* key, Args ... args) const {
 		std::string trans;
 		TranslationMap::const_iterator it = m_content.find(key);
 		if (it == m_content.end())
@@ -67,7 +70,7 @@ public:
 	}
 
 	template<typename ... Args>
-	const std::string translate(const std::string& key, Args ... args) const {
+	const String translate(const std::string& key, Args ... args) const {
 		return translate(key.c_str(), args ...);
 	}
 
