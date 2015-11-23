@@ -4,6 +4,8 @@
 
 // setup constants
 .alias myconst c32 as (1.0, 0.0, 0.5, 1.0)
+// x = 1/255
+.alias colorfix c33 as (0.0039215686, 0, 0, 0)
 
 // setup output map
 .alias outpos  o0      as position
@@ -41,7 +43,7 @@ tex:  // result.texcoord = in.texcoord
 	mov outtex2,  myconst.yyyw
 
 color: // result.color = in.color
-	mov outcol, v1
+	mul outcol, v1.xyzw, colorfix.xxxx
 
 	nop
 	end
