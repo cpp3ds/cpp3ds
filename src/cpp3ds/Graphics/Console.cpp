@@ -124,6 +124,7 @@ void Console::update(float delta)
 void Console::write(String text)
 {
 	Text line(text, m_font, 10);
+	line.setColor(m_color);
 	m_lines.push_back(line);
 }
 
@@ -180,6 +181,19 @@ void Console::draw(RenderTarget& target, RenderStates states) const
 	}
 
 	target.draw(m_memoryText);
+}
+
+
+void Console::setColor(const Color& color)
+{
+	m_memoryText.setColor(color);
+	m_color = color;
+}
+
+
+const Color& Console::getColor() const
+{
+	return m_color;
 }
 
 

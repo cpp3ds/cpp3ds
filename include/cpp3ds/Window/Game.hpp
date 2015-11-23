@@ -21,7 +21,7 @@ public:
 	virtual void processEvent(Event& event) = 0;
 	virtual void renderTopScreen(Window& window) = 0;
     virtual void renderBottomScreen(Window& window) = 0;
-	void console(Screen screen = BottomScreen, bool enable = true, bool visible = true);
+	void console(Screen screen = BottomScreen, Color color = Color::White);
     void render();
 	void run();
 	void exit();
@@ -33,12 +33,12 @@ private:
 	bool m_consoleEnabled;
 	bool m_triggerExit;
 	Console m_console;
-    #ifdef EMULATION
-        sf::RenderTexture m_frameTextureTop, m_frameTextureBottom;
-        sf::Sprite m_frameSpriteTop, m_frameSpriteBottom;
-    #else
-		Shader m_shader;
-    #endif
+#ifdef EMULATION
+	sf::RenderTexture m_frameTextureTop, m_frameTextureBottom;
+	sf::Sprite m_frameSpriteTop, m_frameSpriteBottom;
+#else
+	Shader m_shader;
+#endif
 };
 
 }

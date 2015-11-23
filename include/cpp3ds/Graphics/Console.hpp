@@ -57,6 +57,9 @@ public:
 
 	Screen getScreen();
 
+	void setColor(const Color& color);
+	const Color& getColor() const;
+
 private:
 
 	////////////////////////////////////////////////////////////
@@ -72,6 +75,7 @@ private:
 	// Member data
 	////////////////////////////////////////////////////////////
 	Font  m_font;
+	Color m_color;
 	std::vector<Text> m_lines;
 	Text m_memoryText;
 	unsigned int m_limit;

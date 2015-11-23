@@ -11,7 +11,7 @@ namespace cpp3ds {
 //Apt hook cookie
 static aptHookCookie apt_hook_cookie;
 
-static void apt_clock_hook(int hook, void* param)
+static void apt_clock_hook(APT_HookType hook, void* param)
 {
 	if (hook == APTHOOK_ONRESTORE || hook == APTHOOK_ONWAKEUP) {
 		Clock* clock = (Clock*) param;
@@ -21,6 +21,8 @@ static void apt_clock_hook(int hook, void* param)
 
 
 Game::Game()
+: m_triggerExit(false)
+, m_consoleEnabled(false)
 {
 	gfxInitDefault();
 	Service::enable(ROMFS);
@@ -45,12 +47,13 @@ Game::~Game()
 }
 
 
-void Game::console(Screen screen, bool enable, bool visible)
+void Game::console(Screen screen, Color color)
 {
-	m_consoleEnabled = enable;
-	m_console.setVisible(visible);
-	if (enable)
-		m_console.create(screen);
+	Console::initialize();
+	m_consoleEnabled = true;
+	m_console.setVisible(true);
+	m_console.create(screen);
+	m_console.setColor(color);
 }
 
 

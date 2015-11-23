@@ -9,11 +9,15 @@
 namespace cpp3ds {
 
 Game::Game()
+: m_triggerExit(false)
+, m_consoleEnabled(false)
 {
+	priv::ensureExtensionsInit();
+
 	windowTop.create(ContextSettings(TopScreen));
 	windowBottom.create(ContextSettings(BottomScreen));
 
-    m_frameTextureTop.create(400, 240);
+	m_frameTextureTop.create(400, 240);
 	m_frameTextureBottom.create(320, 240);
 
 	m_frameSpriteTop.setPosition(0, 0);
@@ -27,7 +31,7 @@ Game::~Game()
 }
 
 
-void Game::console(Screen screen, bool enable, bool visible)
+void Game::console(Screen screen, Color color)
 {
 	//
 }
@@ -41,23 +45,21 @@ void Game::exit()
 
 void Game::render()
 {
-    _emulator->screen->clear();
+	_emulator->screen->clear();
 
-    // Top Screen
+	// Top Screen
 	m_frameTextureTop.setActive(true);
-    renderTopScreen(windowTop);
+	renderTopScreen(windowTop);
 	m_frameTextureTop.display();
 	m_frameSpriteTop.setTexture(m_frameTextureTop.getTexture());
-    _emulator->screen->draw(m_frameSpriteTop);
+	_emulator->screen->draw(m_frameSpriteTop);
 
-    // Bottom Screen
-    m_frameTextureBottom.setActive(true);
-    renderBottomScreen(windowBottom);
+	// Bottom Screen
+	m_frameTextureBottom.setActive(true);
+	renderBottomScreen(windowBottom);
 	m_frameTextureBottom.display();
 	m_frameSpriteBottom.setTexture(m_frameTextureBottom.getTexture());
-    _emulator->screen->draw(m_frameSpriteBottom);
-
-    _emulator->screen->display();
+	_emulator->screen->draw(m_frameSpriteBottom);
 }
 
 
@@ -67,21 +69,11 @@ void Game::run()
 	EventManager eventmanager;
 	Clock clock;
 	Time deltaTime;
-    
-	while (windowTop.isOpen()) {
-		render();
-        _emulator->screen->display();
-		// TODO: pause non-drawing services (sound, networking, etc.)
-		if (_emulator->getState() == EMU_PAUSED){
-			_emulator->screen->setActive(false);
-			_emulator->updatePausedFrame();
-			while (_emulator->getState() == EMU_PAUSED)
-				sf::sleep(sf::milliseconds(100));
-			// Restart clock and purge event queue
-			clock.restart();
-			while (eventmanager.pollEvent(event)) {}
-		}
 
+	_emulator->screen->setFramerateLimit(60);
+
+	while (windowTop.isOpen())
+	{
 		while (eventmanager.pollEvent(event)) {
 			processEvent(event);
 		}
@@ -92,6 +84,19 @@ void Game::run()
 
 		Keyboard::update();
 		update(deltaTime.asSeconds());
+
+		render();
+		_emulator->screen->display();
+		// TODO: pause non-drawing services (sound, networking, etc.)
+		if (_emulator->getState() == EMU_PAUSED){
+			_emulator->screen->setActive(false);
+			_emulator->updatePausedFrame();
+			while (_emulator->getState() == EMU_PAUSED)
+				sf::sleep(sf::milliseconds(100));
+			// Restart clock and purge event queue
+			clock.restart();
+			while (eventmanager.pollEvent(event)) {}
+		}
 	}
 }
 
