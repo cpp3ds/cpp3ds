@@ -34,4 +34,4 @@ set_target_properties(${PROJECT_NAME}.elf PROPERTIES LINK_FLAGS "-specs=3dsx.spe
 SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 
 add_3dsx_target(${PROJECT_NAME}.elf)
-add_cia_target(${PROJECT_NAME}.elf ${PROJECT_SOURCE_DIR}/res/app/cia.rsf ${BANNER_IMAGE} ${BANNER_SOUND})
+add_cia_target(${PROJECT_NAME}.elf ${CIA_CONFIG} ${BANNER_IMAGE} ${BANNER_SOUND})

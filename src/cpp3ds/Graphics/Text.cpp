@@ -233,14 +233,6 @@ FloatRect Text::getGlobalBounds() const
 ////////////////////////////////////////////////////////////
 void Text::draw(RenderTarget& target, RenderStates states) const
 {
-	// Load system's opensans.tff if user attempts drawing without font
-	if (m_font == &priv::system_font && !priv::system_font_loaded)
-	{
-		priv::system_font_loaded = true;
-		priv::ResourceInfo font = priv::core_resources["opensans.ttf"];
-		priv::system_font.loadFromMemory(font.data, font.size);
-	}
-
 	ensureGeometryUpdate();
 
 	states.transform *= getTransform();
@@ -252,6 +244,14 @@ void Text::draw(RenderTarget& target, RenderStates states) const
 ////////////////////////////////////////////////////////////
 void Text::ensureGeometryUpdate() const
 {
+	// Load system's opensans.tff if user attempts drawing without font
+	if (m_font == &priv::system_font && !priv::system_font_loaded)
+	{
+		priv::system_font_loaded = true;
+		priv::ResourceInfo font = priv::core_resources["opensans.ttf"];
+		priv::system_font.loadFromMemory(font.data, font.size);
+	}
+
     // Do nothing, if geometry has not changed
     if (!m_geometryNeedUpdate)
         return;
@@ -384,6 +384,20 @@ void Text::ensureGeometryUpdate() const
     m_bounds.top = minY;
     m_bounds.width = maxX - minX;
     m_bounds.height = maxY - minY;
+}
+
+
+////////////////////////////////////////////////////////////
+void Text::setPosition(float x, float y)
+{
+    Transformable::setPosition(std::round(x), std::round(y));
+}
+
+
+////////////////////////////////////////////////////////////
+void Text::setPosition(const Vector2f& position)
+{
+    setPosition(position.x, position.y);
 }
 
 } // namespace cpp3ds

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os, socket, sys, struct, getopt
 
 def sendfile(filename, ip):

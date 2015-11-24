@@ -28,8 +28,8 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#ifdef EMULATION
-#include <SFML/Audio.hpp>
+#ifndef EMULATION
+#include <3ds.h>
 #endif
 #include <cpp3ds/Audio/SoundSource.hpp>
 #include <cpp3ds/System/Time.hpp>
@@ -173,6 +173,10 @@ public :
     ////////////////////////////////////////////////////////////
     bool getLoop() const;
 
+	bool getStateADPCM() const;
+
+	void setStateADPCM(bool enable);
+
     ////////////////////////////////////////////////////////////
     /// \brief Get the current playing position of the sound
     ///
@@ -218,11 +222,8 @@ private :
     // Member data
     ////////////////////////////////////////////////////////////
     const SoundBuffer* m_buffer; ///< Sound buffer bound to the source
-	int m_currentChannel;        ///< Current CSND channel for this sound
 	bool m_loop;
-	#ifdef EMULATION
-	sf::Sound m_sound;
-	#endif
+	bool m_isADPCM;
 };
 
 } // namespace cpp3ds

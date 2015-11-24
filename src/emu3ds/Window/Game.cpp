@@ -5,6 +5,7 @@
 #include <cpp3ds/System/Clock.hpp>
 #include <cpp3ds/Window/Keyboard.hpp>
 #include <cpp3ds/Graphics/Sprite.hpp>
+#include <Audio/AudioDevice.hpp>
 
 namespace cpp3ds {
 
@@ -89,6 +90,7 @@ void Game::run()
 		_emulator->screen->display();
 		// TODO: pause non-drawing services (sound, networking, etc.)
 		if (_emulator->getState() == EMU_PAUSED){
+			priv::AudioDevice::suspend();
 			_emulator->screen->setActive(false);
 			_emulator->updatePausedFrame();
 			while (_emulator->getState() == EMU_PAUSED)
@@ -96,6 +98,7 @@ void Game::run()
 			// Restart clock and purge event queue
 			clock.restart();
 			while (eventmanager.pollEvent(event)) {}
+			priv::AudioDevice::resume();
 		}
 	}
 }

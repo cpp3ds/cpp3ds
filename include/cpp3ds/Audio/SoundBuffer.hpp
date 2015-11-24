@@ -28,11 +28,10 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#ifdef EMULATION
-#include <SFML/Audio.hpp>
-#else
+#ifndef EMULATION
 #include <cpp3ds/System/LinearAllocator.hpp>
 #endif
+#include <cpp3ds/Audio/AlResource.hpp>
 #include <cpp3ds/System/Time.hpp>
 #include <string>
 #include <vector>
@@ -49,7 +48,7 @@ class InputStream;
 /// \brief Storage for audio samples defining a sound
 ///
 ////////////////////////////////////////////////////////////
-class SoundBuffer
+class SoundBuffer : AlResource
 {
 public:
 
@@ -281,9 +280,10 @@ private:
 	unsigned int m_sampleRate;
 	unsigned int m_channelCount;
 	#ifdef EMULATION
-	sf::SoundBuffer m_soundBuffer;
+	unsigned int       m_buffer;   ///< OpenAL buffer identifier
+    std::vector<Int16> m_samples;  ///< Samples buffer
 	#else
-	std::vector<Int16, LinearAllocator<Int16>> m_samples;  ///< Samples buffer
+	std::vector<Int16, LinearAllocator<Int16>> m_samples;
 	#endif
 };
 

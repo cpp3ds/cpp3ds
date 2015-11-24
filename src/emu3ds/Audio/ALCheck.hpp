@@ -22,93 +22,51 @@
 //
 ////////////////////////////////////////////////////////////
 
+#ifndef CPP3DS_ALCHECK_HPP
+#define CPP3DS_ALCHECK_HPP
+
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <cpp3ds/System/FileInputStream.hpp>
-#include <cpp3ds/System/FileSystem.hpp>
+#include <cpp3ds/Config.hpp>
+#include <AL/al.h>
+#include <AL/alc.h>
 
 
 namespace cpp3ds
 {
-////////////////////////////////////////////////////////////
-FileInputStream::FileInputStream()
-: m_file(NULL)
+namespace priv
 {
-
-}
-
-
 ////////////////////////////////////////////////////////////
-FileInputStream::~FileInputStream()
-{
-    if (m_file)
-        std::fclose(m_file);
-}
-
-
+/// Let's define a macro to quickly check every OpenAL API call
 ////////////////////////////////////////////////////////////
-bool FileInputStream::open(const std::string& filename)
-{
-    if (m_file)
-        std::fclose(m_file);
+#ifdef CPP3DS_DEBUG
 
-	m_file = std::fopen(FileSystem::getFilePath(filename).c_str(), "rb");
+    // If in debug mode, perform a test on every call
+    // The do-while loop is needed so that alCheck can be used as a single statement in if/else branches
+    #define alCheck(expr) do { expr; cpp3ds::priv::alCheckError(__FILE__, __LINE__, #expr); } while (false)
 
-    return m_file != NULL;
-}
+#else
+
+    // Else, we don't add any overhead
+    #define alCheck(expr) (expr)
+
+#endif
 
 
 ////////////////////////////////////////////////////////////
-Int64 FileInputStream::read(void* data, Int64 size)
-{
-    if (m_file)
-        return std::fread(data, 1, static_cast<std::size_t>(size), m_file);
-    else
-        return -1;
-}
-
-
+/// Check the last OpenAL error
+///
+/// \param file Source file where the call is located
+/// \param line Line number of the source file where the call is located
+/// \param expression The evaluated expression as a string
+///
 ////////////////////////////////////////////////////////////
-Int64 FileInputStream::seek(Int64 position)
-{
-    if (m_file)
-    {
-        std::fseek(m_file, static_cast<std::size_t>(position), SEEK_SET);
-        return tell();
-    }
-    else
-    {
-        return -1;
-    }
-}
+void alCheckError(const char* file, unsigned int line, const char* expression);
 
-
-////////////////////////////////////////////////////////////
-Int64 FileInputStream::tell()
-{
-    if (m_file)
-        return std::ftell(m_file);
-    else
-        return -1;
-}
-
-
-////////////////////////////////////////////////////////////
-Int64 FileInputStream::getSize()
-{
-    if (m_file)
-    {
-        cpp3ds::Int64 position = tell();
-        std::fseek(m_file, 0, SEEK_END);
-        cpp3ds::Int64 size = tell();
-        seek(position);
-        return size;
-    }
-    else
-    {
-        return -1;
-    }
-}
+} // namespace priv
 
 } // namespace cpp3ds
+
+
+#endif // CPP3DS_ALCHECK_HPP

@@ -32,8 +32,10 @@ set(SRC
         ${EMUSRCROOT}/Emulator/SFMLWidget.cpp
 
         # Audio
+        ${EMUSRCROOT}/Audio/ALCheck.cpp
+        ${EMUSRCROOT}/Audio/AlResource.cpp
         ${EMUSRCROOT}/Audio/AudioDevice.cpp
-        ${EMUSRCROOT}/Audio/InputSoundFile.cpp
+        ${SRCROOT}/Audio/InputSoundFile.cpp
         ${SRCROOT}/Audio/Music.cpp
         ${SRCROOT}/Audio/OutputSoundFile.cpp
         ${EMUSRCROOT}/Audio/Sound.cpp
@@ -43,8 +45,8 @@ set(SRC
         ${SRCROOT}/Audio/SoundFileReaderWav.cpp
         ${SRCROOT}/Audio/SoundFileWriterWav.cpp
         ${EMUSRCROOT}/Audio/SoundRecorder.cpp
-        ${SRCROOT}/Audio/SoundSource.cpp
-        ${SRCROOT}/Audio/SoundStream.cpp
+        ${EMUSRCROOT}/Audio/SoundSource.cpp
+        ${EMUSRCROOT}/Audio/SoundStream.cpp
 
         # Graphics
         ${SRCROOT}/Graphics/BlendMode.cpp
@@ -106,7 +108,7 @@ set(SRC
         ${EMUSRCROOT}/Window/EventManager.cpp
         ${EMUSRCROOT}/Window/Game.cpp
         ${SRCROOT}/Window/GlContext.cpp
-        ${SRCROOT}/Window/GlResource.cpp
+        ${EMUSRCROOT}/Window/GlResource.cpp
         ${EMUSRCROOT}/Window/Keyboard.cpp
         ${SRCROOT}/Window/Sensor.cpp
         ${EMUSRCROOT}/Window/Window.cpp

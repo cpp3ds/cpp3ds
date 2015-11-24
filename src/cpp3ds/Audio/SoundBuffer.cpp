@@ -229,7 +229,7 @@ bool SoundBuffer::update(unsigned int channelCount, unsigned int sampleRate)
         return false;
 
     // Check if the format is valid
-    if (channelCount > 1){
+    if (channelCount > 2){
         err() << "Failed to load sound buffer (unsupported number of channels: " << channelCount << ")" << std::endl;
         return false;
     }

@@ -28,9 +28,6 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#ifdef EMULATION
-#include <SFML/Audio/InputSoundFile.hpp>
-#endif
 #include <cpp3ds/System/NonCopyable.hpp>
 #include <cpp3ds/System/Time.hpp>
 #include <string>
@@ -202,9 +199,6 @@ private:
     Uint64           m_sampleCount;  ///< Total number of samples in the file
     unsigned int     m_channelCount; ///< Number of channels of the sound
     unsigned int     m_sampleRate;   ///< Number of samples per second
-	#ifdef EMULATION
-	sf::InputSoundFile m_inputSoundFile;
-	#endif
 };
 
 } // namespace cpp3ds

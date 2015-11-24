@@ -325,10 +325,10 @@ private :
     mutable bool      m_inverseTransformNeedUpdate; ///< Does the transform need to be recomputed?
 };
 
-} // namespace sf
+} // namespace cpp3ds
 
 
-#endif // SFML_TRANSFORMABLE_HPP
+#endif // CPP3DS_TRANSFORMABLE_HPP
 
 
 ////////////////////////////////////////////////////////////
@@ -371,7 +371,7 @@ private :
 /// center, for example. To do such things, use cpp3ds::Transform directly.
 ///
 /// cpp3ds::Transformable can be used as a base class. It is often
-/// combined with cpp3ds::Drawable -- that's what SFML's sprites,
+/// combined with cpp3ds::Drawable -- that's what cpp3ds's sprites,
 /// texts and shapes do.
 /// \code
 /// class MyEntity : public cpp3ds::Transformable, public cpp3ds::Drawable
@@ -412,7 +412,7 @@ private :
 /// \endcode
 ///
 /// A note on coordinates and undistorted rendering: \n
-/// By default, SFML (or more exactly, OpenGL) may interpolate drawable objects
+/// By default, cpp3ds (or more exactly, OpenGL) may interpolate drawable objects
 /// such as sprites or texts when rendering. While this allows transitions
 /// like slow movements or rotations to appear smoothly, it can lead to
 /// unwanted results in some cases, for example blurred or distorted objects.

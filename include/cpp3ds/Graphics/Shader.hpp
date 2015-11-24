@@ -559,11 +559,10 @@ private :
     ParamTable   m_params;         ///< Parameters location cache
 	std::vector<char> m_shaderData;
 
-    #ifndef EMULATION
-    //shader structure
+#ifndef EMULATION
     DVLB_s* dvlb;
     shaderProgram_s shader;
-    #endif
+#endif
 };
 
 }

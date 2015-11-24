@@ -1,6 +1,7 @@
 set(SRCROOT ${PROJECT_SOURCE_DIR}/src/cpp3ds/Audio)
 
 set(SRC
+    ${SRCROOT}/AlResource.cpp
     ${SRCROOT}/InputSoundFile.cpp
     ${SRCROOT}/Music.cpp
     ${SRCROOT}/OutputSoundFile.cpp

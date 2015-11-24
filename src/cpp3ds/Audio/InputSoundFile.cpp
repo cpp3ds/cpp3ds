@@ -148,7 +148,7 @@ bool InputSoundFile::openFromStream(InputStream& stream)
     m_reader = SoundFileFactory::createReaderFromStream(stream);
     if (!m_reader)
     {
-        err() << "Failed to open sound file from stream (format not supported)" << std::endl;
+        err() << "Failed to open sound file from stream (or format not supported)" << std::endl;
         return false;
     }
 

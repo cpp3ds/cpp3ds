@@ -34,7 +34,7 @@ namespace cpp3ds
 ////////////////////////////////////////////////////////////
 VertexArray::VertexArray() :
 m_vertices     (),
-m_primitiveType(Points)
+m_primitiveType(Triangles)
 {
 }
 

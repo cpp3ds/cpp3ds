@@ -25,90 +25,61 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <cpp3ds/System/FileInputStream.hpp>
-#include <cpp3ds/System/FileSystem.hpp>
+#include <cpp3ds/Window/GlResource.hpp>
+#include <cpp3ds/Window/GlContext.hpp>
+#include <cpp3ds/System/Mutex.hpp>
+#include <cpp3ds/System/Lock.hpp>
+
+
+namespace
+{
+    // OpenGL resources counter and its mutex
+//    unsigned int count = 0;
+//    cpp3ds::Mutex mutex;
+}
 
 
 namespace cpp3ds
 {
 ////////////////////////////////////////////////////////////
-FileInputStream::FileInputStream()
-: m_file(NULL)
+GlResource::GlResource()
 {
-
+//    {
+//        // Protect from concurrent access
+//        Lock lock(mutex);
+//
+//        // If this is the very first resource, trigger the global context initialization
+//        if (count == 0)
+//            priv::GlContext::globalInit();
+//
+//        // Increment the resources counter
+//        count++;
+//    }
+//
+//    // Now make sure that there is an active OpenGL context in the current thread
+//    priv::GlContext::ensureContext();
 }
 
 
 ////////////////////////////////////////////////////////////
-FileInputStream::~FileInputStream()
+GlResource::~GlResource()
 {
-    if (m_file)
-        std::fclose(m_file);
+//    // Protect from concurrent access
+//    Lock lock(mutex);
+//
+//    // Decrement the resources counter
+//    count--;
+//
+//    // If there's no more resource alive, we can trigger the global context cleanup
+//    if (count == 0)
+//        priv::GlContext::globalCleanup();
 }
 
 
 ////////////////////////////////////////////////////////////
-bool FileInputStream::open(const std::string& filename)
+void GlResource::ensureGlContext()
 {
-    if (m_file)
-        std::fclose(m_file);
-
-	m_file = std::fopen(FileSystem::getFilePath(filename).c_str(), "rb");
-
-    return m_file != NULL;
-}
-
-
-////////////////////////////////////////////////////////////
-Int64 FileInputStream::read(void* data, Int64 size)
-{
-    if (m_file)
-        return std::fread(data, 1, static_cast<std::size_t>(size), m_file);
-    else
-        return -1;
-}
-
-
-////////////////////////////////////////////////////////////
-Int64 FileInputStream::seek(Int64 position)
-{
-    if (m_file)
-    {
-        std::fseek(m_file, static_cast<std::size_t>(position), SEEK_SET);
-        return tell();
-    }
-    else
-    {
-        return -1;
-    }
-}
-
-
-////////////////////////////////////////////////////////////
-Int64 FileInputStream::tell()
-{
-    if (m_file)
-        return std::ftell(m_file);
-    else
-        return -1;
-}
-
-
-////////////////////////////////////////////////////////////
-Int64 FileInputStream::getSize()
-{
-    if (m_file)
-    {
-        cpp3ds::Int64 position = tell();
-        std::fseek(m_file, 0, SEEK_END);
-        cpp3ds::Int64 size = tell();
-        seek(position);
-        return size;
-    }
-    else
-    {
-        return -1;
-    }
+//    priv::GlContext::ensureContext();
 }
 
 } // namespace cpp3ds

@@ -28,8 +28,12 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
+#include <cpp3ds/Audio/AlResource.hpp>
 #include <cpp3ds/System/Vector3.hpp>
-
+#include <cpp3ds/System/Time.hpp>
+#ifndef EMULATION
+#include <3ds.h>
+#endif
 
 namespace cpp3ds
 {
@@ -37,7 +41,7 @@ namespace cpp3ds
 /// \brief Base class defining a sound's properties
 ///
 ////////////////////////////////////////////////////////////
-class SoundSource
+class SoundSource: AlResource
 {
 public :
 
@@ -238,6 +242,16 @@ public :
     ////////////////////////////////////////////////////////////
     float getAttenuation() const;
 
+	////////////////////////////////////////////////////////////
+	/// \brief Overload of assignment operator
+	///
+	/// \param right Instance to assign
+	///
+	/// \return Reference to self
+	///
+	////////////////////////////////////////////////////////////
+	SoundSource& operator =(const SoundSource& right);
+
 protected :
 
     ////////////////////////////////////////////////////////////
@@ -259,7 +273,14 @@ protected :
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-//    unsigned int m_source; ///< OpenAL source identifier
+    unsigned int m_source; ///< OpenAL source identifier
+	int  m_channel;        ///< Current DSP channel for this sound source
+	Time m_playOffset;
+	Time m_pauseOffset;
+#ifndef EMULATION
+	ndspWaveBuf m_ndspWaveBuf;
+#endif
+
 };
 
 } // namespace cpp3ds

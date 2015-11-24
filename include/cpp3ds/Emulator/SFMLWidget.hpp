@@ -11,20 +11,12 @@
 class QSFMLCanvas: public QWidget, public sf::RenderWindow
 {
 public :
-
-	sf::RenderTexture topLeftScreen, topRightScreen, bottomScreen;
-
 	QSFMLCanvas(QWidget* Parent);
     virtual ~QSFMLCanvas();
 
-    bool pollMouseEvent(sf::Event& event);
+    bool pollEvent(sf::Event& event);
 
 private :
-
-//    virtual void OnInit();
-//
-//    virtual void OnUpdate();
-
     virtual QPaintEngine* paintEngine() const;
 
     virtual void showEvent(QShowEvent*);
@@ -33,9 +25,11 @@ private :
     virtual void mousePressEvent(QMouseEvent* event);
     virtual void mouseReleaseEvent(QMouseEvent* event);
     virtual void mouseMoveEvent(QMouseEvent* event);
+	virtual void keyPressEvent(QKeyEvent *);
+	virtual void keyReleaseEvent(QKeyEvent *);
     virtual int heightForWidth(int w);
 
-    void pushMouseEvent(const sf::Event& event);
+    void pushEvent(const sf::Event& event);
 
     bool   myInitialized;
     int paintCount;

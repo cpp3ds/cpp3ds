@@ -262,6 +262,11 @@ public :
     ////////////////////////////////////////////////////////////
     FloatRect getGlobalBounds() const;
 
+    // Override position functions from Transformable.
+    // The 3DS text renders poorly without rounded coordinates.
+    void setPosition(float x, float y);
+    void setPosition(const Vector2f& position);
+
 private :
 
     ////////////////////////////////////////////////////////////
