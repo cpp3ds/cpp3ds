@@ -115,33 +115,33 @@ private:
 
 
 ////////////////////////////////////////////////////////////
-/// \class MemoryeInputStream
+/// \class cpp3ds::MemoryInputStream
 /// \ingroup system
 ///
-/// This class is a specialization of InputStream that
+/// This class is a specialization of cpp3ds::InputStream that
 /// reads from data in memory.
 ///
-/// It wraps a memory chunk in the common InputStream interface
+/// It wraps a memory chunk in the common cpp3ds::InputStream interface
 /// and therefore allows to use generic classes or functions
 /// that accept such a stream, with content already loaded in memory.
 ///
 /// In addition to the virtual functions inherited from
-/// InputStream, MemoryInputStream adds a function to
+/// cpp3ds::InputStream, cpp3ds::MemoryInputStream adds a function to
 /// specify the pointer and size of the data in memory.
 ///
 /// cpp3ds resource classes can usually be loaded directly from
 /// memory, so this class shouldn't be useful to you unless
-/// you create your own algorithms that operate on a InputStream.
+/// you create your own algorithms that operate on a cpp3ds::InputStream.
 ///
 /// Usage example:
 /// \code
-/// void process(InputStream& stream);
+/// void process(cpp3ds::InputStream& stream);
 ///
-/// MemoryStream stream;
+/// cpp3ds::MemoryStream stream;
 /// stream.open(thePtr, theSize);
 /// process(stream);
 /// \endcode
 ///
-/// InputStream, FileStream
+/// cpp3ds::InputStream, cpp3ds::FileStream
 ///
 ////////////////////////////////////////////////////////////

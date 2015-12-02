@@ -130,3 +130,13 @@ private:
 
 
 #endif
+
+
+////////////////////////////////////////////////////////////
+/// \class cpp3ds::EventManager
+/// \ingroup window
+///
+/// cpp3ds::EventManager is used primarily by cpp3ds::Game for input/event management.
+/// Only useful for those planning on reimplementing cpp3ds::Game for customized needs.
+///
+////////////////////////////////////////////////////////////

@@ -70,3 +70,14 @@ namespace cpp3ds {
 } // namespace cpp3ds
 
 #endif // CPP3DS_LINEARALLOCATOR_HPP
+
+
+////////////////////////////////////////////////////////////
+/// \class cpp3ds::LinearAllocator
+/// \ingroup system
+///
+/// This allocator class is useful for when you want to use a STL
+/// container (e.g. std::vector) that allocates everything using ctrulib's linear memory.
+///
+/// \see cpp3ds::VertexArray
+////////////////////////////////////////////////////////////

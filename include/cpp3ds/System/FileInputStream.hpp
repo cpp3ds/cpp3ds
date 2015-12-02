@@ -121,34 +121,34 @@ private:
 
 
 ////////////////////////////////////////////////////////////
-/// \class FileInputStream
+/// \class cpp3ds::FileInputStream
 /// \ingroup system
 ///
-/// This class is a specialization of InputStream that
+/// This class is a specialization of cpp3ds::InputStream that
 /// reads from a file on disk.
 ///
-/// It wraps a file in the common InputStream interface
+/// It wraps a file in the common cpp3ds::InputStream interface
 /// and therefore allows to use generic classes or functions
 /// that accept such a stream, with a file on disk as the data
 /// source.
 ///
 /// In addition to the virtual functions inherited from
-/// InputStream, FileInputStream adds a function to
+/// cpp3ds::InputStream, cpp3ds::FileInputStream adds a function to
 /// specify the file to open.
 ///
 /// cpp3ds resource classes can usually be loaded directly from
 /// a filename, so this class shouldn't be useful to you unless
-/// you create your own algorithms that operate on a InputStream.
+/// you create your own algorithms that operate on a cpp3ds::InputStream.
 ///
 /// Usage example:
 /// \code
-/// void process(InputStream& stream);
+/// void process(cpp3ds::InputStream& stream);
 ///
-/// FileStream stream;
+/// cpp3ds::FileStream stream;
 /// if (stream.open("some_file.dat"))
 ///    process(stream);
 /// \endcode
 ///
-/// InputStream, MemoryStream
+/// cpp3ds::InputStream, cpp3ds::MemoryStream
 ///
 ////////////////////////////////////////////////////////////
