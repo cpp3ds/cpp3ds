@@ -34,6 +34,9 @@
 #include <cpp3ds/Audio/SoundFileReaderOgg.hpp>
 #include <cpp3ds/Audio/SoundFileWriterOgg.hpp>
 #endif
+#ifdef CPP3DS_ENABLE_MP3
+#include <cpp3ds/Audio/SoundFileReaderMp3.hpp>
+#endif
 #include <cpp3ds/Audio/SoundFileReaderWav.hpp>
 #include <cpp3ds/Audio/SoundFileWriterWav.hpp>
 #include <cpp3ds/System/FileInputStream.hpp>
@@ -48,14 +51,17 @@ namespace
         static bool registered = false;
         if (!registered)
         {
-			#ifdef CPP3DS_ENABLE_FLAC
+#ifdef CPP3DS_ENABLE_FLAC
             cpp3ds::SoundFileFactory::registerReader<cpp3ds::priv::SoundFileReaderFlac>();
             cpp3ds::SoundFileFactory::registerWriter<cpp3ds::priv::SoundFileWriterFlac>();
-			#endif
-			#ifdef CPP3DS_ENABLE_OGG
+#endif
+#ifdef CPP3DS_ENABLE_OGG
             cpp3ds::SoundFileFactory::registerReader<cpp3ds::priv::SoundFileReaderOgg>();
             cpp3ds::SoundFileFactory::registerWriter<cpp3ds::priv::SoundFileWriterOgg>();
-            #endif
+#endif
+#ifdef CPP3DS_ENABLE_MP3
+			cpp3ds::SoundFileFactory::registerReader<cpp3ds::priv::SoundFileReaderMp3>();
+#endif
             cpp3ds::SoundFileFactory::registerReader<cpp3ds::priv::SoundFileReaderWav>();
             cpp3ds::SoundFileFactory::registerWriter<cpp3ds::priv::SoundFileWriterWav>();
             registered = true;

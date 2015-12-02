@@ -8,14 +8,19 @@ include(cpp3ds)
 
 option(BUILD_EMULATOR "Build cpp3ds emulator (Qt5 required)" ON)
 option(BUILD_EXAMPLES "Build all cpp3ds example projects" ON)
-option(ENABLE_OGG "Build all cpp3ds example projects" ON)
-option(ENABLE_FLAC "Build all cpp3ds example projects" OFF)
+option(BUILD_DOCS "Build doxygen documentation" OFF)
+option(ENABLE_OGG "Include OGG encoder/decoder classes" ON)
+option(ENABLE_FLAC "Include FLAC encoder/decoder classes" OFF)
+option(ENABLE_MP3 "Include MP3 decoder class" OFF)
 
 if(ENABLE_OGG)
 	add_definitions(-DCPP3DS_ENABLE_OGG)
 endif()
 if(ENABLE_FLAC)
 	add_definitions(-DCPP3DS_ENABLE_FLAC)
+endif()
+if(ENABLE_MP3)
+	add_definitions(-DCPP3DS_ENABLE_MP3)
 endif()
 
 # C++11 support
@@ -72,6 +77,9 @@ set(CPP3DS_EMU_FLAGS "-g -O2")
 
 if(BUILD_EXAMPLES)
     add_subdirectory(examples)
+endif()
+if(BUILD_DOCS)
+	add_subdirectory(doc)
 endif()
 
 add_subdirectory(src)

@@ -1,5 +1,27 @@
 include(CMakeParseArguments)
 
+# detect the OS
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+	set(CPP3DS_OS_WINDOWS 1)
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+	set(CPP3DS_OS_UNIX 1)
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
+	set(CPP3DS_OS_FREEBSD 1)
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	set(CPP3DS_OS_MACOSX 1)
+
+	# detect OS X version. (use '/usr/bin/sw_vers -productVersion' to extract V from '10.V.x'.)
+	EXEC_PROGRAM(/usr/bin/sw_vers ARGS -productVersion OUTPUT_VARIABLE MACOSX_VERSION_RAW)
+	STRING(REGEX REPLACE "10\\.([0-9]+).*" "\\1" MACOSX_VERSION "${MACOSX_VERSION_RAW}")
+	if(${MACOSX_VERSION} LESS 7)
+		message(FATAL_ERROR "Unsupported version of OS X: ${MACOSX_VERSION_RAW}")
+		return()
+	endif()
+else()
+	message(FATAL_ERROR "Unsupported operating system")
+	return()
+endif()
+
 # DevkitPro Paths are broken on windows, so we have to fix those
 macro(msys_to_cmake_path MsysPath ResultingPath)
     string(REGEX REPLACE "^/([a-zA-Z])/" "\\1:/" ${ResultingPath} "${MsysPath}")
@@ -324,6 +346,9 @@ function(add_cia_target target RSF IMAGE SOUND )
             -rsf ${RSF}
             -banner ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.bnr
             -icon ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.smdh
+			-DAPP_TITLE=${APP_TITLE}
+			-DAPP_PRODUCT_CODE=${APP_PRODUCT_CODE}
+			-DAPP_UNIQUE_ID=${APP_UNIQUE_ID}
             DEPENDS ${target} ${RSF} ${ROMFS_FILES} ${SHADER_OUTPUT} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.bnr ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.smdh
             WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
             VERBATIM

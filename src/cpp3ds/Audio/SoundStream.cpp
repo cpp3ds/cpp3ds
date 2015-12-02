@@ -26,30 +26,25 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/Audio/SoundStream.hpp>
-//#include <cpp3ds/Audio/AudioDevice.hpp>
-//#include <cpp3ds/Audio/ALCheck.hpp>
 #include <cpp3ds/System/Sleep.hpp>
 #include <cpp3ds/System/Err.hpp>
 #include <cpp3ds/System/Lock.hpp>
-
-#ifdef _MSC_VER
-    #pragma warning(disable: 4355) // 'this' used in base member initializer list
-#endif
+#include <string.h>
 
 
 namespace cpp3ds
 {
 ////////////////////////////////////////////////////////////
-SoundStream::SoundStream() :
-m_thread          (&SoundStream::streamData, this),
-m_threadMutex     (),
-m_threadStartState(Stopped),
-m_isStreaming     (false),
-m_channelCount    (0),
-m_sampleRate      (0),
-m_format          (0),
-m_loop            (false),
-m_samplesProcessed(0)
+SoundStream::SoundStream()
+: m_thread          (&SoundStream::streamData, this)
+, m_threadMutex     ()
+, m_threadStartState(Stopped)
+, m_isStreaming     (false)
+, m_channelCount    (0)
+, m_sampleRate      (0)
+, m_format          (0)
+, m_loop            (false)
+, m_samplesProcessed(0)
 {
 
 }
@@ -77,16 +72,15 @@ void SoundStream::initialize(unsigned int channelCount, unsigned int sampleRate)
     m_channelCount = channelCount;
     m_sampleRate   = sampleRate;
 
-    // Deduce the format from the number of channels
-//    m_format = priv::AudioDevice::getFormatFromChannelCount(channelCount);
-
     // Check if the format is valid
-    if (m_format == 0)
+    if (channelCount > 2)
     {
         m_channelCount = 0;
         m_sampleRate   = 0;
         err() << "Unsupported number of channels (" << m_channelCount << ")" << std::endl;
     }
+	else
+		m_format = 1;
 }
 
 
@@ -100,7 +94,22 @@ void SoundStream::play()
         return;
     }
 
-    bool isStreaming = false;
+	m_channel = 0;
+	while (m_channel < 24 && ndspChnIsPlaying(m_channel))
+		m_channel++;
+
+	if (m_channel == 24) {
+		err() << "Failed to play audio stream: all channels are in use." << std::endl;
+		m_channel = -1;
+		return;
+	}
+
+	ndspChnReset(m_channel);
+	ndspChnSetInterp(m_channel, NDSP_INTERP_POLYPHASE);
+	ndspChnSetRate(m_channel, float(m_sampleRate));
+	ndspChnSetFormat(m_channel, (m_channelCount == 1) ? NDSP_FORMAT_MONO_PCM16 : NDSP_FORMAT_STEREO_PCM16);
+
+	bool isStreaming = false;
     Status threadStartState = Stopped;
 
     {
@@ -114,9 +123,16 @@ void SoundStream::play()
     if (isStreaming && (threadStartState == Paused))
     {
         // If the sound is paused, resume it
-        Lock lock(m_threadMutex);
-        m_threadStartState = Playing;
-//        alCheck(alSourcePlay(m_source));
+		setPlayingOffset(m_pauseOffset);
+
+		Lock lock(m_threadMutex);
+		m_threadStartState = Playing;
+
+//		for (int i = 0; i < BufferCount; ++i)
+//			m_endBuffers[i] = false;
+
+		// Fill the queue
+//		fillQueue();
         return;
     }
     else if (isStreaming && (threadStartState == Playing))
@@ -147,9 +163,10 @@ void SoundStream::pause()
             return;
 
         m_threadStartState = Paused;
-    }
 
-//    alCheck(alSourcePause(m_source));
+		m_pauseOffset = getPlayingOffset();
+		clearQueue();
+    }
 }
 
 
@@ -234,11 +251,14 @@ Time SoundStream::getPlayingOffset() const
 {
     if (m_sampleRate && m_channelCount)
     {
-        float secs = 0.f;
-//        ALfloat secs = 0.f;
-//        alCheck(alGetSourcef(m_source, AL_SEC_OFFSET, &secs));
+		u32 samplePos = ndspChnGetSamplePos(m_channel);
 
-        return seconds(secs + static_cast<float>(m_samplesProcessed) / m_sampleRate / m_channelCount);
+		// In case current buffer has finished and yet to be updated to next in queue
+		if (m_ndspWaveBuf.status == NDSP_WBUF_DONE)
+		if (ndspChnGetWaveBufSeq(m_channel) != m_ndspWaveBuf.sequence_id)
+			samplePos += m_ndspWaveBuf.nsamples;
+
+        return seconds(static_cast<float>(m_samplesProcessed + samplePos) / m_sampleRate / m_channelCount);
     }
     else
     {
@@ -278,22 +298,19 @@ void SoundStream::streamData()
     }
 
     // Create the buffers
-//    alCheck(alGenBuffers(BufferCount, m_buffers));
     for (int i = 0; i < BufferCount; ++i)
         m_endBuffers[i] = false;
 
-    // Fill the queue
+    // Fill the queue to start playing
     requestStop = fillQueue();
-
-    // Play the sound
-//    alCheck(alSourcePlay(m_source));
 
     {
         Lock lock(m_threadMutex);
 
         // Check if the thread was launched Paused
-//        if (m_threadStartState == Paused)
-//            alCheck(alSourcePause(m_source));
+        if (m_threadStartState == Paused) {
+//			std::cout << "thread launched while paused" << std::endl;
+		}
     }
 
     for (;;)
@@ -320,81 +337,43 @@ void SoundStream::streamData()
             }
         }
 
+		if (SoundSource::getStatus() != Paused)
         // Get the number of buffers that have been processed (i.e. ready for reuse)
-        int nbProcessed = 0;
-//        ALint nbProcessed = 0;
-//        alCheck(alGetSourcei(m_source, AL_BUFFERS_PROCESSED, &nbProcessed));
+		for (int i = 0; i < BufferCount; ++i)
+		{
+			if (m_ndspWaveBuffers[i].status == NDSP_WBUF_DONE)
+			{
+				// Retrieve its size and add it to the samples count
+				if (m_endBuffers[i]) {
+					// This was the last buffer: reset the sample count
+					m_samplesProcessed = 0;
+					m_endBuffers[i] = false;
+				}
+				else {
+					m_samplesProcessed += m_ndspWaveBuffers[i].nsamples;
+				}
 
-        while (nbProcessed--)
-        {
-            // Pop the first unused buffer from the queue
-            int buffer;
-//            ALuint buffer;
-//            alCheck(alSourceUnqueueBuffers(m_source, 1, &buffer));
-
-            // Find its number
-            unsigned int bufferNum = 0;
-            for (int i = 0; i < BufferCount; ++i)
-                if (m_buffers[i] == buffer)
-                {
-                    bufferNum = i;
-                    break;
-                }
-
-            // Retrieve its size and add it to the samples count
-            if (m_endBuffers[bufferNum])
-            {
-                // This was the last buffer: reset the sample count
-                m_samplesProcessed = 0;
-                m_endBuffers[bufferNum] = false;
-            }
-            else
-            {
-                int size, bits;
-//                ALint size, bits;
-//                alCheck(alGetBufferi(buffer, AL_SIZE, &size));
-//                alCheck(alGetBufferi(buffer, AL_BITS, &bits));
-
-                // Bits can be 0 if the format or parameters are corrupt, avoid division by zero
-                if (bits == 0)
-                {
-                    err() << "Bits in sound stream are 0: make sure that the audio format is not corrupt "
-                          << "and initialize() has been called correctly" << std::endl;
-
-                    // Abort streaming (exit main loop)
-                    Lock lock(m_threadMutex);
-                    m_isStreaming = false;
-                    requestStop = true;
-                    break;
-                }
-                else
-                {
-                    m_samplesProcessed += size / (bits / 8);
-                }
-            }
-
-            // Fill it and push it back into the playing queue
-            if (!requestStop)
-            {
-                if (fillAndPushBuffer(bufferNum))
-                    requestStop = true;
-            }
-        }
-
+				// Fill it and push it back into the playing queue
+				if (!requestStop) {
+					if (fillAndPushBuffer(i))
+						requestStop = true;
+				}
+			}
+		}
         // Leave some time for the other threads if the stream is still playing
         if (SoundSource::getStatus() != Stopped)
             sleep(milliseconds(10));
     }
 
     // Stop the playback
-//    alCheck(alSourceStop(m_source));
-
     // Dequeue any buffer left in the queue
     clearQueue();
 
-    // Delete the buffers
-//    alCheck(alSourcei(m_source, AL_BUFFER, 0));
-//    alCheck(alDeleteBuffers(BufferCount, m_buffers));
+	m_ndspWaveBuf.status = NDSP_WBUF_DONE;
+	m_pauseOffset = Time::Zero;
+
+	for (int i = 0; i < BufferCount; ++i)
+		m_buffers->clear();
 }
 
 
@@ -432,14 +411,24 @@ bool SoundStream::fillAndPushBuffer(unsigned int bufferNum)
     // Fill the buffer if some data was returned
     if (data.samples && data.sampleCount)
     {
-        unsigned int buffer = m_buffers[bufferNum];
+        auto& buffer = m_buffers[bufferNum];
+		auto& ndspBuffer = m_ndspWaveBuffers[bufferNum];
 
         // Fill the buffer
-//        ALsizei size = static_cast<ALsizei>(data.sampleCount) * sizeof(Int16);
-//        alCheck(alBufferData(buffer, m_format, data.samples, size, m_sampleRate));
+		buffer.assign(data.samples, data.samples + data.sampleCount);
+
+		memset(&ndspBuffer, 0, sizeof(ndspWaveBuf));
+		ndspBuffer.data_vaddr = reinterpret_cast<u32>(&buffer[0]);
+		ndspBuffer.nsamples = data.sampleCount;
+		ndspBuffer.looping = false;
+		ndspBuffer.status = NDSP_WBUF_FREE;
+
+		DSP_FlushDataCache((u8*)&buffer[0], data.sampleCount);
 
         // Push it into the sound queue
-//        alCheck(alSourceQueueBuffers(m_source, 1, &buffer));
+		ndspChnWaveBufAdd(m_channel, &ndspBuffer);
+
+		m_ndspWaveBuf = ndspBuffer;
     }
 
     return requestStop;
@@ -455,6 +444,7 @@ bool SoundStream::fillQueue()
     {
         if (fillAndPushBuffer(i))
             requestStop = true;
+		sleep(milliseconds(10));
     }
 
     return requestStop;
@@ -464,14 +454,9 @@ bool SoundStream::fillQueue()
 ////////////////////////////////////////////////////////////
 void SoundStream::clearQueue()
 {
-    // Get the number of buffers still in the queue
-//    ALint nbQueued;
-//    alCheck(alGetSourcei(m_source, AL_BUFFERS_QUEUED, &nbQueued));
+	ndspChnWaveBufClear(m_channel);
 
-    // Dequeue them all
-//    ALuint buffer;
-//    for (ALint i = 0; i < nbQueued; ++i)
-//        alCheck(alSourceUnqueueBuffers(m_source, 1, &buffer));
+	m_ndspWaveBuf.status = NDSP_WBUF_FREE;
 }
 
 } // namespace cpp3ds

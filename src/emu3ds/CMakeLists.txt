@@ -119,6 +119,12 @@ if(ENABLE_OGG)
             ${SRCROOT}/Audio/SoundFileReaderOgg.cpp
             ${SRCROOT}/Audio/SoundFileWriterOgg.cpp)
 endif()
+if(ENABLE_MP3)
+	find_package(mpg123 REQUIRED)
+	include_directories(${MPG123_INCLUDE_DIRS})
+	list(APPEND SRC
+			${SRCROOT}/Audio/SoundFileReaderMp3.cpp)
+endif()
 
 # ImageLoader.cpp must be compiled with the -fno-strict-aliasing
 # when gcc is used; otherwise saving PNGs may crash in stb_image_write

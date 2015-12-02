@@ -18,8 +18,14 @@ set(SRC
 
 if(ENABLE_OGG)
     list(APPEND SRC
-         ${SRCROOT}/SoundFileReaderOgg.cpp
-         ${SRCROOT}/SoundFileWriterOgg.cpp)
+        ${SRCROOT}/SoundFileReaderOgg.cpp
+        ${SRCROOT}/SoundFileWriterOgg.cpp)
+endif()
+if(ENABLE_MP3)
+	find_package(mpg123 REQUIRED)
+	include_directories(${MPG123_INCLUDE_DIRS})
+    list(APPEND SRC
+        ${SRCROOT}/SoundFileReaderMp3.cpp)
 endif()
 
 add_cpp3ds_library(cpp3ds-audio

@@ -27,39 +27,42 @@
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/Audio/Sound.hpp>
 #include <cpp3ds/Audio/SoundBuffer.hpp>
-//#include <cpp3ds/Audio/ALCheck.hpp>
 #include <3ds.h>
-#include <iostream>
 #include <string.h>
+#include <cpp3ds/System/Err.hpp>
 
 namespace cpp3ds
 {
+
 ////////////////////////////////////////////////////////////
-Sound::Sound() :
-m_buffer(NULL),
-m_loop(false)
+Sound::Sound()
+: m_buffer(nullptr)
+, m_loop(false)
+, m_isADPCM(false)
 {
 }
 
 
 ////////////////////////////////////////////////////////////
-Sound::Sound(const SoundBuffer& buffer) :
-m_buffer(NULL),
-m_currentChannel(-1),
-m_loop(false)
+Sound::Sound(const SoundBuffer& buffer)
+: m_buffer(nullptr)
+, m_loop(false)
+, m_isADPCM(false)
 {
     setBuffer(buffer);
 }
 
 
 ////////////////////////////////////////////////////////////
-Sound::Sound(const Sound& copy) :
-SoundSource(copy),
-m_buffer   (NULL)
+Sound::Sound(const Sound& copy)
+: SoundSource(copy)
+, m_buffer(nullptr)
 {
     if (copy.m_buffer)
         setBuffer(*copy.m_buffer);
+	m_pauseOffset = copy.m_pauseOffset;
     setLoop(copy.getLoop());
+	setStateADPCM(copy.getStateADPCM());
 }
 
 
@@ -77,33 +80,57 @@ void Sound::play()
 {
 	if (!m_buffer || m_buffer->getSampleCount() == 0)
 		return;
+	if (getStatus() == Playing)
+		stop();
 
-	// 24 possible CSND channels to cycle through (0-7) reserved for DSP
-	static int channel;
-	channel++;
-	channel %= 24;
+	m_channel = 0;
+	while (m_channel < 24 && ndspChnIsPlaying(m_channel))
+		m_channel++;
 
-	u32 flags = SOUND_FORMAT_16BIT;
-	if (m_loop)
-		flags |= SOUND_REPEAT;
+	if (m_channel == 24) {
+		err() << "Sound::play() failed because all channels are in use." << std::endl;
+		m_channel = -1;
+		return;
+	}
+
+	setPlayingOffset(m_pauseOffset);
+
+	if (m_pauseOffset != Time::Zero)
+		m_pauseOffset = Time::Zero;
+
 	u32 size = sizeof(Int16) * m_buffer->getSampleCount();
-	std::cout << "Playing sound: " << m_buffer->getSampleCount();
-	GSPGPU_FlushDataCache(NULL, (u8*)m_buffer->getSamples(), size);
-	csndPlaySound(channel+8, flags, m_buffer->getSampleRate(), 1.0, 0.0, (u32*)m_buffer->getSamples(), (u32*)m_buffer->getSamples(), size);
+
+	ndspChnReset(m_channel);
+	ndspChnSetInterp(m_channel, NDSP_INTERP_POLYPHASE);
+	ndspChnSetRate(m_channel, float(m_buffer->getSampleRate()));
+	ndspChnSetFormat(m_channel, (m_buffer->getChannelCount() == 1) ? NDSP_FORMAT_MONO_PCM16 : NDSP_FORMAT_STEREO_PCM16);
+
+	DSP_FlushDataCache((u8*)m_buffer->getSamples(), size);
+
+	ndspChnWaveBufAdd(m_channel, &m_ndspWaveBuf);
 }
 
 
 ////////////////////////////////////////////////////////////
 void Sound::pause()
 {
+	if (getStatus() != Playing)
+		return;
 
+	m_pauseOffset = getPlayingOffset();
+
+	ndspChnWaveBufClear(m_channel);
 }
 
 
 ////////////////////////////////////////////////////////////
 void Sound::stop()
 {
-
+	if (getStatus() == Stopped)
+		return;
+	m_pauseOffset = Time::Zero;
+	ndspChnWaveBufClear(m_channel);
+	m_ndspWaveBuf.status = NDSP_WBUF_DONE;
 }
 
 
@@ -117,6 +144,12 @@ void Sound::setBuffer(const SoundBuffer& buffer)
         m_buffer->detachSound(this);
     }
 
+	memset(&m_ndspWaveBuf, 0, sizeof(ndspWaveBuf));
+	m_ndspWaveBuf.data_vaddr = reinterpret_cast<u32>(buffer.getSamples());
+	m_ndspWaveBuf.nsamples = buffer.getSampleCount();
+	m_ndspWaveBuf.looping = m_loop; // Loop enabled
+	m_ndspWaveBuf.status = NDSP_WBUF_FREE;
+
     // Assign and use the new buffer
     m_buffer = &buffer;
     m_buffer->attachSound(this);
@@ -124,16 +157,38 @@ void Sound::setBuffer(const SoundBuffer& buffer)
 
 
 ////////////////////////////////////////////////////////////
+void Sound::setStateADPCM(bool enable)
+{
+	m_isADPCM = enable;
+}
+
+
+////////////////////////////////////////////////////////////
+bool Sound::getStateADPCM() const
+{
+	return m_isADPCM;
+}
+
+
+////////////////////////////////////////////////////////////
 void Sound::setLoop(bool loop)
 {
 	m_loop = loop;
+	m_ndspWaveBuf.looping = m_loop;
 }
 
 
 ////////////////////////////////////////////////////////////
 void Sound::setPlayingOffset(Time timeOffset)
 {
-
+	Status status = getStatus();
+	stop();
+	m_playOffset = timeOffset;
+	int offset = m_buffer->getSampleRate() * m_buffer->getChannelCount() * timeOffset.asSeconds();
+	m_ndspWaveBuf.data_vaddr = reinterpret_cast<u32>(m_buffer->getSamples() + offset);
+	m_ndspWaveBuf.nsamples = m_buffer->getSampleCount() - offset;
+	if (status == Playing)
+		ndspChnWaveBufAdd(m_channel, &m_ndspWaveBuf);
 }
 
 
@@ -154,7 +209,13 @@ bool Sound::getLoop() const
 ////////////////////////////////////////////////////////////
 Time Sound::getPlayingOffset() const
 {
-    return seconds(0);
+	if (getStatus() == Stopped)
+		return Time::Zero;
+	if (getStatus() == Paused)
+		return m_pauseOffset;
+
+	u32 samplePos = ndspChnGetSamplePos(m_channel);
+	return seconds(static_cast<float>(samplePos) / m_buffer->getSampleRate()) + m_playOffset;
 }
 
 

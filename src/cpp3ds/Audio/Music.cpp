@@ -26,7 +26,6 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/Audio/Music.hpp>
-//#include <cpp3ds/Audio/ALCheck.hpp>
 #include <cpp3ds/System/Lock.hpp>
 #include <cpp3ds/System/Err.hpp>
 #include <fstream>

@@ -26,12 +26,13 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/Audio/SoundSource.hpp>
-
+#include <3ds/ndsp/ndsp.h>
 
 namespace cpp3ds
 {
 ////////////////////////////////////////////////////////////
 SoundSource::SoundSource()
+: m_channel(-1)
 {
 
 }
@@ -39,6 +40,7 @@ SoundSource::SoundSource()
 
 ////////////////////////////////////////////////////////////
 SoundSource::SoundSource(const SoundSource& copy)
+: m_channel(copy.m_channel)
 {
     setPitch(copy.getPitch());
     setVolume(copy.getVolume());
@@ -149,9 +151,29 @@ float SoundSource::getAttenuation() const
 
 
 ////////////////////////////////////////////////////////////
+SoundSource& SoundSource::operator =(const SoundSource& right)
+{
+	// Assign the sound attributes
+	setPitch(right.getPitch());
+	setVolume(right.getVolume());
+	setPosition(right.getPosition());
+	setRelativeToListener(right.isRelativeToListener());
+	setMinDistance(right.getMinDistance());
+	setAttenuation(right.getAttenuation());
+
+	m_channel = right.m_channel;
+	m_ndspWaveBuf = right.m_ndspWaveBuf;
+
+	return *this;
+}
+
+////////////////////////////////////////////////////////////
 SoundSource::Status SoundSource::getStatus() const
 {
-    return Stopped;
+	if (m_ndspWaveBuf.status == NDSP_WBUF_PLAYING || m_ndspWaveBuf.status == NDSP_WBUF_QUEUED)
+		return (m_pauseOffset == Time::Zero) ? Playing : Paused;
+
+	return Stopped;
 }
 
 } // namespace cpp3ds

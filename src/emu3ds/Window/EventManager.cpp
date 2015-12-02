@@ -9,7 +9,12 @@ namespace cpp3ds {
 // TODO: configurable key-mapping
 std::map<sf::Keyboard::Key, cpp3ds::Keyboard::Key> keyMap = {
 	{sf::Keyboard::A, cpp3ds::Keyboard::A},
-	{sf::Keyboard::B, cpp3ds::Keyboard::B}
+	{sf::Keyboard::B, cpp3ds::Keyboard::B},
+	{sf::Keyboard::X, cpp3ds::Keyboard::X},
+	{sf::Keyboard::Y, cpp3ds::Keyboard::Y},
+	{sf::Keyboard::L, cpp3ds::Keyboard::L},
+	{sf::Keyboard::R, cpp3ds::Keyboard::R},
+	{sf::Keyboard::Return, cpp3ds::Keyboard::Start},
 };
 
 EventManager::EventManager() {
@@ -52,11 +57,11 @@ void EventManager::processEvents() {
 		BOTTOM_WIDTH = 320;
 	// Check all inputs and push Events that are triggered
 	sf::Event event;
-	while (_emulator->screen->pollMouseEvent(event)) {
+	while (_emulator->screen->pollEvent(event)) {
+		cpp3ds::Event e;
 		switch (event.type) {
 			case sf::Event::MouseButtonPressed:
 				if (event.mouseButton.x > BOTTOM_X && event.mouseButton.x < BOTTOM_X+BOTTOM_WIDTH && event.mouseButton.y > BOTTOM_Y){
-					cpp3ds::Event e;
 					e.type = Event::TouchBegan;
 					e.touch.x = event.mouseButton.x - BOTTOM_X;
 					e.touch.y = event.mouseButton.y - BOTTOM_Y;
@@ -65,7 +70,6 @@ void EventManager::processEvents() {
 				break;
 			case sf::Event::MouseButtonReleased:
 				if (event.mouseButton.x > BOTTOM_X && event.mouseButton.x < BOTTOM_X+BOTTOM_WIDTH && event.mouseButton.y > BOTTOM_Y){
-					cpp3ds::Event e;
 					e.type = Event::TouchEnded;
 					e.touch.x = event.mouseButton.x - BOTTOM_X;
 					e.touch.y = event.mouseButton.y - BOTTOM_Y;
@@ -74,41 +78,34 @@ void EventManager::processEvents() {
 				break;
 			case sf::Event::MouseMoved:
 				if (event.mouseButton.x > BOTTOM_X && event.mouseButton.x < BOTTOM_X+BOTTOM_WIDTH && event.mouseButton.y > BOTTOM_Y){
-					cpp3ds::Event e;
 					e.type = Event::TouchMoved;
 					e.touch.x = event.mouseButton.x - BOTTOM_X;
 					e.touch.y = event.mouseButton.y - BOTTOM_Y;
 					pushEvent(e);
 				}
 				break;
-			default:
-				break;
-		}
-	}
-	while (_emulator->screen->pollEvent(event)) {
-		std::cout << "EVENT: " << event.type << std::endl;
-        cpp3ds::Event e;
-		std::map<sf::Keyboard::Key, cpp3ds::Keyboard::Key>::iterator key;
-		switch (event.type) {
-			case sf::Event::KeyPressed:
-			std::cout << "sf::KeyPressed";
-				key = keyMap.find(event.key.code);
+			case sf::Event::KeyPressed: {
+				auto key = keyMap.find(event.key.code);
 				if (key != keyMap.end()) {
 					e.type = Event::KeyPressed;
 					e.key.code = key->second;
 					pushEvent(e);
 				}
 				break;
-			case sf::Event::KeyReleased:
-//				std::cout << "EVENT: " << event.type << std::endl;
-                e.type = Event::KeyReleased;
-                pushEvent(e);
+			}
+			case sf::Event::KeyReleased: {
+				auto key = keyMap.find(event.key.code);
+				if (key != keyMap.end()) {
+					e.type = Event::KeyReleased;
+					e.key.code = key->second;
+					pushEvent(e);
+				}
 				break;
+			}
 			case sf::Event::JoystickMoved:
 				e.type = Event::JoystickMoved;
 				// TODO: implement joystick for emulator
 				e.joystickMove.x = event.joystickMove.position;
-//				pushEvent(e);
 				break;
 			default:
 				break;
