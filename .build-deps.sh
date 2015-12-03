@@ -24,21 +24,10 @@ wget https://github.com/cpp3ds/3ds_portlibs/releases/download/r1/portlibs-3ds-r1
 tar -xaf portlibs-3ds-r1.tar.xz
 ln -s $(pwd)/portlibs $DEVKITPRO/portlibs
 
-# Build makerom (commit 4ef27aca30a)
-git clone https://github.com/profi200/Project_CTR.git
-cd Project_CTR/makerom && git reset --hard 4ef27aca30a && make -j4 && cp makerom $DEVKITARM/bin && cd -
-
-# Build latest 3dsxtool
-git clone https://github.com/devkitPro/3dstools.git
-cd 3dstools && ./autogen.sh && ./configure && make -j4 && cp 3dsxtool $DEVKITARM/bin && cd -
-
-# Build latest bannertool
-git clone https://github.com/Steveice10/bannertool.git
-cd bannertool && cmake . && make -j4 && cp bannertool $DEVKITARM/bin && cd -
-
-# Build nihstro
-git clone https://github.com/neobrain/nihstro.git
-cd nihstro && cmake . && make -j4 && cp nihstro-assemble $DEVKITARM/bin && cd -
+# Download latest 3ds-tools
+wget https://github.com/cpp3ds/3ds-tools/releases/download/r1/3ds-tools-linux-r1.tar.xz
+tar -xaf 3ds-tools-linux-r1.tar.xz
+cp 3ds-tools/* $DEVKITARM/bin
 
 # Get latest ctrulib
 git clone https://github.com/smealum/ctrulib.git
