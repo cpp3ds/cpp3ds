@@ -36,7 +36,7 @@ namespace cpp3ds
 Socket::Socket(Type type) :
 m_type      (type),
 m_socket    (priv::SocketImpl::invalidSocket()),
-m_isBlocking(false)
+m_isBlocking(true)
 {
 
 }
@@ -123,10 +123,10 @@ void Socket::create(SocketHandle handle)
         {
             // Enable broadcast by default for UDP sockets
             int yes = 1;
-            if (setsockopt(m_socket, SOL_SOCKET, SO_BROADCAST, reinterpret_cast<char*>(&yes), sizeof(yes)) == -1)
-            {
-                err() << "Failed to enable broadcast on UDP socket" << std::endl;
-            }
+//            if (setsockopt(m_socket, SOL_SOCKET, SO_BROADCAST, reinterpret_cast<char*>(&yes), sizeof(yes)) == -1)
+//            {
+//                err() << "Failed to enable broadcast on UDP socket" << std::endl;
+//            }
         }
     }
 }

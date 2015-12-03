@@ -28,6 +28,8 @@
 #include <cpp3ds/Network/IpAddress.hpp>
 #include <cpp3ds/Network/Http.hpp>
 #include <cpp3ds/Network/SocketImpl.hpp>
+#include <cpp3ds/System/String.hpp>
+#include <cpp3ds/System/Service.hpp>
 #include <cstring>
 
 namespace
@@ -47,20 +49,13 @@ namespace
             if (ip != INADDR_NONE)
                 return ip;
 
-            // Not a valid address, try to convert it as a host name
-//            addrinfo hints;
-//            std::memset(&hints, 0, sizeof(hints));
-//            hints.ai_family = AF_INET;
-//            addrinfo* result = NULL;
-//            if (getaddrinfo(address.c_str(), NULL, &hints, &result) == 0)
-//            {
-//                if (result)
-//                {
-//                    ip = reinterpret_cast<sockaddr_in*>(result->ai_addr)->sin_addr.s_addr;
-//                    freeaddrinfo(result);
-//                    return ip;
-//                }
-//            }
+			// Try address as a host name.
+			if (cpp3ds::Service::isEnabled(cpp3ds::NETWORK)) {
+				struct hostent* host = gethostbyname(address.c_str());
+				struct in_addr** addr_list = reinterpret_cast<struct in_addr**>(host->h_addr_list);
+				if (addr_list[0] != NULL)
+					return addr_list[0]->s_addr;
+			}
 
             // Not a valid address nor a host name
             return 0;
@@ -139,8 +134,8 @@ IpAddress IpAddress::getLocalAddress()
     // and get the local socket address with the getsockname function.
     // UDP connection will not send anything to the network, so this function won't cause any overhead.
 
-    IpAddress localAddress;
-#ifdef EMULATION
+	IpAddress localAddress;
+
     // Create the socket
     SocketHandle sock = socket(PF_INET, SOCK_DGRAM, 0);
     if (sock == priv::SocketImpl::invalidSocket())
@@ -167,9 +162,6 @@ IpAddress IpAddress::getLocalAddress()
 
     // Finally build the IP address
     localAddress = IpAddress(ntohl(address.sin_addr.s_addr));
-#else
-	localAddress = IpAddress(ntohl((Uint32)gethostid()));
-#endif
 
     return localAddress;
 }
