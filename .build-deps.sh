@@ -25,13 +25,13 @@ tar -xaf portlibs-3ds-r1.tar.xz
 ln -s $(pwd)/portlibs $DEVKITPRO/portlibs
 
 # Download latest 3ds-tools
-wget https://github.com/cpp3ds/3ds-tools/releases/download/r1/3ds-tools-linux-r1.tar.xz
-tar -xaf 3ds-tools-linux-r1.tar.xz
+wget https://github.com/cpp3ds/3ds-tools/releases/download/r3/3ds-tools-linux-r3.tar.gz
+tar -xaf 3ds-tools-linux-r3.tar.gz
 cp 3ds-tools/* $DEVKITARM/bin
 
 # Get latest ctrulib
 git clone https://github.com/smealum/ctrulib.git
-cd ctrulib/libctru && make -j4 install && cd -
+cd ctrulib/libctru && git checkout great-refactor && make -j4 install && cd -
 
 # Build gl3ds
 git clone https://github.com/cpp3ds/gl3ds.git ${GL3DS}
