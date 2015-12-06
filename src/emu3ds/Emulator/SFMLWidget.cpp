@@ -1,10 +1,11 @@
 #ifdef Q_WS_X11
-    #include <Qt/qx11info_x11.h>
-    #include <X11/Xlib.h>
+#include <Qt/qx11info_x11.h>
+#include <X11/Xlib.h>
 #endif
 #include <iostream>
 #include <cpp3ds/Emulator/SFMLWidget.hpp>
 #include <cpp3ds/Graphics/Color.hpp>
+#include <QtGui/qwindow.h>
 
 QSFMLCanvas::QSFMLCanvas(QWidget* Parent) :
 QWidget       (Parent),
@@ -17,17 +18,12 @@ paintCount (0)
     setAttribute(Qt::WA_NoSystemBackground);
     setAttribute(Qt::WA_PaintUnclipped);
 
-	topLeftScreen.create(400, 240, true);
-	topRightScreen.create(400, 240, true);
-	bottomScreen.create(320, 240, true);
-
     // Set strong focus to enable keyboard events to be received
     setFocusPolicy(Qt::WheelFocus);
 
     QSizePolicy test = this->sizePolicy();// (QSizePolicy::Minimum, QSizePolicy::Minimum);
     test.setHeightForWidth(true);
     setSizePolicy(test);
-    std::cout << "QSFMLCanvas Made!" << std::endl;
 }
 
 QSFMLCanvas::~QSFMLCanvas(){}
@@ -42,7 +38,7 @@ void QSFMLCanvas::showEvent(QShowEvent*)
         #endif
 
         // Create the SFML window with the widget handle
-		RenderWindow::create(winId());
+		RenderWindow::create(QWidget::winId());
 
         myInitialized = true;
     }
@@ -52,7 +48,6 @@ void QSFMLCanvas::resizeEvent (QResizeEvent* event) {
 	RenderWindow::onResize();
 	int w = event->size().width(),
 	    h = event->size().height();
-	std::cout << "RESIZED width:" << w << " height:" << h << std::endl;
 }
 
 int QSFMLCanvas::heightForWidth( int w ) {
@@ -69,7 +64,6 @@ QPaintEngine* QSFMLCanvas::paintEngine() const {
 void QSFMLCanvas::paintEvent(QPaintEvent*) {
 	// Dirty hack to get cleared black widget after initialization
 	if (paintCount++ < 2) {
-		std::cout << "QSFMLCanvas::paintEvent" << std::endl;
 		RenderWindow::clear(sf::Color::Black);
 		RenderWindow::display();
 	}
@@ -80,28 +74,56 @@ void QSFMLCanvas::mousePressEvent(QMouseEvent* event) {
     e.type = sf::Event::MouseButtonPressed;
     e.mouseButton.x = event->x();
     e.mouseButton.y = event->y();
-    pushMouseEvent(e);
+	pushEvent(e);
 }
 void QSFMLCanvas::mouseMoveEvent(QMouseEvent* event) {
 	sf::Event e;
 	e.type = sf::Event::MouseMoved;
 	e.mouseButton.x = event->x();
 	e.mouseButton.y = event->y();
-	pushMouseEvent(e);
+	pushEvent(e);
 }
 void QSFMLCanvas::mouseReleaseEvent(QMouseEvent* event) {
 	sf::Event e;
 	e.type = sf::Event::MouseButtonReleased;
 	e.mouseButton.x = event->x();
 	e.mouseButton.y = event->y();
-	pushMouseEvent(e);
+	pushEvent(e);
 }
 
-void QSFMLCanvas::pushMouseEvent(const sf::Event& event) {
+std::map<Qt::Key, sf::Keyboard::Key> keyMap = {
+		{Qt::Key_A, sf::Keyboard::A},
+		{Qt::Key_B, sf::Keyboard::B},
+		{Qt::Key_X, sf::Keyboard::X},
+		{Qt::Key_Y, sf::Keyboard::Y},
+		{Qt::Key_L, sf::Keyboard::L},
+		{Qt::Key_R, sf::Keyboard::R},
+		{Qt::Key_Enter, sf::Keyboard::Return},
+};
+void QSFMLCanvas::keyPressEvent(QKeyEvent * event) {
+	auto key = keyMap.find(static_cast<Qt::Key>(event->key()));
+	if (key != keyMap.end()) {
+		sf::Event e;
+		e.type = sf::Event::KeyPressed;
+		e.key.code = key->second;
+		pushEvent(e);
+	}
+}
+void QSFMLCanvas::keyReleaseEvent(QKeyEvent * event) {
+	auto key = keyMap.find(static_cast<Qt::Key>(event->key()));
+	if (key != keyMap.end()) {
+		sf::Event e;
+		e.type = sf::Event::KeyReleased;
+		e.key.code = key->second;
+		pushEvent(e);
+	}
+}
+
+void QSFMLCanvas::pushEvent(const sf::Event& event) {
 	m_events.push(event);
 }
 
-bool QSFMLCanvas::pollMouseEvent(sf::Event& event) {
+bool QSFMLCanvas::pollEvent(sf::Event& event) {
 	// Pop the first event of the queue, if it is not empty
 	if (!m_events.empty()) {
 		event = m_events.front();

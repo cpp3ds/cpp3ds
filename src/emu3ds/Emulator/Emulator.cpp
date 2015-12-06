@@ -4,7 +4,9 @@
 
 namespace cpp3ds {
 
-	Emulator::Emulator(QWidget *parent): QMainWindow(parent){
+	Emulator::Emulator(QWidget *parent)
+	: QMainWindow(parent)
+	{
 		setupUi(this);
 
 //		float ratio = (float)logo->get_width() / logo->get_height();
@@ -12,9 +14,9 @@ namespace cpp3ds {
 
 		// Create and add a SFML widget
 		screen = new QSFMLCanvas(this);
+		verticalLayout->addWidget(screen, 0, Qt::AlignCenter);
 		screen->setMinimumHeight(480);
 		screen->setMinimumWidth(400);
-		verticalLayout->addWidget(screen, 0, Qt::AlignCenter);
 //		centralwidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 		screen->setFramerateLimit(60);
 		screen->setKeyRepeatEnabled(false);
@@ -38,7 +40,7 @@ namespace cpp3ds {
 		pausedFrameTexture.create(800 + EMU_OUTLINE_THICKNESS*2, 480 + EMU_OUTLINE_THICKNESS*2);
 
 //		this->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-		this->setMinimumWidth(500);
+		this->setMinimumWidth(400);
 	}
 
 	Emulator::~Emulator(){
@@ -54,11 +56,10 @@ namespace cpp3ds {
 	}
 
 	// Meant to be run in another thread or will block the GUI.
-	void Emulator::runGame(){
+	void Emulator::runGame() {
 		isThreadRunning = true;
 		std::cout << "Emulation starting..." << std::endl;
         screen->setActive(true);
-//		cpp3ds_main();
         __real_main(0, NULL);
 		std::cout << "Emulation ended. " << std::endl;
 		screen->setActive(false);
@@ -83,7 +84,6 @@ namespace cpp3ds {
 		while (screen->pollEvent(event)) {
             int i = 0;
         }
-		while (screen->pollMouseEvent(event)) {}
         screen->setActive(false);
 		if (!isThreadRunning)
 			thread->launch();
@@ -136,9 +136,7 @@ namespace cpp3ds {
 		if (!initialized){
 			initialized = true;
 			screen->clear();
-			// TODO: Make pausedFrame the cpp3ds logo?
 			screen->display();
-//			pausedFrameTexture.update(screen->renderWindow);
 			updatePausedFrame();
 		}
 
@@ -178,14 +176,11 @@ namespace cpp3ds {
 		slider3D->setEnabled(checked);
 		if (checked) {
 			screen->setMinimumWidth(800);
-			sf::View view;
-			view.reset(sf::FloatRect(0, 0, 800, 480));
-			screen->setView(view);
+			this->setMinimumWidth(800);
 		} else {
 			screen->setMinimumWidth(400);
-			screen->setView(screen->getDefaultView());
+			this->setMinimumWidth(400);
 		}
-//		screen->set_size_request(active ? 800 + SIM_OUTLINE_THICKNESS*2 : 400, 480 + SIM_OUTLINE_THICKNESS*2);
 		// Resize window to smallest size allowed
 		this->adjustSize();
 	}
