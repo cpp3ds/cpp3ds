@@ -145,7 +145,7 @@ void Sound::setBuffer(const SoundBuffer& buffer)
     }
 
 	memset(&m_ndspWaveBuf, 0, sizeof(ndspWaveBuf));
-	m_ndspWaveBuf.data_vaddr = reinterpret_cast<u32>(buffer.getSamples());
+	m_ndspWaveBuf.data_vaddr = buffer.getSamples();
 	m_ndspWaveBuf.nsamples = buffer.getSampleCount();
 	m_ndspWaveBuf.looping = m_loop; // Loop enabled
 	m_ndspWaveBuf.status = NDSP_WBUF_FREE;
@@ -185,7 +185,7 @@ void Sound::setPlayingOffset(Time timeOffset)
 	stop();
 	m_playOffset = timeOffset;
 	int offset = m_buffer->getSampleRate() * m_buffer->getChannelCount() * timeOffset.asSeconds();
-	m_ndspWaveBuf.data_vaddr = reinterpret_cast<u32>(m_buffer->getSamples() + offset);
+	m_ndspWaveBuf.data_vaddr = m_buffer->getSamples() + offset;
 	m_ndspWaveBuf.nsamples = m_buffer->getSampleCount() - offset;
 	if (status == Playing)
 		ndspChnWaveBufAdd(m_channel, &m_ndspWaveBuf);

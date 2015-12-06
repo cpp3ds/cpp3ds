@@ -30,7 +30,7 @@ tar -xaf 3ds-tools-linux-r3.tar.gz
 cp 3ds-tools/* $DEVKITARM/bin
 
 # Get latest ctrulib
-git clone https://github.com/smealum/ctrulib.git
+git clone https://github.com/Cruel/ctrulib.git
 cd ctrulib/libctru && git checkout great-refactor && make -j4 install && cd -
 
 # Build gl3ds

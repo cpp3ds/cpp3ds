@@ -418,7 +418,7 @@ bool SoundStream::fillAndPushBuffer(unsigned int bufferNum)
 		buffer.assign(data.samples, data.samples + data.sampleCount);
 
 		memset(&ndspBuffer, 0, sizeof(ndspWaveBuf));
-		ndspBuffer.data_vaddr = reinterpret_cast<u32>(&buffer[0]);
+		ndspBuffer.data_vaddr = &buffer[0];
 		ndspBuffer.nsamples = data.sampleCount;
 		ndspBuffer.looping = false;
 		ndspBuffer.status = NDSP_WBUF_FREE;

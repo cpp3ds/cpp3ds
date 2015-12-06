@@ -27,128 +27,172 @@
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/Audio/Sound.hpp>
 #include <cpp3ds/Audio/SoundBuffer.hpp>
+#include "ALCheck.hpp"
+
 
 namespace cpp3ds
 {
 ////////////////////////////////////////////////////////////
 Sound::Sound() :
-		m_buffer(NULL),
-		m_sound()
+m_buffer(NULL)
 {
 }
 
 
 ////////////////////////////////////////////////////////////
 Sound::Sound(const SoundBuffer& buffer) :
-		m_buffer(NULL),
-		m_sound()
+m_buffer(NULL)
 {
-	setBuffer(buffer);
+    setBuffer(buffer);
 }
 
 
 ////////////////////////////////////////////////////////////
 Sound::Sound(const Sound& copy) :
-		SoundSource(copy),
-		m_buffer   (NULL),
-		m_sound(copy.m_sound)
+SoundSource(copy),
+m_buffer   (NULL)
 {
-	if (copy.m_buffer)
-		setBuffer(*copy.m_buffer);
-	setLoop(copy.getLoop());
+    if (copy.m_buffer)
+        setBuffer(*copy.m_buffer);
+    setLoop(copy.getLoop());
 }
 
 
 ////////////////////////////////////////////////////////////
 Sound::~Sound()
 {
-
+    stop();
+    if (m_buffer)
+        m_buffer->detachSound(this);
 }
 
 
 ////////////////////////////////////////////////////////////
 void Sound::play()
 {
-	m_sound.play();
+    alCheck(alSourcePlay(m_source));
 }
 
 
 ////////////////////////////////////////////////////////////
 void Sound::pause()
 {
-	m_sound.pause();
+    alCheck(alSourcePause(m_source));
 }
 
 
 ////////////////////////////////////////////////////////////
 void Sound::stop()
 {
-	m_sound.stop();
+    alCheck(alSourceStop(m_source));
 }
 
 
 ////////////////////////////////////////////////////////////
 void Sound::setBuffer(const SoundBuffer& buffer)
 {
-	m_sound.setBuffer(buffer.m_soundBuffer);
+    // First detach from the previous buffer
+    if (m_buffer)
+    {
+        stop();
+        m_buffer->detachSound(this);
+    }
+
+    // Assign and use the new buffer
+    m_buffer = &buffer;
+    m_buffer->attachSound(this);
+    alCheck(alSourcei(m_source, AL_BUFFER, m_buffer->m_buffer));
 }
 
 
 ////////////////////////////////////////////////////////////
 void Sound::setLoop(bool loop)
 {
-	m_sound.setLoop(loop);
+    alCheck(alSourcei(m_source, AL_LOOPING, loop));
 }
 
 
 ////////////////////////////////////////////////////////////
 void Sound::setPlayingOffset(Time timeOffset)
 {
-	m_sound.setPlayingOffset(sf::seconds(timeOffset.asSeconds()));
+    alCheck(alSourcef(m_source, AL_SEC_OFFSET, timeOffset.asSeconds()));
 }
 
 
 ////////////////////////////////////////////////////////////
 const SoundBuffer* Sound::getBuffer() const
 {
-	return m_buffer;
+    return m_buffer;
 }
 
 
 ////////////////////////////////////////////////////////////
 bool Sound::getLoop() const
 {
-	return m_sound.getLoop();
+    ALint loop;
+    alCheck(alGetSourcei(m_source, AL_LOOPING, &loop));
+
+    return loop != 0;
 }
 
 
 ////////////////////////////////////////////////////////////
 Time Sound::getPlayingOffset() const
 {
-	return seconds(m_sound.getPlayingOffset().asSeconds());
+    ALfloat secs = 0.f;
+    alCheck(alGetSourcef(m_source, AL_SEC_OFFSET, &secs));
+
+    return seconds(secs);
 }
 
 
 ////////////////////////////////////////////////////////////
 Sound::Status Sound::getStatus() const
 {
-	return static_cast<Sound::Status>(m_sound.getStatus());
+    return SoundSource::getStatus();
 }
 
 
 ////////////////////////////////////////////////////////////
 Sound& Sound::operator =(const Sound& right)
 {
-	m_sound = right.m_sound;
+    // Here we don't use the copy-and-swap idiom, because it would mess up
+    // the list of sound instances contained in the buffers and unnecessarily
+    // destroy/create OpenAL sound sources
 
-	return *this;
+    // Delegate to base class, which copies all the sound attributes
+    SoundSource::operator=(right);
+
+    // Detach the sound instance from the previous buffer (if any)
+    if (m_buffer)
+    {
+        stop();
+        m_buffer->detachSound(this);
+        m_buffer = NULL;
+    }
+
+    // Copy the remaining sound attributes
+    if (right.m_buffer)
+        setBuffer(*right.m_buffer);
+    setLoop(right.getLoop());
+
+    return *this;
 }
 
 
 ////////////////////////////////////////////////////////////
 void Sound::resetBuffer()
 {
-	m_sound.resetBuffer();
+    // First stop the sound in case it is playing
+    stop();
+
+    // Detach the buffer
+    if (m_buffer)
+    {
+        alCheck(alSourcei(m_source, AL_BUFFER, 0));
+        m_buffer->detachSound(this);
+        m_buffer = NULL;
+    }
 }
 
 } // namespace cpp3ds

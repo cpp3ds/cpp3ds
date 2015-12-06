@@ -205,7 +205,7 @@ void RenderTarget::draw(const Vertex* vertices, unsigned int vertexCount,
 
 	// Vertices allocated in the stack (common) can't be converted to physical address
 	#ifndef EMULATION
-	if (osConvertVirtToPhys((u32)vertices) == 0)
+	if (osConvertVirtToPhys(vertices) == 0)
 	{
 		err() << "RenderTarget::draw() called with vertex array in inaccessible memory space." << std::endl;
 		return;
@@ -290,7 +290,7 @@ void RenderTarget::draw(const Vertex* vertices, unsigned int vertexCount,
 				u8 bufferAttribCounts[] = {3};
 				GPU_SetAttributeBuffers(
 					3, // number of attributes
-					(u32*)osConvertVirtToPhys((u32)vertices),
+					(u32*)osConvertVirtToPhys(vertices),
 					GPU_ATTRIBFMT(0, 2, GPU_FLOAT) | GPU_ATTRIBFMT(1, 4, GPU_UNSIGNED_BYTE) | GPU_ATTRIBFMT(2, 2, GPU_FLOAT),
 					0xFF8, //0b1100
 					0x210,
