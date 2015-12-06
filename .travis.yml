@@ -10,14 +10,15 @@ addons:
     sources:
       - ubuntu-toolchain-r-test
       - kalakris-cmake
-      - boost-latest
+      - ubuntu-sdk-team
     packages:
       - gcc-4.9
       - g++-4.9
       - libsfml-dev
+      - qt5-default
+      - libopenal-dev
       - libgtest-dev
       - cmake
-      - libboost1.55-all-dev
 
 before_install:
   - source .build-deps.sh
