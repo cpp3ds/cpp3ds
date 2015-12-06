@@ -9,12 +9,13 @@
 namespace cpp3ds {
 
 enum ServiceName {
-	NETWORK    = 1 << 0,
-	AUDIO      = 1 << 1,
-	CONFIG     = 1 << 2,
-	ROMFS      = 1 << 3,
+	NETWORK     = 1 << 0,
+	AUDIO       = 1 << 1,
+	CONFIG      = 1 << 2,
+	ROMFS       = 1 << 3,
+	WIFI_STATUS = 1 << 4,
 
-	ALL        = 0xFFFF
+	ALL         = 0xFFFF
 };
 
 class Service {
@@ -26,7 +27,7 @@ public:
 private:
 	static Uint16 m_enabledServices;
 	#ifndef EMULATION
-	static u32* socBuffer;
+	static u32* m_socBuffer;
 	#endif
 };
 
