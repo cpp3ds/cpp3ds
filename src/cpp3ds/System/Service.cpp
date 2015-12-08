@@ -20,10 +20,10 @@ bool Service::enable(ServiceName service) {
 	Result result;
 
 	switch (service) {
-		case ALL:
-			return enable(NETWORK) && enable(AUDIO) &&
-			       enable(CONFIG) && enable(ROMFS);
-		case NETWORK:
+		case All:
+			return enable(Network) && enable(Audio) &&
+			       enable(Config) && enable(RomFS);
+		case Network:
 			m_socBuffer = (u32*) memalign(0x1000, 0x100000);
 			if (m_socBuffer == nullptr)
 				break;
@@ -36,19 +36,19 @@ bool Service::enable(ServiceName service) {
 			}
 			success = true;
 			break;
-		case AUDIO:
+		case Audio:
 			result = ndspInit();
 			success = R_SUCCEEDED(result);
 			if (!success)
 				err() << "Audio service (dsp) failed to initialize: " << std::hex << result;
 			break;
-		case CONFIG:
+		case Config:
 			success = R_SUCCEEDED(cfguInit());
 			break;
-		case ROMFS:
+		case RomFS:
 			success = R_SUCCEEDED(romfsInit());
 			break;
-		case WIFI_STATUS:
+		case WifiStatus:
 			success = R_SUCCEEDED(acInit());
 			break;
 		default:
@@ -62,9 +62,9 @@ bool Service::enable(ServiceName service) {
 
 
 bool Service::disable(ServiceName service) {
-	if (service == ALL)
-		return disable(NETWORK) && disable(AUDIO) &&
-			   disable(CONFIG) && disable(ROMFS);
+	if (service == All)
+		return disable(Network) && disable(Audio) &&
+			   disable(Config) && disable(RomFS);
 
 	if (!isEnabled(service))
 		return true;
@@ -72,20 +72,20 @@ bool Service::disable(ServiceName service) {
 	bool success = true;
 
 	switch (service) {
-		case NETWORK:
+		case Network:
 			socExit();
 			free(m_socBuffer);
 			break;
-		case AUDIO:
+		case Audio:
 			ndspExit();
 			break;
-		case CONFIG:
+		case Config:
 			cfguExit();
 			break;
-		case ROMFS:
+		case RomFS:
 			romfsExit();
 			break;
-		case WIFI_STATUS:
+		case WifiStatus:
 			acExit();
 			break;
 		default:
@@ -99,8 +99,8 @@ bool Service::disable(ServiceName service) {
 
 
 bool Service::isEnabled(ServiceName service) {
-	if (service == NETWORK) {
-		if (!enable(WIFI_STATUS))
+	if (service == Network) {
+		if (!enable(WifiStatus))
 			return false;
 		u32 status;
 		Result result = ACU_GetWifiStatus(&status);

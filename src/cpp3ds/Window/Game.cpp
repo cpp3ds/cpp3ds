@@ -25,7 +25,7 @@ Game::Game()
 , m_consoleEnabled(false)
 {
 	gfxInitDefault();
-	Service::enable(ROMFS);
+	Service::enable(RomFS);
 	Console::initialize(); // Initialize console if it hasn't been already
 	I18n::getInstance();   // Init and load localization file(s)
 
@@ -42,7 +42,7 @@ Game::Game()
 
 Game::~Game()
 {
-	Service::disable(ALL);
+	Service::disable(All);
 	gfxExit();
 }
 

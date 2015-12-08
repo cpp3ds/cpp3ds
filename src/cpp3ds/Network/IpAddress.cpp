@@ -50,7 +50,7 @@ namespace
                 return ip;
 
 			// Try address as a host name.
-			if (cpp3ds::Service::isEnabled(cpp3ds::NETWORK)) {
+			if (cpp3ds::Service::isEnabled(cpp3ds::Network)) {
 				struct hostent* host = gethostbyname(address.c_str());
 				struct in_addr** addr_list = reinterpret_cast<struct in_addr**>(host->h_addr_list);
 				if (addr_list[0] != NULL)

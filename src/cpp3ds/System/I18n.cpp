@@ -45,7 +45,7 @@ I18n& I18n::getInstance()
 I18n::I18n()
 {
 	Uint8 langcode;
-	Service::enable(CONFIG);
+	Service::enable(Config);
 #ifdef EMULATION
 	langcode = 1; // TODO: get actual locale of PC
 #else
