@@ -8,6 +8,11 @@ float Keyboard::m_slider3d     = 0;
 float Keyboard::m_sliderVolume = 0;
 
 ////////////////////////////////////////////////////////////
+bool Keyboard::isKeyDown(Key key) {
+	return isKeyPressed(key);
+}
+
+////////////////////////////////////////////////////////////
 bool Keyboard::isKeyPressed(Key key) {
 	return sf::Keyboard::isKeyPressed(static_cast<sf::Keyboard::Key>(key));
 }

@@ -126,17 +126,13 @@ private:
 ///
 /// Usage example:
 /// \code
-/// if (cpp3ds::Keyboard::isKeyPressed(cpp3ds::Mouse, cpp3ds::Keyboard::Left))
+/// if (cpp3ds::Keyboard::isKeyPressed(cpp3ds::Keyboard::Left))
 /// {
 ///     // move left...
 /// }
 /// else if (cpp3ds::Keyboard::isKeyPressed(cpp3ds::Keyboard::Right))
 /// {
 ///     // move right...
-/// }
-/// else if (cpp3ds::Keyboard::isKeyPressed(cpp3ds::Keyboard::Escape))
-/// {
-///     // quit...
 /// }
 /// \endcode
 ///

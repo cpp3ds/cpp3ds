@@ -16,7 +16,7 @@ bool Keyboard::isKeyDown(Key key) {
 
 ////////////////////////////////////////////////////////////
 bool Keyboard::isKeyPressed(Key key) {
-	return (m_keysPressed& static_cast<u32>(key));
+	return (m_keysPressed & static_cast<u32>(key));
 }
 
 ////////////////////////////////////////////////////////////
