@@ -213,12 +213,6 @@ void RenderTarget::draw(const Vertex* vertices, unsigned int vertexCount,
 	#endif
 
 	// GL_QUADS is unavailable on OpenGL ES
-	if (type == Quads)
-	{
-		err() << "cpp3ds::Quads primitive type is not supported on OpenGL ES platforms, drawing skipped" << std::endl;
-		return;
-	}
-	#define GL_QUADS 0
 
     if (activate(true))
     {
@@ -303,8 +297,7 @@ void RenderTarget::draw(const Vertex* vertices, unsigned int vertexCount,
         }
 
         // Find the OpenGL primitive type
-        static const GLenum modes[] = {GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES,
-                                       GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_QUADS};
+        static const GLenum modes[] = {GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN};
         GLenum mode = modes[type];
 
         // Draw the primitives
