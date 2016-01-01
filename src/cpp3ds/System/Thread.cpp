@@ -34,7 +34,6 @@ namespace cpp3ds
 ////////////////////////////////////////////////////////////
 void Thread::initialize()
 {
-	threadStack = (u32*)memalign(32, sizeof(u32) * THREAD_STACK_SIZE);
 }
 
 
@@ -42,7 +41,6 @@ void Thread::initialize()
 Thread::~Thread()
 {
     wait();
-	free(threadStack);
     delete m_entryPoint;
 }
 
@@ -51,7 +49,10 @@ Thread::~Thread()
 void Thread::launch()
 {
     wait();
-	svcCreateThread(&m_thread, &Thread::entryPoint, (u32)this, &threadStack[THREAD_STACK_SIZE/sizeof(u32)], 0x3F, 0);
+
+	s32 prio = 0;
+	svcGetThreadPriority(&prio, CUR_THREAD_HANDLE);
+	m_thread = threadCreate(&Thread::entryPoint, this, THREAD_STACK_SIZE, prio-1, -2, false);
 }
 
 
@@ -59,11 +60,9 @@ void Thread::launch()
 void Thread::wait()
 {
 	// TODO: check that this isn't current thread asking to wait for itself
-    if (m_thread != 0)
-	{
-		svcWaitSynchronization(m_thread, U64_MAX);
-		svcCloseHandle(m_thread);
-		m_thread = 0;
+	if (m_thread != nullptr) {
+		threadJoin(m_thread, U64_MAX);
+		m_thread = nullptr;
 	}
 }
 
@@ -71,7 +70,7 @@ void Thread::wait()
 ////////////////////////////////////////////////////////////
 void Thread::terminate()
 {
-    if (m_thread != 0)
+    if (m_thread != nullptr)
     {
 		// TODO: implement this
     }
@@ -94,7 +93,6 @@ void Thread::entryPoint(void* userData)
 	// Forward to the owner
 	owner->run();
 
-	svcExitThread();
 }
 
 } // namespace cpp3ds

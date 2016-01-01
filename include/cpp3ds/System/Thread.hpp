@@ -203,12 +203,11 @@ private :
     ////////////////////////////////////////////////////////////
     priv::ThreadFunc* m_entryPoint; ///< Abstraction of the function to run
 	bool              m_isActive; ///< Thread state (active or inactive)
-	#ifdef EMULATION
+#ifdef EMULATION
 	sf::Thread* m_thread;
-	#else
-	Handle  m_thread;
-	u32*    threadStack;
-	#endif
+#else
+	::Thread  m_thread;
+#endif
 };
 
 #include <cpp3ds/System/Thread.inl>
