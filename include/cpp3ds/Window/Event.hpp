@@ -2,7 +2,6 @@
 #define CPP3DS_EVENT_HPP
 
 #include <cpp3ds/Config.hpp>
-#include <cpp3ds/Window/Joystick.hpp>
 #include <cpp3ds/Window/Keyboard.hpp>
 #include <cpp3ds/Window/Sensor.hpp>
 
