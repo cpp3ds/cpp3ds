@@ -14,6 +14,7 @@ enum ServiceName {
 	Config     = 1 << 2,
 	RomFS      = 1 << 3,
 	WifiStatus = 1 << 4,
+	Microphone = 1 << 5,
 
 	All         = 0xFFFF
 };
@@ -24,6 +25,9 @@ public:
 	static bool disable(ServiceName service);
 	static bool isEnabled(ServiceName service);
 
+#ifndef EMULATION
+	static u8*  m_micBuffer;
+#endif
 private:
 	static Uint16 m_enabledServices;
 #ifndef EMULATION
