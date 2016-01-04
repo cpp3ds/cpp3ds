@@ -282,7 +282,7 @@ Image Texture::copyToImage() const
 
     // Create an array of pixels
     std::vector<Uint8> pixels(m_size.x * m_size.y * 4);
-
+#if 0
     // OpenGL ES doesn't have the glGetTexImage function, the only way to read
     // from a texture is to bind it to a FBO and use glReadPixels
     GLuint frameBuffer = 0;
@@ -299,7 +299,43 @@ Image Texture::copyToImage() const
 
         glCheck(GLEXT_glBindFramebuffer(GLEXT_GL_FRAMEBUFFER, previousFrameBuffer));
     }
+#else
+	if ((m_size == m_actualSize) && !m_pixelsFlipped)
+	{
+		// Texture is not padded nor flipped, we can use a direct copy
+		glCheck(glBindTexture(GL_TEXTURE_2D, m_texture));
+		glCheck(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, &pixels[0]));
+	}
+	else
+	{
+		// Texture is either padded or flipped, we have to use a slower algorithm
 
+		// All the pixels will first be copied to a temporary array
+		std::vector<Uint8> allPixels(m_actualSize.x * m_actualSize.y * 4);
+		glCheck(glBindTexture(GL_TEXTURE_2D, m_texture));
+		glCheck(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, &allPixels[0]));
+
+		// Then we copy the useful pixels from the temporary array to the final one
+		const Uint8* src = &allPixels[0];
+		Uint8* dst = &pixels[0];
+		int srcPitch = m_actualSize.x * 4;
+		int dstPitch = m_size.x * 4;
+
+		// Handle the case where source pixels are flipped vertically
+		if (m_pixelsFlipped)
+		{
+			src += srcPitch * (m_size.y - 1);
+			srcPitch = -srcPitch;
+		}
+
+		for (unsigned int i = 0; i < m_size.y; ++i)
+		{
+			std::memcpy(dst, src, dstPitch);
+			src += srcPitch;
+			dst += dstPitch;
+		}
+	}
+#endif
     // Create the image
     Image image;
     image.create(m_size.x, m_size.y, &pixels[0]);
