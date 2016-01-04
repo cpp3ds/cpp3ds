@@ -55,20 +55,20 @@ set(SRC
         ${SRCROOT}/Graphics/Console.cpp
         ${SRCROOT}/Graphics/ConvexShape.cpp
         ${SRCROOT}/Graphics/Font.cpp
-        ${SRCROOT}/Graphics/GLCheck.cpp
+        ${EMUSRCROOT}/Graphics/GLCheck.cpp
         ${SRCROOT}/Graphics/GLExtensions.cpp
         ${SRCROOT}/Graphics/Image.cpp
         ${SRCROOT}/Graphics/ImageLoader.cpp
         ${SRCROOT}/Graphics/RectangleShape.cpp
         ${SRCROOT}/Graphics/RenderStates.cpp
-        ${SRCROOT}/Graphics/RenderTarget.cpp
+        ${EMUSRCROOT}/Graphics/RenderTarget.cpp
         ${SRCROOT}/Graphics/RenderTexture.cpp
-        ${SRCROOT}/Graphics/Shader.cpp
+        ${EMUSRCROOT}/Graphics/Shader.cpp
         ${SRCROOT}/Graphics/Shape.cpp
         ${SRCROOT}/Graphics/Sprite.cpp
         ${SRCROOT}/Graphics/Text.cpp
-        ${SRCROOT}/Graphics/Texture.cpp
-        ${SRCROOT}/Graphics/TextureSaver.cpp
+        ${EMUSRCROOT}/Graphics/Texture.cpp
+        ${EMUSRCROOT}/Graphics/TextureSaver.cpp
         ${SRCROOT}/Graphics/Transform.cpp
         ${SRCROOT}/Graphics/Transformable.cpp
         ${SRCROOT}/Graphics/Vertex.cpp
@@ -107,7 +107,7 @@ set(SRC
         ${SRCROOT}/Window/Context.cpp
         ${EMUSRCROOT}/Window/EventManager.cpp
         ${EMUSRCROOT}/Window/Game.cpp
-        ${SRCROOT}/Window/GlContext.cpp
+        ${EMUSRCROOT}/Window/GlContext.cpp
         ${EMUSRCROOT}/Window/GlResource.cpp
         ${EMUSRCROOT}/Window/Keyboard.cpp
         ${SRCROOT}/Window/Sensor.cpp
