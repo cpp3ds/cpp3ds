@@ -22,6 +22,7 @@ public:
 	virtual void renderTopScreen(Window& window) = 0;
     virtual void renderBottomScreen(Window& window) = 0;
 	void console(Screen screen = BottomScreen, Color color = Color::White);
+	void consoleBasic(Screen screen = BottomScreen);
     void render();
 	void run();
 	void exit();
@@ -31,8 +32,10 @@ protected:
     Window windowTop, windowBottom;
 private:
 	bool m_consoleEnabled;
+	bool m_consoleBasicEnabled;
 	bool m_triggerExit;
 	Console m_console;
+	Screen m_consoleScreen;
 #ifdef EMULATION
 	sf::RenderTexture m_frameTextureTop, m_frameTextureBottom;
 	sf::Sprite m_frameSpriteTop, m_frameSpriteBottom;

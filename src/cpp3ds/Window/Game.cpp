@@ -23,10 +23,10 @@ static void apt_clock_hook(APT_HookType hook, void* param)
 Game::Game()
 : m_triggerExit(false)
 , m_consoleEnabled(false)
+, m_consoleBasicEnabled(false)
 {
 	gfxInitDefault();
 	Service::enable(RomFS);
-	Console::initialize(); // Initialize console if it hasn't been already
 	I18n::getInstance();   // Init and load localization file(s)
 
 	windowTop.create(ContextSettings(TopScreen));
@@ -49,7 +49,10 @@ Game::~Game()
 
 void Game::console(Screen screen, Color color)
 {
+	if (m_consoleEnabled || m_consoleBasicEnabled)
+		return;
 	Console::initialize();
+	m_consoleScreen = screen;
 	m_consoleEnabled = true;
 	m_console.setVisible(true);
 	m_console.create(screen);
@@ -57,19 +60,33 @@ void Game::console(Screen screen, Color color)
 }
 
 
+void Game::consoleBasic(Screen screen)
+{
+	if (m_consoleEnabled || m_consoleBasicEnabled)
+		return;
+	consoleInit(screen == TopScreen ? GFX_TOP : GFX_BOTTOM, nullptr);
+	m_consoleScreen = screen;
+	m_consoleBasicEnabled = true;
+}
+
+
 void Game::render()
 {
-	windowTop.setActive(true);
-	renderTopScreen(windowTop);
-	if (m_consoleEnabled && m_console.getScreen() == TopScreen)
-		windowTop.draw(m_console);
-	windowTop.display();
+	if (!m_consoleBasicEnabled || m_consoleScreen != TopScreen) {
+		windowTop.setActive(true);
+		renderTopScreen(windowTop);
+		if (m_consoleEnabled && m_consoleScreen == TopScreen)
+			windowTop.draw(m_console);
+		windowTop.display();
+	}
 
-	windowBottom.setActive(true);
-	renderBottomScreen(windowBottom);
-	if (m_consoleEnabled && m_console.getScreen() == BottomScreen)
-		windowBottom.draw(m_console);
-	windowBottom.display();
+	if (!m_consoleBasicEnabled || m_consoleScreen != BottomScreen) {
+		windowBottom.setActive(true);
+		renderBottomScreen(windowBottom);
+		if (m_consoleEnabled && m_consoleScreen == BottomScreen)
+			windowBottom.draw(m_console);
+		windowBottom.display();
+	}
 
 	gl3ds_swapBuffers();
 }
