@@ -70,8 +70,8 @@ set(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/lib")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 
 # compile flags
-set(ARCH "-march=armv6k -mtune=mpcore -mfloat-abi=hard")
-set(CPP3DS_ARM_FLAGS "-g -O2 ${ARCH} -fno-rtti -fno-exceptions -ffunction-sections -fdata-sections")
+set(ARCH "-march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft")
+set(CPP3DS_ARM_FLAGS "-g -O2 ${ARCH} -ffunction-sections -fdata-sections")
 set(CPP3DS_TEST_FLAGS "-g -O2")
 set(CPP3DS_EMU_FLAGS "-g -O2")
 
