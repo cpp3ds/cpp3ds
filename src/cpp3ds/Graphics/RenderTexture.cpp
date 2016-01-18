@@ -28,7 +28,6 @@
 #include <cpp3ds/Graphics/RenderTexture.hpp>
 #include <cpp3ds/OpenGL.hpp>
 #include <cpp3ds/System/Err.hpp>
-#include <cpp3ds/Graphics/TextureSaver.hpp>
 
 
 namespace cpp3ds
@@ -117,12 +116,9 @@ void RenderTexture::display()
     // Update the target texture
     if (setActive(true))
     {
-        // Make sure that the current texture binding will be preserved
-        priv::TextureSaver save;
-
         // Copy the rendered pixels to the texture
-        glCheck(glBindTexture(GL_TEXTURE_2D, m_texture.m_texture));
-        glCheck(glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_width, m_height));
+//        glCheck(glBindTexture(GL_TEXTURE_2D, m_texture.m_texture));
+//        glCheck(glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_width, m_height));
         m_texture.m_pixelsFlipped = true;
     }
 }

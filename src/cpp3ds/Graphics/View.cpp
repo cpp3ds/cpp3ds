@@ -217,6 +217,9 @@ const Transform& View::getTransform() const
         m_transform = Transform( a * cosine, a * sine,   a * tx + c,
                                 -b * sine,   b * cosine, b * ty + d,
                                  0.f,        0.f,        1.f);
+#ifndef EMULATION
+		m_transform.apply3dsFix();
+#endif
         m_transformUpdated = true;
     }
 

@@ -28,10 +28,6 @@
 #include <cpp3ds/Graphics/Sprite.hpp>
 #include <cpp3ds/Graphics/Texture.hpp>
 #include <cpp3ds/Graphics/RenderTarget.hpp>
-#include <cstdlib>
-#ifndef EMULATION
-#include <3ds.h>
-#endif
 
 
 namespace cpp3ds

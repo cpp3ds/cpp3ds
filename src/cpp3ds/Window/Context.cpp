@@ -50,7 +50,11 @@ Context::~Context()
 ////////////////////////////////////////////////////////////
 bool Context::setActive(bool active)
 {
+#ifdef EMULATION
     return m_context->setActive(active);
+#else
+    return true;
+#endif
 }
 
 

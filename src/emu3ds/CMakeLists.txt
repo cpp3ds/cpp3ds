@@ -69,7 +69,7 @@ set(SRC
         ${SRCROOT}/Graphics/Text.cpp
         ${EMUSRCROOT}/Graphics/Texture.cpp
         ${EMUSRCROOT}/Graphics/TextureSaver.cpp
-        ${SRCROOT}/Graphics/Transform.cpp
+        ${EMUSRCROOT}/Graphics/Transform.cpp
         ${SRCROOT}/Graphics/Transformable.cpp
         ${SRCROOT}/Graphics/Vertex.cpp
         ${SRCROOT}/Graphics/VertexArray.cpp

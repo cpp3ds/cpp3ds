@@ -3,6 +3,7 @@
 #include <cpp3ds/System/Service.hpp>
 #include <cpp3ds/Window/Game.hpp>
 #include <cpp3ds/System/I18n.hpp>
+#include "../Graphics/CitroHelpers.hpp"
 
 
 namespace cpp3ds {
@@ -25,7 +26,9 @@ Game::Game()
 , m_consoleEnabled(false)
 , m_consoleBasicEnabled(false)
 {
-	gfxInitDefault();
+	if (!Console::isInitialized())
+		gfxInitDefault();
+	CitroInit();
 	Service::enable(RomFS);
 	I18n::getInstance();   // Init and load localization file(s)
 
@@ -43,6 +46,7 @@ Game::Game()
 Game::~Game()
 {
 	Service::disable(All);
+	CitroDestroy();
 	gfxExit();
 }
 
@@ -64,7 +68,7 @@ void Game::consoleBasic(Screen screen)
 {
 	if (m_consoleEnabled || m_consoleBasicEnabled)
 		return;
-	consoleInit(screen == TopScreen ? GFX_TOP : GFX_BOTTOM, nullptr);
+	Console::initializeBasic(screen);
 	m_consoleScreen = screen;
 	m_consoleBasicEnabled = true;
 }
@@ -73,22 +77,26 @@ void Game::consoleBasic(Screen screen)
 void Game::render()
 {
 	if (!m_consoleBasicEnabled || m_consoleScreen != TopScreen) {
-		windowTop.setActive(true);
+		C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
+		C3D_FrameDrawOn(windowTop.getCitroTarget());
 		renderTopScreen(windowTop);
-		if (m_consoleEnabled && m_consoleScreen == TopScreen)
+		if (m_consoleEnabled && m_consoleScreen == TopScreen) {
+			windowTop.setView(windowTop.getDefaultView());
 			windowTop.draw(m_console);
-		windowTop.display();
+		}
+		C3D_FrameEnd(0);
 	}
 
 	if (!m_consoleBasicEnabled || m_consoleScreen != BottomScreen) {
-		windowBottom.setActive(true);
+		C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
+		C3D_FrameDrawOn(windowBottom.getCitroTarget());
 		renderBottomScreen(windowBottom);
-		if (m_consoleEnabled && m_consoleScreen == BottomScreen)
+		if (m_consoleEnabled && m_consoleScreen == BottomScreen) {
+			windowBottom.setView(windowBottom.getDefaultView());
 			windowBottom.draw(m_console);
-		windowBottom.display();
+		}
+		C3D_FrameEnd(0);
 	}
-
-	gl3ds_swapBuffers();
 }
 
 

@@ -4,6 +4,7 @@ set(SRC
     ${RESOURCE_OUTPUT} # Embedded resources needed for graphics
     ${SRCROOT}/BlendMode.cpp
     ${SRCROOT}/CircleShape.cpp
+    ${SRCROOT}/CitroHelpers.cpp
     ${SRCROOT}/Color.cpp
     ${SRCROOT}/Console.cpp
     ${SRCROOT}/ConvexShape.cpp
@@ -21,7 +22,6 @@ set(SRC
     ${SRCROOT}/Sprite.cpp
     ${SRCROOT}/Text.cpp
     ${SRCROOT}/Texture.cpp
-    ${SRCROOT}/TextureSaver.cpp
     ${SRCROOT}/Transform.cpp
     ${SRCROOT}/Transformable.cpp
     ${SRCROOT}/Vertex.cpp

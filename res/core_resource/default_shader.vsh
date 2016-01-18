@@ -20,8 +20,8 @@
 .alias texture        c8-c11
 
 main:
-	mov r1.xyz,  v0.xyz
-	mov r1.w,    myconst.w
+	mov r1.xy,  v0.xy
+	mov r1.zw,  myconst.yw
 
 mdvl:  // tempreg = mdlvMtx * in.pos
 	dp4 r0.x,  modelview[0],  r1

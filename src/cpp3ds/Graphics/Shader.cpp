@@ -33,11 +33,10 @@
 #include <cpp3ds/OpenGL/GLExtensions.hpp>
 #include <cpp3ds/System/InputStream.hpp>
 #include <cpp3ds/System/Err.hpp>
-#ifndef EMULATION
-#include <3ds.h>
-#endif
 #include <fstream>
 #include <vector>
+#include <3ds/gpu/shbin.h>
+#include "CitroHelpers.hpp"
 
 
 namespace
@@ -76,7 +75,7 @@ Shader Shader::Default;
 
 ////////////////////////////////////////////////////////////
 Shader::Shader() :
-m_shaderProgram (0),
+m_shaderProgram (NULL),
 m_currentTexture(-1),
 m_textures      (),
 m_params        ()
@@ -88,7 +87,9 @@ m_params        ()
 Shader::~Shader()
 {
     if (m_shaderProgram)
-        glDeleteProgram(m_shaderProgram);
+        shaderProgramFree(m_shaderProgram);
+    if (m_dvlb)
+        DVLB_Free(m_dvlb);
 }
 
 
@@ -96,12 +97,7 @@ Shader::~Shader()
 bool Shader::loadFromFile(const std::string& filename, Type type)
 {
 	std::string shaderfile;
-#ifdef EMULATION
-	// TODO: check for sdmc:/ filenames
-	shaderfile = "../res/glsl/" + filename + ".glsl";
-#else
 	shaderfile = filename + ".shbin";
-#endif
 
 	// Read the file
 	if (!getFileContents(shaderfile, m_shaderData))
@@ -110,15 +106,7 @@ bool Shader::loadFromFile(const std::string& filename, Type type)
 		return false;
 	}
 
-#ifdef EMULATION
-	// Compile the shader program
-    if (type == Vertex)
-        return compile(&m_shaderData[0], NULL);
-    else
-        return compile(NULL, &m_shaderData[0]);
-#else
 	return loadBinary(reinterpret_cast<Uint8*>(&m_shaderData[0]), m_shaderData.size(), type);
-#endif
 }
 
 
@@ -162,20 +150,12 @@ void Shader::setParameter(const std::string& name, float x)
 {
     if (m_shaderProgram)
     {
-        // Enable program
-        GLint program;
-        glCheck(glGetIntegerv(GL_CURRENT_PROGRAM, &program));
-        glCheck(glUseProgram(m_shaderProgram));
-
         // Get parameter location and assign it new values
-        GLint location = getParamLocation(name);
+        int location = getParamLocation(name);
         if (location != -1)
         {
-            glCheck(glUniform1f(location, x));
+            C3D_FVUnifSet(GPU_VERTEX_SHADER, location, x, 0, 0, 0);
         }
-
-        // Disable program
-        glCheck(glUseProgram(program));
     }
 }
 
@@ -185,20 +165,12 @@ void Shader::setParameter(const std::string& name, float x, float y)
 {
     if (m_shaderProgram)
     {
-        // Enable program
-        GLint program;
-        glCheck(glGetIntegerv(GL_CURRENT_PROGRAM, &program));
-        glCheck(glUseProgram(m_shaderProgram));
-
         // Get parameter location and assign it new values
-        GLint location = getParamLocation(name);
+        int location = getParamLocation(name);
         if (location != -1)
         {
-            glCheck(glUniform2f(location, x, y));
+            C3D_FVUnifSet(GPU_VERTEX_SHADER, location, x, y, 0, 0);
         }
-
-        // Disable program
-        glCheck(glUseProgram(program));
     }
 }
 
@@ -208,20 +180,12 @@ void Shader::setParameter(const std::string& name, float x, float y, float z)
 {
     if (m_shaderProgram)
     {
-        // Enable program
-        GLint program;
-        glCheck(glGetIntegerv(GL_CURRENT_PROGRAM, &program));
-        glCheck(glUseProgram(m_shaderProgram));
-
         // Get parameter location and assign it new values
-        GLint location = getParamLocation(name);
+        int location = getParamLocation(name);
         if (location != -1)
         {
-            glCheck(glUniform3f(location, x, y, z));
+            C3D_FVUnifSet(GPU_VERTEX_SHADER, location, x, y, z, 0);
         }
-
-        // Disable program
-        glCheck(glUseProgram(program));
     }
 }
 
@@ -231,20 +195,12 @@ void Shader::setParameter(const std::string& name, float x, float y, float z, fl
 {
     if (m_shaderProgram)
     {
-        // Enable program
-        GLint program;
-        glCheck(glGetIntegerv(GL_CURRENT_PROGRAM, &program));
-        glCheck(glUseProgram(m_shaderProgram));
-
         // Get parameter location and assign it new values
-        GLint location = getParamLocation(name);
+        int location = getParamLocation(name);
         if (location != -1)
         {
-            glCheck(glUniform4f(location, x, y, z, w));
+            C3D_FVUnifSet(GPU_VERTEX_SHADER, location, x, y, z, w);
         }
-
-        // Disable program
-        glCheck(glUseProgram(program));
     }
 }
 
@@ -275,20 +231,12 @@ void Shader::setParameter(const std::string& name, const cpp3ds::Transform& tran
 {
     if (m_shaderProgram)
     {
-        // Enable program
-        GLint program;
-        glCheck(glGetIntegerv(GL_CURRENT_PROGRAM, &program));
-        glCheck(glUseProgram(m_shaderProgram));
-
         // Get parameter location and assign it new values
-        GLint location = getParamLocation(name);
+        int location = getParamLocation(name);
         if (location != -1)
         {
-            glCheck(glUniformMatrix4fv(location, 1, GL_FALSE, transform.getMatrix()));
+            C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, location, reinterpret_cast<const C3D_Mtx*>(transform.getMatrix()));
         }
-
-        // Disable program
-        glCheck(glUseProgram(program));
     }
 }
 
@@ -298,32 +246,8 @@ void Shader::setParameter(const std::string& name, const Texture& texture)
 {
     if (m_shaderProgram)
     {
-        // Find the location of the variable in the shader
-        int location = getParamLocation(name);
-        if (location != -1)
-        {
-            // Store the location -> texture mapping
-            TextureTable::iterator it = m_textures.find(location);
-            if (it == m_textures.end())
-            {
-                // New entry, make sure there are enough texture units
-                GLint maxUnits = 0;
-                glCheck(glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxUnits));
-
-                if (m_textures.size() + 1 >= static_cast<std::size_t>(maxUnits))
-                {
-                    err() << "Impossible to use texture \"" << name << "\" for shader: all available texture units are used" << std::endl;
-                    return;
-                }
-
-                m_textures[location] = &texture;
-            }
-            else
-            {
-                // Location already used, just replace the texture
-                it->second = &texture;
-            }
-        }
+        err() << "Setting texture as uniform isn't supported." << std::endl;
+        return;
     }
 }
 
@@ -341,7 +265,7 @@ void Shader::setParameter(const std::string& name, CurrentTextureType)
 
 
 ////////////////////////////////////////////////////////////
-unsigned int Shader::getNativeHandle() const
+shaderProgram_s* Shader::getNativeHandle() const
 {
     return m_shaderProgram;
 }
@@ -361,28 +285,14 @@ void Shader::bind(const Shader* shader)
     if (shader && shader->m_shaderProgram)
     {
         // Enable the program
-//        glCheck(GLEXT_glUseProgramObject(castToGlHandle(shader->m_shaderProgram)));
-        glCheck(glUseProgram(shader->m_shaderProgram));
-
-        // Bind the textures
-        shader->bindTextures();
-
-        // Bind the current texture
-//        if (shader->m_currentTexture != -1)
-//            glCheck(GLEXT_glUniform1i(shader->m_currentTexture, 0));
+        C3D_BindProgram(shader->m_shaderProgram);
+        CitroBindUniforms(shader->m_shaderProgram);
     }
     else
     {
-#ifdef EMULATION
-		//Bind no shader
-		glCheck(glUseProgram(0));
-#else
         // Bind default shader
-        glCheck(glUseProgram(Default.m_shaderProgram));
-
-		// Bind the textures
-		shader->bindTextures();
-#endif
+        C3D_BindProgram(Default.m_shaderProgram);
+        CitroBindUniforms(Default.m_shaderProgram);
     }
 }
 
@@ -397,104 +307,29 @@ bool Shader::isAvailable()
 ////////////////////////////////////////////////////////////
 bool Shader::compile(const char* vertexShaderCode, const char* fragmentShaderCode)
 {
-	// First make sure that we can use shaders
-	if (!isAvailable())
-	{
-		err() << "Failed to create a shader: your system doesn't support shaders "
-		<< "(you should test Shader::isAvailable() before trying to use the Shader class)" << std::endl;
-		return false;
-	}
-#ifdef EMULATION
-	// Destroy the shader if it was already created
-	if (m_shaderProgram)
-	{
-		glCheck(glDeleteObjectARB(m_shaderProgram));
-		m_shaderProgram = 0;
-	}
-
-	// Reset the internal state
-	m_currentTexture = -1;
-	m_textures.clear();
-	m_params.clear();
-
-	// Create the program
-	GLhandleARB shaderProgram;
-	glCheck(shaderProgram = glCreateProgramObjectARB());
-
-	// Create the vertex shader if needed
-	if (vertexShaderCode)
-	{
-		// Create and compile the shader
-		GLhandleARB vertexShader;
-		glCheck(vertexShader = glCreateShaderObjectARB(GL_VERTEX_SHADER));
-		glCheck(glShaderSource(vertexShader, 1, &vertexShaderCode, NULL));
-		glCheck(glCompileShader(vertexShader));
-
-		// Check the compile log
-		GLint success;
-		glCheck(glGetObjectParameterivARB(vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &success));
-		if (success == GL_FALSE)
-		{
-			char log[1024];
-			glCheck(glGetInfoLogARB(vertexShader, sizeof(log), 0, log));
-			err() << "Failed to compile vertex shader:" << std::endl
-			<< log << std::endl;
-			glCheck(glDeleteObjectARB(vertexShader));
-			glCheck(glDeleteObjectARB(shaderProgram));
-			return false;
-		}
-
-		// Attach the shader to the program, and delete it (not needed anymore)
-		glCheck(glAttachObjectARB(shaderProgram, vertexShader));
-		glCheck(glDeleteObjectARB(vertexShader));
-	}
-
-	// Link the program
-	glCheck(glLinkProgram(shaderProgram));
-
-	// Check the link log
-	GLint success;
-	glCheck(glGetObjectParameterivARB(shaderProgram, GL_OBJECT_LINK_STATUS_ARB, &success));
-	if (success == GL_FALSE)
-	{
-		char log[1024];
-		glCheck(glGetInfoLogARB(shaderProgram, sizeof(log), 0, log));
-		err() << "Failed to link shader:" << std::endl
-		<< log << std::endl;
-		glCheck(glDeleteObjectARB(shaderProgram));
-		return false;
-	}
-
-	m_shaderProgram = shaderProgram;
-
-	// Force an OpenGL flush, so that the shader will appear updated
-	// in all contexts immediately (solves problems in multi-threaded apps)
-	glCheck(glFlush());
-
-	return true;
-#endif
-	return false;
+    err() << "Failed to compile shader: not yet supported" << std::endl;
+    return false;
 }
 
 
 ////////////////////////////////////////////////////////////
 bool Shader::loadBinary(const Uint8* data, const Uint32 size, Type type)
 {
-#ifndef EMULATION
-	if (!m_shaderProgram)
-		m_shaderProgram = glCreateProgram();
-
     // Reset the internal state
     m_currentTexture = -1;
     m_textures.clear();
     m_params.clear();
 
-	if (type == Vertex)
-    	glProgramBinary(m_shaderProgram, GL_VERTEX_SHADER_BINARY, data, (GLsizei)size);
-	else if (type == Geometry)
-		glProgramBinary(m_shaderProgram, GL_GEOMETRY_SHADER_BINARY, data, (GLsizei)size);
-#endif
+    if (!m_shaderProgram)
+        m_shaderProgram = (shaderProgram_s*)malloc(sizeof(shaderProgram_s));
 
+    m_dvlb = DVLB_ParseFile((u32*)data, size);
+    if (R_FAILED(shaderProgramInit(m_shaderProgram)))
+        return false;
+    if (type == Vertex)
+        shaderProgramSetVsh(m_shaderProgram, &m_dvlb->DVLE[0]);
+    else
+        shaderProgramSetGsh(m_shaderProgram, &m_dvlb->DVLE[0], 0);
     return true;
 }
 
@@ -515,7 +350,7 @@ int Shader::getParamLocation(const std::string& name)
     }
     else {
         // Not in cache, request the location from OpenGL
-        int location = glGetUniformLocation(m_shaderProgram, name.c_str());
+        int location = shaderInstanceGetUniformLocation(m_shaderProgram->vertexShader, name.c_str());
         m_params.insert(std::make_pair(name, location));
 
         if (location == -1)

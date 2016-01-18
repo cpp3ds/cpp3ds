@@ -35,6 +35,7 @@ namespace priv
 ////////////////////////////////////////////////////////////
 void glCheckError(const char* file, unsigned int line)
 {
+#ifdef EMULATION
     // Get the last error
     GLenum errorCode = glGetError();
 
@@ -103,6 +104,7 @@ void glCheckError(const char* file, unsigned int line)
               << error << ", " << description
               << std::endl;
     }
+#endif
 }
 
 

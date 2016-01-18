@@ -134,7 +134,11 @@ public:
 	/// \brief Get the gl3ds context handle
 	///
 	////////////////////////////////////////////////////////////
+#ifdef EMULATION
 	GLuint getHandle() const;
+#else
+    int getHandle() const;
+#endif
 
     ////////////////////////////////////////////////////////////
     /// \brief Activate or deactivate the context as the current target for rendering
@@ -225,7 +229,11 @@ private:
 	////////////////////////////////////////////////////////////
 	// Member data
 	////////////////////////////////////////////////////////////
-	GLuint m_context; ///< Internal gl3ds context
+#ifndef EMULATION
+	int m_context; ///< Internal citro3d context
+#else
+    GLuint m_context;
+#endif
 };
 
 } // namespace priv

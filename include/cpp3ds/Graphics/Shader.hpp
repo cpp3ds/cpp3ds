@@ -472,7 +472,11 @@ public :
     /// \return OpenGL handle of the shader or 0 if not yet loaded
     ///
     ////////////////////////////////////////////////////////////
+#ifdef EMULATION
     unsigned int getNativeHandle() const;
+#else
+    shaderProgram_s* getNativeHandle() const;
+#endif
 
     ////////////////////////////////////////////////////////////
     /// \brief Bind a shader for rendering
@@ -553,15 +557,16 @@ private :
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    GLuint       m_shaderProgram;  ///< OpenGL identifier for the program
     int          m_currentTexture; ///< Location of the current texture in the shader
     TextureTable m_textures;       ///< Texture variables in the shader, mapped to their location
     ParamTable   m_params;         ///< Parameters location cache
 	std::vector<char> m_shaderData;
 
-#ifndef EMULATION
-    DVLB_s* dvlb;
-    shaderProgram_s shader;
+#ifdef EMULATION
+    GLuint       m_shaderProgram;  ///< OpenGL identifier for the program
+#else
+    DVLB_s* m_dvlb;
+    shaderProgram_s* m_shaderProgram;
 #endif
 };
 

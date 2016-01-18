@@ -31,6 +31,9 @@
 #include <cpp3ds/Config.hpp>
 #include <cpp3ds/Graphics/Image.hpp>
 #include <cpp3ds/Window/GlResource.hpp>
+#ifndef EMULATION
+#include <citro3d.h>
+#endif
 
 
 namespace cpp3ds
@@ -424,7 +427,7 @@ public :
     /// \brief Bind a texture for rendering
     ///
     /// This function is not part of the graphics API, it mustn't be
-    /// used when drawing SFML entities. It must be used only if you
+    /// used when drawing cpp3ds entities. It must be used only if you
     /// mix cpp3ds::Texture with OpenGL code.
     ///
     /// \code
@@ -443,7 +446,7 @@ public :
     /// must be in range [0 .. 1], which is the default way of handling
     /// texture coordinates with OpenGL. If Pixels, they must be given
     /// in pixels (range [0 .. size]). This mode is used internally by
-    /// the graphics classes of SFML, it makes the definition of texture
+    /// the graphics classes of cpp3ds, it makes the definition of texture
     /// coordinates more intuitive for the high-level API, users don't need
     /// to compute normalized values.
     ///
@@ -490,17 +493,21 @@ private :
     ////////////////////////////////////////////////////////////
     Vector2u     m_size;          ///< Public texture size
     Vector2u     m_actualSize;    ///< Actual texture size (can be greater than public size because of padding)
-    unsigned int m_texture;       ///< Internal texture identifier
     bool         m_isSmooth;      ///< Status of the smooth filter
     bool         m_isRepeated;    ///< Is the texture in repeat mode?
     mutable bool m_pixelsFlipped; ///< To work around the inconsistency in Y orientation
     Uint64       m_cacheId;       ///< Unique number that identifies the texture to the render target's cache
+#ifdef EMULATION
+    unsigned int m_texture;       ///< Internal texture identifier
+#else
+    C3D_Tex*     m_texture;       ///< Internal texture identifier
+#endif
 };
 
-} // namespace sf
+} // namespace cpp3ds
 
 
-#endif // SFML_TEXTURE_HPP
+#endif // CPP3DS_TEXTURE_HPP
 
 ////////////////////////////////////////////////////////////
 /// \class cpp3ds::Texture

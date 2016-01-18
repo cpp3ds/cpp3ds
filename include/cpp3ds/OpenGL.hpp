@@ -42,7 +42,7 @@
 
 #else
 
-    #include <GL/gl3ds.h>
+    #include <citro3d.h>
 
 #endif
 

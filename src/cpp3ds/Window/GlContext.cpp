@@ -34,51 +34,13 @@
 #include <set>
 #include <cstdlib>
 #include <cstring>
+#include "../Graphics/CitroHelpers.hpp"
 
 typedef cpp3ds::priv::GlContext ContextType;
 
 namespace
 {
-    // AMD drivers have issues with internal synchronization
-    // We need to make sure that no operating system context
-    // or pixel format operations are performed simultaneously
-    cpp3ds::Mutex mutex;
-
-    // This per-thread variable holds the current context for each thread
-    cpp3ds::ThreadLocalPtr<cpp3ds::priv::GlContext> currentContext(NULL);
-
-    // The hidden, inactive context that will be shared with all other contexts
-    ContextType* sharedContext = NULL;
-
-    // Internal contexts
-    cpp3ds::ThreadLocalPtr<cpp3ds::priv::GlContext> internalContext(NULL);
-    std::set<cpp3ds::priv::GlContext*> internalContexts;
-    cpp3ds::Mutex internalContextsMutex;
-
-    // Check if the internal context of the current thread is valid
-    bool hasInternalContext()
-    {
-        // The internal context can be null...
-        if (!internalContext)
-            return false;
-
-        // ... or non-null but deleted from the list of internal contexts
-        cpp3ds::Lock lock(internalContextsMutex);
-        return internalContexts.find(internalContext) != internalContexts.end();
-    }
-
-    // Retrieve the internal context for the current thread
-    cpp3ds::priv::GlContext* getInternalContext()
-    {
-        if (!hasInternalContext())
-        {
-            internalContext = cpp3ds::priv::GlContext::create();
-            cpp3ds::Lock lock(internalContextsMutex);
-            internalContexts.insert(internalContext);
-        }
-
-        return internalContext;
-    }
+    cpp3ds::priv::GlContext* currentContext(NULL);
 }
 
 
@@ -89,52 +51,28 @@ namespace priv
 ////////////////////////////////////////////////////////////
 void GlContext::globalInit()
 {
-    Lock lock(mutex);
 
-    // Create the shared context
-    sharedContext = new ContextType(NULL);
-    sharedContext->initialize();
-
-    // This call makes sure that:
-    // - the shared context is inactive (it must never be)
-    // - another valid context is activated in the current thread
-    sharedContext->setActive(false);
 }
 
 
 ////////////////////////////////////////////////////////////
 void GlContext::globalCleanup()
 {
-    Lock lock(mutex);
 
-    // Destroy the shared context
-    delete sharedContext;
-    sharedContext = NULL;
-
-    // Destroy the internal contexts
-    Lock internalContextsLock(internalContextsMutex);
-    for (std::set<GlContext*>::iterator it = internalContexts.begin(); it != internalContexts.end(); ++it)
-        delete *it;
-    internalContexts.clear();
 }
 
 
 ////////////////////////////////////////////////////////////
 void GlContext::ensureContext()
 {
-    // If there's no active context on the current thread, activate an internal one
-    if (!currentContext)
-        getInternalContext()->setActive(true);
 }
 
 
 ////////////////////////////////////////////////////////////
 GlContext* GlContext::create()
 {
-    Lock lock(mutex);
-
     // Create the context
-    GlContext* context = new ContextType(sharedContext);
+    GlContext* context = new ContextType(NULL);
     context->initialize();
 
     return context;
@@ -144,13 +82,8 @@ GlContext* GlContext::create()
 ////////////////////////////////////////////////////////////
 GlContext* GlContext::create(const ContextSettings& settings, unsigned int width, unsigned int height)
 {
-    // Make sure that there's an active context (context creation may need extensions, and thus a valid context)
-    ensureContext();
-
-    Lock lock(mutex);
-
     // Create the context
-    GlContext* context = new ContextType(sharedContext, settings, width, height);
+    GlContext* context = new ContextType(NULL, settings, width, height);
     context->initialize();
     context->checkSettings(settings);
 
@@ -161,24 +94,13 @@ GlContext* GlContext::create(const ContextSettings& settings, unsigned int width
 ////////////////////////////////////////////////////////////
 GlContext::~GlContext()
 {
-    // Deactivate the context before killing it, unless we're inside Cleanup()
-    if (sharedContext)
-        setActive(false);
-
-	#ifndef EMULATION
-	gl3ds_deleteContext(m_context);
-	#endif
 }
 
 
 ////////////////////////////////////////////////////////////
 bool GlContext::makeCurrent()
 {
-	#ifdef EMULATION
-		return true;
-	#else
-		return gl3ds_makeCurrent(m_context);
-	#endif
+    return true;
 }
 
 
@@ -190,10 +112,8 @@ void GlContext::setVerticalSyncEnabled(bool enabled)
 
 
 ////////////////////////////////////////////////////////////
-void GlContext::display() {
-	#ifndef EMULATION
-		gl3ds_flushContext(m_context);
-	#endif
+void GlContext::display()
+{
 }
 
 
@@ -205,7 +125,7 @@ const ContextSettings& GlContext::getSettings() const
 
 
 ////////////////////////////////////////////////////////////
-GLuint GlContext::getHandle() const
+int GlContext::getHandle() const
 {
 	return m_context;
 }
@@ -218,8 +138,6 @@ bool GlContext::setActive(bool active)
     {
         if (this != currentContext)
         {
-            Lock lock(mutex);
-
             // Activate the context
             if (makeCurrent())
             {
@@ -240,17 +158,8 @@ bool GlContext::setActive(bool active)
     }
     else
     {
-        if (this == currentContext)
-        {
-            // To deactivate the context, we actually activate another one so that we make
-            // sure that there is always an active context for subsequent graphics operations
-            return getInternalContext()->setActive(true);
-        }
-        else
-        {
-            // This context is not the active one on this thread, don't do anything
-            return true;
-        }
+        currentContext = nullptr;
+        return true;
     }
 }
 
@@ -259,17 +168,11 @@ bool GlContext::setActive(bool active)
 GlContext::GlContext(GlContext* shared)
 {
 	m_settings = ContextSettings();
-	#ifndef EMULATION
-	m_context = gl3ds_createContext((shared) ? shared->getHandle() : 0, (gfxScreen_t) m_settings.screen);
-	#endif
 }
 
 GlContext::GlContext(GlContext* shared, const ContextSettings& settings, unsigned int width, unsigned int height)
 {
 	m_settings = settings;
-	#ifndef EMULATION
-	m_context = gl3ds_createContext((shared) ? shared->getHandle() : 0, (gfxScreen_t) m_settings.screen);
-	#endif
 }
 
 
@@ -301,28 +204,7 @@ int GlContext::evaluateFormat(unsigned int bitsPerPixel, const ContextSettings& 
 ////////////////////////////////////////////////////////////
 void GlContext::initialize()
 {
-    // Activate the context
-    setActive(true);
-
     m_settings.attributeFlags = ContextSettings::Default;
-/*
-	// Retrieve the context flags
-	int flags = 0;
-	glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-
-	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
-		m_settings.attributeFlags |= ContextSettings::Debug;
-
-	// Retrieve the context profile
-	int profile = 0;
-	glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &profile);
-
-	if (profile & GL_CONTEXT_CORE_PROFILE_BIT)
-		m_settings.attributeFlags |= ContextSettings::Core;
-*/
-    // Enable antialiasing if needed
-//    if (m_settings.antialiasingLevel > 0)
-//        glEnable(GL_MULTISAMPLE);
 }
 
 

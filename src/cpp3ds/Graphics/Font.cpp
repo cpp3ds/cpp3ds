@@ -512,10 +512,6 @@ Glyph Font::loadGlyph(Uint32 codePoint, unsigned int characterSize, bool bold) c
     // Delete the FT glyph
     FT_Done_Glyph(glyphDesc);
 
-    // Force an OpenGL flush, so that the font's texture will appear updated
-    // in all contexts immediately (solves problems in multi-threaded apps)
-//    glCheck(glFlush());
-
     // Done :)
     return glyph;
 }

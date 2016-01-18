@@ -30,6 +30,10 @@
 #include <cpp3ds/System/Err.hpp>
 #include <cpp3ds/Window/GlContext.hpp>
 
+#define DISPLAY_TRANSFER_FLAGS \
+	(GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(0) | GX_TRANSFER_RAW_COPY(0) | \
+	GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT(GX_TRANSFER_FMT_RGB8) | \
+	GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO))
 
 namespace cpp3ds
 {
@@ -56,7 +60,7 @@ void Window::create(const ContextSettings& settings)
 	// Destroy the previous window implementation
 	close();
 
-	unsigned int width  = settings.screen == TopScreen ? 400 : 400;
+	unsigned int width  = settings.screen == TopScreen ? 400 : 320;
 	unsigned int height = 240;
 
 	m_size.x = width;
@@ -64,6 +68,10 @@ void Window::create(const ContextSettings& settings)
 
 	// Recreate the context
 	m_context = priv::GlContext::create(settings, width, height);
+
+	m_target = C3D_RenderTargetCreate(height, width, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8);
+	C3D_RenderTargetSetOutput(m_target, settings.screen == TopScreen ? GFX_TOP : GFX_BOTTOM, GFX_LEFT, DISPLAY_TRANSFER_FLAGS);
+	C3D_RenderTargetSetClear(m_target, C3D_CLEAR_ALL, 0, 0);
 
 	// Perform common initializations
 	initialize();
@@ -157,8 +165,7 @@ Image Window::capture() const
 ////////////////////////////////////////////////////////////
 void Window::setVerticalSyncEnabled(bool enabled)
 {
-//    if (setActive())
-//        m_context->setVerticalSyncEnabled(enabled);
+
 }
 
 

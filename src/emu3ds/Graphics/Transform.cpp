@@ -27,7 +27,6 @@
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/Graphics/Transform.hpp>
 #include <cmath>
-#include "CitroHelpers.hpp"
 
 
 namespace cpp3ds
@@ -40,7 +39,10 @@ const Transform Transform::Identity;
 Transform::Transform()
 {
     // Identity matrix
-    Mtx_Identity(&m_matrix);
+    m_matrix[0] = 1.f; m_matrix[4] = 0.f; m_matrix[8]  = 0.f; m_matrix[12] = 0.f;
+    m_matrix[1] = 0.f; m_matrix[5] = 1.f; m_matrix[9]  = 0.f; m_matrix[13] = 0.f;
+    m_matrix[2] = 0.f; m_matrix[6] = 0.f; m_matrix[10] = 1.f; m_matrix[14] = 0.f;
+    m_matrix[3] = 0.f; m_matrix[7] = 0.f; m_matrix[11] = 0.f; m_matrix[15] = 1.f;
 }
 
 
@@ -49,36 +51,17 @@ Transform::Transform(float a00, float a01, float a02,
                      float a10, float a11, float a12,
                      float a20, float a21, float a22)
 {
-    m_matrix.m[3] = a00; m_matrix.m[2] = a01; m_matrix.m[1]  = 0.f; m_matrix.m[0] = a02;
-    m_matrix.m[7] = a10; m_matrix.m[6] = a11; m_matrix.m[5]  = 0.f; m_matrix.m[4] = a12;
-    m_matrix.m[11] = 0.f; m_matrix.m[10] = 0.f; m_matrix.m[9] = 1.f; m_matrix.m[8] = 0.f;
-    m_matrix.m[15] = a20; m_matrix.m[14] = a21; m_matrix.m[13] = 0.f; m_matrix.m[12] = a22;
-}
-
-
-void Transform::apply3dsFix()
-{
-    // Fix depth range to [-1, 0]
-    C3D_Mtx mp2, mp3;
-    Mtx_Identity(&mp2);
-    mp2.r[2].z = 0.5;
-    mp2.r[2].w = -0.5;
-    Mtx_Multiply(&mp3, &mp2, &m_matrix);
-
-    // Fix the 3DS screens' orientation by swapping the X and Y axis
-    Mtx_Identity(&mp2);
-    mp2.r[0].x = 0.0;
-    mp2.r[0].y = 1.0;
-    mp2.r[1].x = -1.0; // flipped
-    mp2.r[1].y = 0.0;
-    Mtx_Multiply(&m_matrix, &mp2, &mp3);
+    m_matrix[0] = a00; m_matrix[4] = a01; m_matrix[8]  = 0.f; m_matrix[12] = a02;
+    m_matrix[1] = a10; m_matrix[5] = a11; m_matrix[9]  = 0.f; m_matrix[13] = a12;
+    m_matrix[2] = 0.f; m_matrix[6] = 0.f; m_matrix[10] = 1.f; m_matrix[14] = 0.f;
+    m_matrix[3] = a20; m_matrix[7] = a21; m_matrix[11] = 0.f; m_matrix[15] = a22;
 }
 
 
 ////////////////////////////////////////////////////////////
 const float* Transform::getMatrix() const
 {
-    return m_matrix.m;
+    return m_matrix;
 }
 
 
@@ -86,23 +69,23 @@ const float* Transform::getMatrix() const
 Transform Transform::getInverse() const
 {
     // Compute the determinant
-    float det = m_matrix.m[3] * (m_matrix.m[12] * m_matrix.m[6] - m_matrix.m[14] * m_matrix.m[4]) -
-                m_matrix.m[7] * (m_matrix.m[12] * m_matrix.m[2] - m_matrix.m[14] * m_matrix.m[0]) +
-                m_matrix.m[15] * (m_matrix.m[4] * m_matrix.m[2] - m_matrix.m[6] * m_matrix.m[0]);
+    float det = m_matrix[0] * (m_matrix[15] * m_matrix[5] - m_matrix[7] * m_matrix[13]) -
+                m_matrix[1] * (m_matrix[15] * m_matrix[4] - m_matrix[7] * m_matrix[12]) +
+                m_matrix[3] * (m_matrix[13] * m_matrix[4] - m_matrix[5] * m_matrix[12]);
 
     // Compute the inverse if the determinant is not zero
     // (don't use an epsilon because the determinant may *really* be tiny)
     if (det != 0.f)
     {
-        return Transform( (m_matrix.m[12] * m_matrix.m[6] - m_matrix.m[14] * m_matrix.m[4]) / det,
-                         -(m_matrix.m[12] * m_matrix.m[2] - m_matrix.m[14] * m_matrix.m[0]) / det,
-                          (m_matrix.m[4] * m_matrix.m[2] - m_matrix.m[6] * m_matrix.m[0]) / det,
-                         -(m_matrix.m[12] * m_matrix.m[7] - m_matrix.m[15] * m_matrix.m[4]) / det,
-                          (m_matrix.m[12] * m_matrix.m[3] - m_matrix.m[15] * m_matrix.m[0]) / det,
-                         -(m_matrix.m[4] * m_matrix.m[3] - m_matrix.m[7] * m_matrix.m[0]) / det,
-                          (m_matrix.m[14]  * m_matrix.m[7] - m_matrix.m[15] * m_matrix.m[6])  / det,
-                         -(m_matrix.m[14]  * m_matrix.m[3] - m_matrix.m[15] * m_matrix.m[2])  / det,
-                          (m_matrix.m[6]  * m_matrix.m[3] - m_matrix.m[7] * m_matrix.m[2])  / det);
+        return Transform( (m_matrix[15] * m_matrix[5] - m_matrix[7] * m_matrix[13]) / det,
+                         -(m_matrix[15] * m_matrix[4] - m_matrix[7] * m_matrix[12]) / det,
+                          (m_matrix[13] * m_matrix[4] - m_matrix[5] * m_matrix[12]) / det,
+                         -(m_matrix[15] * m_matrix[1] - m_matrix[3] * m_matrix[13]) / det,
+                          (m_matrix[15] * m_matrix[0] - m_matrix[3] * m_matrix[12]) / det,
+                         -(m_matrix[13] * m_matrix[0] - m_matrix[1] * m_matrix[12]) / det,
+                          (m_matrix[7]  * m_matrix[1] - m_matrix[3] * m_matrix[5])  / det,
+                         -(m_matrix[7]  * m_matrix[0] - m_matrix[3] * m_matrix[4])  / det,
+                          (m_matrix[5]  * m_matrix[0] - m_matrix[1] * m_matrix[4])  / det);
     }
     else
     {
@@ -114,8 +97,8 @@ Transform Transform::getInverse() const
 ////////////////////////////////////////////////////////////
 Vector2f Transform::transformPoint(float x, float y) const
 {
-    return Vector2f(m_matrix.m[3] * x + m_matrix.m[2] * y + m_matrix.m[0],
-                    m_matrix.m[7] * x + m_matrix.m[6] * y + m_matrix.m[4]);
+    return Vector2f(m_matrix[0] * x + m_matrix[4] * y + m_matrix[12],
+                    m_matrix[1] * x + m_matrix[5] * y + m_matrix[13]);
 }
 
 
@@ -158,18 +141,18 @@ FloatRect Transform::transformRect(const FloatRect& rectangle) const
 ////////////////////////////////////////////////////////////
 Transform& Transform::combine(const Transform& transform)
 {
-    const float* a = m_matrix.m;
-    const float* b = transform.m_matrix.m;
+    const float* a = m_matrix;
+    const float* b = transform.m_matrix;
 
-    *this = Transform(a[3] * b[3]  + a[2] * b[7]  + a[0] * b[15],
-                      a[3] * b[2]  + a[2] * b[6]  + a[0] * b[14],
-                      a[3] * b[0] + a[2] * b[4] + a[0] * b[12],
-                      a[7] * b[3]  + a[6] * b[7]  + a[4] * b[15],
-                      a[7] * b[2]  + a[6] * b[6]  + a[4] * b[14],
-                      a[7] * b[0] + a[6] * b[4] + a[4] * b[12],
-                      a[15] * b[3]  + a[14] * b[7]  + a[12] * b[15],
-                      a[15] * b[2]  + a[14] * b[6]  + a[12] * b[14],
-                      a[15] * b[0] + a[14] * b[4] + a[12] * b[12]);
+    *this = Transform(a[0] * b[0]  + a[4] * b[1]  + a[12] * b[3],
+                      a[0] * b[4]  + a[4] * b[5]  + a[12] * b[7],
+                      a[0] * b[12] + a[4] * b[13] + a[12] * b[15],
+                      a[1] * b[0]  + a[5] * b[1]  + a[13] * b[3],
+                      a[1] * b[4]  + a[5] * b[5]  + a[13] * b[7],
+                      a[1] * b[12] + a[5] * b[13] + a[13] * b[15],
+                      a[3] * b[0]  + a[7] * b[1]  + a[15] * b[3],
+                      a[3] * b[4]  + a[7] * b[5]  + a[15] * b[7],
+                      a[3] * b[12] + a[7] * b[13] + a[15] * b[15]);
 
     return *this;
 }

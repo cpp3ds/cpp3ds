@@ -34,6 +34,9 @@
 #include <cpp3ds/Graphics/PrimitiveType.hpp>
 #include <cpp3ds/Graphics/Vertex.hpp>
 #include <cpp3ds/System/NonCopyable.hpp>
+#ifndef EMULATION
+#include <citro3d.h>
+#endif
 
 
 namespace cpp3ds
@@ -319,6 +322,10 @@ public :
     ////////////////////////////////////////////////////////////
     void resetGLStates();
 
+#ifndef EMULATION
+	C3D_RenderTarget* getCitroTarget();
+#endif
+
 protected :
 
     ////////////////////////////////////////////////////////////
@@ -412,6 +419,11 @@ private:
     View        m_defaultView; ///< Default view
     View        m_view;        ///< Current view
     StatesCache m_cache;       ///< Render states cache
+
+protected:
+#ifndef EMULATION
+    C3D_RenderTarget *m_target;
+#endif
 };
 
 }
