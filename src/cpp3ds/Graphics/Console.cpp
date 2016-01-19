@@ -43,52 +43,86 @@ static const devoptab_t dotab_stdout = {
 namespace cpp3ds
 {
 
-bool Console::m_initialized = false;
+bool Console::m_enabled      = false;
+bool Console::m_enabledBasic = false;
 
 ////////////////////////////////////////////////////////////
 Console::Console()
+: m_visible(true)
 {
-	//
 }
 
 
 ////////////////////////////////////////////////////////////
 Console::~Console()
 {
-	if (m_initialized)
-	{
-		//
+}
+
+
+////////////////////////////////////////////////////////////
+Console& Console::getInstance()
+{
+	static Console console;
+	return console;
+}
+
+
+////////////////////////////////////////////////////////////
+void Console::enable(Screen screen, Color color)
+{
+	if (m_enabledBasic)
+		return;
+	if (!m_enabled) {
+		m_enabled = true;
+#ifndef EMULATION
+		gfxInitDefault();
+		devoptab_list[STD_OUT] = &dotab_stdout;
+		devoptab_list[STD_ERR] = &dotab_stdout;
+		setvbuf(stdout, NULL, _IONBF, 0);
+		setvbuf(stderr, NULL, _IONBF, 0);
+#endif
+		Console& console = getInstance();
+		priv::ResourceInfo font = priv::core_resources["opensans.ttf"];
+		console.m_font.loadFromMemory(font.data, font.size);
+
+		console.m_memoryText.setFont(console.m_font);
+		console.m_memoryText.setCharacterSize(12);
+
+		console.m_screen = screen;
+		console.m_color = color;
+		console.m_limit = 1000;
 	}
 }
 
 
 ////////////////////////////////////////////////////////////
-void Console::initialize()
+void Console::enableBasic(Screen screen)
 {
-	if (!m_initialized) {
-		m_initialized = true;
+	if (m_enabled)
+		return;
+	if (!m_enabledBasic) {
+		m_enabledBasic = true;
+		Console& console = getInstance();
+		console.m_screen = screen;
 #ifndef EMULATION
-		devoptab_list[STD_OUT] = &dotab_stdout;
-		devoptab_list[STD_ERR] = &dotab_stdout;
-		setvbuf(stdout, NULL, _IONBF, 0);
-		setvbuf(stderr, NULL, _IONBF, 0);
+		gfxInitDefault();
+		consoleInit(screen == TopScreen ? GFX_TOP : GFX_BOTTOM, nullptr);
 #endif
 	}
 }
 
 
 ////////////////////////////////////////////////////////////
-void Console::create(Screen screen)
+bool Console::isEnabled()
 {
-	initialize();
-	priv::ResourceInfo font = priv::core_resources["opensans.ttf"];
-	m_font.loadFromMemory(font.data, font.size);
+	return m_enabled;
+}
 
-	m_memoryText.setFont(m_font);
-	m_memoryText.setCharacterSize(12);
 
-	m_screen = screen;
-	m_limit = 1000;
+////////////////////////////////////////////////////////////
+bool Console::isEnabledBasic()
+{
+	return m_enabledBasic;
 }
 
 
@@ -102,12 +136,12 @@ void Console::update(float delta)
 	if (m_lines.size() > m_limit)
 		m_lines.erase(m_lines.begin(), m_lines.end() - m_limit);
 
-	#ifndef EMULATION
+#ifndef EMULATION
 	std::ostringstream ss;
 	ss << (__linear_heap_size - linearSpaceFree()) / 1024 << "kb / " << __linear_heap_size / 1024 << "kb";
 	m_memoryText.setString(ss.str());
 	m_memoryText.setPosition((m_screen == TopScreen ? 395 : 315) - m_memoryText.getGlobalBounds().width, 5);
-	#endif
+#endif
 
 	int h = 240;
 	int i = m_lines.size();

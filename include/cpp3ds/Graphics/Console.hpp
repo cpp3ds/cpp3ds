@@ -24,24 +24,12 @@ class Console : public Drawable
 public:
 
 	////////////////////////////////////////////////////////////
-	/// \brief Default constructor
-	///
-	/// The constructor creates and activates the context
-	///
-	////////////////////////////////////////////////////////////
-	Console();
-
-	////////////////////////////////////////////////////////////
 	/// \brief Destructor
 	///
-	/// The destructor deactivates and destroys the context
+	/// The destructor deactivates and destroys the console
 	///
 	////////////////////////////////////////////////////////////
 	~Console();
-
-public:
-
-	void create(Screen screen = BottomScreen);
 
 	void update(float delta);
 
@@ -51,16 +39,28 @@ public:
 
 	void setVisible(bool visible);
 
-	static void initialize();
+	static Console& getInstance();
+
+	static void enable(Screen screen, Color color = Color::White);
+	static void enableBasic(Screen screen);
+	static bool isEnabled();
+	static bool isEnabledBasic();
 
 	void setScreen(Screen screen);
-
 	Screen getScreen();
 
 	void setColor(const Color& color);
 	const Color& getColor() const;
 
 private:
+
+	////////////////////////////////////////////////////////////
+	/// \brief Default constructor
+	///
+	/// The constructor creates and activates the context
+	///
+	////////////////////////////////////////////////////////////
+	Console();
 
 	////////////////////////////////////////////////////////////
 	/// \brief Draw the console to a render target
@@ -79,7 +79,8 @@ private:
 	std::vector<Text> m_lines;
 	Text m_memoryText;
 	unsigned int m_limit;
-	static bool m_initialized;
+	static bool m_enabled;
+	static bool m_enabledBasic;
 	bool m_visible;
 	Screen m_screen;
 };

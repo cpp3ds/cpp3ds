@@ -11,7 +11,6 @@ namespace cpp3ds {
 
 Game::Game()
 : m_triggerExit(false)
-, m_consoleEnabled(false)
 {
 	priv::ensureExtensionsInit();
 
@@ -27,12 +26,6 @@ Game::Game()
 
 
 Game::~Game()
-{
-	//
-}
-
-
-void Game::console(Screen screen, Color color)
 {
 	//
 }

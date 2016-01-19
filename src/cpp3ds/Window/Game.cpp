@@ -23,10 +23,8 @@ static void apt_clock_hook(APT_HookType hook, void* param)
 
 Game::Game()
 : m_triggerExit(false)
-, m_consoleEnabled(false)
-, m_consoleBasicEnabled(false)
 {
-	if (!Console::isInitialized())
+	if (!Console::isEnabled() && !Console::isEnabledBasic())
 		gfxInitDefault();
 	CitroInit();
 	Service::enable(RomFS);
@@ -51,49 +49,30 @@ Game::~Game()
 }
 
 
-void Game::console(Screen screen, Color color)
-{
-	if (m_consoleEnabled || m_consoleBasicEnabled)
-		return;
-	Console::initialize();
-	m_consoleScreen = screen;
-	m_consoleEnabled = true;
-	m_console.setVisible(true);
-	m_console.create(screen);
-	m_console.setColor(color);
-}
-
-
-void Game::consoleBasic(Screen screen)
-{
-	if (m_consoleEnabled || m_consoleBasicEnabled)
-		return;
-	Console::initializeBasic(screen);
-	m_consoleScreen = screen;
-	m_consoleBasicEnabled = true;
-}
-
-
 void Game::render()
 {
-	if (!m_consoleBasicEnabled || m_consoleScreen != TopScreen) {
+	Console& console = Console::getInstance();
+
+	if (!console.isEnabledBasic() || console.getScreen() != TopScreen) {
 		C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
 		C3D_FrameDrawOn(windowTop.getCitroTarget());
+		windowTop.setView(windowTop.getDefaultView());
 		renderTopScreen(windowTop);
-		if (m_consoleEnabled && m_consoleScreen == TopScreen) {
+		if (console.isEnabled() && console.getScreen() == TopScreen) {
 			windowTop.setView(windowTop.getDefaultView());
-			windowTop.draw(m_console);
+			windowTop.draw(Console::getInstance());
 		}
 		C3D_FrameEnd(0);
 	}
 
-	if (!m_consoleBasicEnabled || m_consoleScreen != BottomScreen) {
+	if (!console.isEnabledBasic() || console.getScreen() != BottomScreen) {
 		C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
 		C3D_FrameDrawOn(windowBottom.getCitroTarget());
+		windowBottom.setView(windowBottom.getDefaultView());
 		renderBottomScreen(windowBottom);
-		if (m_consoleEnabled && m_consoleScreen == BottomScreen) {
+		if (console.isEnabled() && console.getScreen() == BottomScreen) {
 			windowBottom.setView(windowBottom.getDefaultView());
-			windowBottom.draw(m_console);
+			windowBottom.draw(Console::getInstance());
 		}
 		C3D_FrameEnd(0);
 	}
@@ -113,6 +92,8 @@ void Game::run()
 	Clock clock;
 	Time deltaTime;
 
+	Console& console = Console::getInstance();
+
 	// Hook for clock
 	aptHook(&apt_hook_cookie, apt_clock_hook, &clock);
 
@@ -122,8 +103,8 @@ void Game::run()
 		Sensor::update();
 
 		while (eventmanager.pollEvent(event)) {
-			if (m_consoleEnabled) {
-				if (!m_console.processEvent(event))
+			if (console.isEnabled()) {
+				if (!console.processEvent(event))
 					continue;
 			}
 			processEvent(event);
@@ -133,8 +114,8 @@ void Game::run()
 		if (m_triggerExit)
 			break;
 
-		if (m_consoleEnabled)
-			m_console.update(deltaTime.asSeconds());
+		if (console.isEnabled())
+			console.update(deltaTime.asSeconds());
 
 		update(deltaTime.asSeconds());
 		render();
