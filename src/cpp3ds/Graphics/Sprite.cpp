@@ -28,6 +28,7 @@
 #include <cpp3ds/Graphics/Sprite.hpp>
 #include <cpp3ds/Graphics/Texture.hpp>
 #include <cpp3ds/Graphics/RenderTarget.hpp>
+#include <string.h>
 
 
 namespace cpp3ds
@@ -38,6 +39,28 @@ m_texture    (NULL),
 m_textureRect()
 {
 	m_vertices = new Vertex[4];
+}
+
+
+////////////////////////////////////////////////////////////
+Sprite::Sprite(const Sprite& copy)
+: Transformable(copy)
+, m_texture (copy.m_texture)
+, m_textureRect (copy.m_textureRect)
+{
+    m_vertices = new Vertex[4];
+    memcpy(m_vertices, copy.m_vertices, sizeof(Vertex)*4);
+}
+
+
+////////////////////////////////////////////////////////////
+Sprite& Sprite::operator=(const Sprite& other)
+{
+    Transformable::operator=(other);
+    m_texture = other.m_texture;
+    m_textureRect = other.m_textureRect;
+    memcpy(m_vertices, other.m_vertices, sizeof(Vertex)*4);
+    return *this;
 }
 
 

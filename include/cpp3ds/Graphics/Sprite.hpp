@@ -55,6 +55,10 @@ public :
     ////////////////////////////////////////////////////////////
     Sprite();
 
+    Sprite(const Sprite& copy);
+
+    Sprite& operator=(const Sprite& other);
+
     ////////////////////////////////////////////////////////////
     /// \brief Construct the sprite from a source texture
     ///
