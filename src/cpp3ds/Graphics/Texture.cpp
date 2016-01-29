@@ -36,7 +36,14 @@
 #include <cassert>
 #include <cstring>
 #include <iostream>
+#include <c3d/texture.h>
 #include "CitroHelpers.hpp"
+
+// Note: vertical flip flag set so 0,0 is top left of texture
+#define TEXTURE_TRANSFER_FLAGS \
+	(GX_TRANSFER_FLIP_VERT(1) | GX_TRANSFER_RAW_COPY(0) | \
+	GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT(GX_TRANSFER_FMT_RGBA8) | \
+	GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO))
 
 namespace
 {
@@ -112,7 +119,7 @@ bool Texture::create(unsigned int width, unsigned int height)
     Vector2u actualSize(getValidSize(width), getValidSize(height));
 
     // Check the maximum texture size
-    unsigned int maxSize = 1024;
+    unsigned int maxSize = getMaximumSize();
     if ((actualSize.x > maxSize) || (actualSize.y > maxSize))
     {
         err() << "Failed to create texture, its internal size is too high "
@@ -121,6 +128,8 @@ bool Texture::create(unsigned int width, unsigned int height)
               << std::endl;
         return false;
     }
+    if (actualSize.x < 64) actualSize.x = 64;
+    if (actualSize.y < 64) actualSize.y = 64;
 
     // All the validity checks passed, we can store the new texture settings
     m_size.x        = width;
@@ -130,15 +139,16 @@ bool Texture::create(unsigned int width, unsigned int height)
 
 	ensureGlContext();
 
-    // Create the citro3d texture if it doesn't exist yet
+    // Create the citro3d texture, or delete if already created
     if (!m_texture)
-    {
         m_texture = new C3D_Tex();
-        if (!m_texture)
-            return false;
-        if (!C3D_TexInit(m_texture, m_actualSize.x, m_actualSize.y, GPU_RGBA8))
-            return false;
-    }
+    else
+        C3D_TexDelete(m_texture);
+
+    if (!m_texture)
+        return false;
+    if (!C3D_TexInit(m_texture, m_actualSize.x, m_actualSize.y, GPU_RGBA8))
+        return false;
 
     C3D_TexSetWrap(m_texture,
                    m_isRepeated ? GPU_REPEAT : GPU_CLAMP_TO_EDGE,
@@ -250,11 +260,19 @@ Image Texture::copyToImage() const
     // Create an array of pixels
     std::vector<Uint8> pixels(m_size.x * m_size.y * 4);
 
+    u32 *data = (u32*)linearAlloc(m_texture->size);
+    u32 dim = GX_BUFFER_DIM(m_texture->width, m_texture->height);
+    GX_DisplayTransfer((u32*)m_texture->data, dim, data, dim, TEXTURE_TRANSFER_FLAGS);
+    gspWaitForPPF();
+    GSPGPU_FlushDataCache(data, m_texture->size);
+
+    for (int i = 0; i < m_texture->width * m_texture->height; ++i)
+        data[i] = __builtin_bswap32(data[i]);
+
 	if ((m_size == m_actualSize) && !m_pixelsFlipped)
 	{
 		// Texture is not padded nor flipped, we can use a direct copy
-//		glCheck(glBindTexture(GL_TEXTURE_2D, m_texture));
-//		glCheck(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, &pixels[0]));
+        std::memcpy(&pixels[0], data, pixels.size());
 	}
 	else
 	{
@@ -262,8 +280,7 @@ Image Texture::copyToImage() const
 
 		// All the pixels will first be copied to a temporary array
 		std::vector<Uint8> allPixels(m_actualSize.x * m_actualSize.y * 4);
-//		glCheck(glBindTexture(GL_TEXTURE_2D, m_texture));
-//		glCheck(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, &allPixels[0]));
+        std::memcpy(&allPixels[0], data, allPixels.size());
 
 		// Then we copy the useful pixels from the temporary array to the final one
 		const Uint8* src = &allPixels[0];
@@ -290,6 +307,8 @@ Image Texture::copyToImage() const
     Image image;
     image.create(m_size.x, m_size.y, &pixels[0]);
 
+    linearFree(data);
+
     return image;
 }
 
@@ -301,11 +320,6 @@ void Texture::update(const Uint8* pixels)
     update(pixels, m_size.x, m_size.y, 0, 0);
 }
 
-// Note: vertical flip flag set so 0,0 is top left of texture
-#define TEXTURE_TRANSFER_FLAGS \
-	(GX_TRANSFER_FLIP_VERT(1) | GX_TRANSFER_RAW_COPY(0) | \
-	GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT(GX_TRANSFER_FMT_RGBA8) | \
-	GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO))
 
 ////////////////////////////////////////////////////////////
 void Texture::update(const Uint8* pixels, unsigned int width, unsigned int height, unsigned int x, unsigned int y)
@@ -320,6 +334,7 @@ void Texture::update(const Uint8* pixels, unsigned int width, unsigned int heigh
         const u32 *pixels32 = reinterpret_cast<const u32*>(pixels);
         u32 *data = (u32*)linearAlloc(m_texture->size);
         u32 dim = GX_BUFFER_DIM(m_texture->width, m_texture->height);
+
         GX_DisplayTransfer((u32*)m_texture->data, dim, data, dim, TEXTURE_TRANSFER_FLAGS);
         gspWaitForPPF();
 
