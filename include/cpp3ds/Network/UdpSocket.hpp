@@ -57,7 +57,7 @@ public:
     /// \brief Default constructor
     ///
     ////////////////////////////////////////////////////////////
-    UdpSocket();
+    UdpSocket(bool secure = false);
 
     ////////////////////////////////////////////////////////////
     /// \brief Get the port to which the socket is bound locally

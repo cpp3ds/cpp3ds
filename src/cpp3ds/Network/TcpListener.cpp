@@ -35,7 +35,7 @@ namespace cpp3ds
 {
 ////////////////////////////////////////////////////////////
 TcpListener::TcpListener() :
-Socket(Tcp)
+Socket(Tcp, false)
 {
 
 }

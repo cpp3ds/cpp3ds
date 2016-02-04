@@ -31,6 +31,9 @@
 #include <cpp3ds/Network/SocketHandle.hpp>
 #include <cpp3ds/System/NonCopyable.hpp>
 #include <vector>
+#include <mbedtls/net.h>
+#include <mbedtls/entropy.h>
+#include <mbedtls/ctr_drbg.h>
 
 
 namespace cpp3ds
@@ -65,6 +68,16 @@ public:
     enum
     {
         AnyPort = 0 ///< Special value that tells the system to pick any available port
+    };
+
+    struct SecureData
+    {
+        mbedtls_net_context socket;
+        mbedtls_entropy_context entropy;
+        mbedtls_ctr_drbg_context ctr_drbg;
+        mbedtls_ssl_context ssl;
+        mbedtls_ssl_config conf;
+        mbedtls_x509_crt cacert;
     };
 
 public:
@@ -104,6 +117,9 @@ public:
     ////////////////////////////////////////////////////////////
     bool isBlocking() const;
 
+    void setSecure(bool secure);
+    bool isSecure() const;
+
 protected:
 
     ////////////////////////////////////////////////////////////
@@ -124,7 +140,7 @@ protected:
     /// \param type Type of the socket (TCP or UDP)
     ///
     ////////////////////////////////////////////////////////////
-    Socket(Type type);
+    Socket(Type type, bool secure);
 
     ////////////////////////////////////////////////////////////
     /// \brief Return the internal handle of the socket
@@ -137,6 +153,8 @@ protected:
     ///
     ////////////////////////////////////////////////////////////
     SocketHandle getHandle() const;
+
+    SecureData& getSecureData() const;
 
     ////////////////////////////////////////////////////////////
     /// \brief Create the internal representation of the socket
@@ -173,8 +191,10 @@ private:
     // Member data
     ////////////////////////////////////////////////////////////
     Type         m_type;       ///< Type of the socket (TCP or UDP)
-    SocketHandle m_socket;     ///< Socket descriptor
     bool         m_isBlocking; ///< Current blocking mode of the socket
+    bool         m_isSecure;   ///< Socket using SSL
+    SocketHandle m_socket;     ///< Socket descriptor
+    mutable SecureData m_secureData; ///< Data needed for secure socket
 };
 
 } // namespace cpp3ds

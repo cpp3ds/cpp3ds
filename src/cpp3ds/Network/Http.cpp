@@ -319,19 +319,21 @@ void Http::setHost(const std::string& host, unsigned short port)
     if (toLower(host.substr(0, 7)) == "http://")
     {
         // HTTP protocol
+        m_connection.setSecure(false);
         m_hostName = host.substr(7);
         m_port     = (port != 0 ? port : 80);
     }
     else if (toLower(host.substr(0, 8)) == "https://")
     {
-        // HTTPS protocol -- unsupported (requires encryption and certificates and stuff...)
-        err() << "HTTPS protocol is not supported by cpp3ds::Http" << std::endl;
-        m_hostName = "";
-        m_port     = 0;
+        // HTTPS protocol
+        m_connection.setSecure(true);
+        m_hostName = host.substr(8);
+        m_port     = (port != 0 ? port : 443);
     }
     else
     {
         // Undefined protocol - use HTTP
+        m_connection.setSecure(false);
         m_hostName = host;
         m_port     = (port != 0 ? port : 80);
     }

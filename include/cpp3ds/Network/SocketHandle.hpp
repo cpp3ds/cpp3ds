@@ -30,7 +30,7 @@
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/Config.hpp>
 
-#if defined(SFML_SYSTEM_WINDOWS)
+#if defined(CPP3DS_SYSTEM_WINDOWS)
     #include <basetsd.h>
 #endif
 
@@ -41,7 +41,7 @@ namespace cpp3ds
 // Define the low-level socket handle type, specific to
 // each platform
 ////////////////////////////////////////////////////////////
-#if defined(SFML_SYSTEM_WINDOWS)
+#if defined(CPP3DS_SYSTEM_WINDOWS)
 
     typedef UINT_PTR SocketHandle;
 

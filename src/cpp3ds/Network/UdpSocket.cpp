@@ -36,8 +36,8 @@
 namespace cpp3ds
 {
 ////////////////////////////////////////////////////////////
-UdpSocket::UdpSocket() :
-Socket  (Udp),
+UdpSocket::UdpSocket(bool secure) :
+Socket  (Udp, secure),
 m_buffer(MaxDatagramSize)
 {
 

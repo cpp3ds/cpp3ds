@@ -50,7 +50,7 @@ public:
     /// \brief Default constructor
     ///
     ////////////////////////////////////////////////////////////
-    TcpSocket();
+    TcpSocket(bool secure = false);
 
     ////////////////////////////////////////////////////////////
     /// \brief Get the port to which the socket is bound locally
