@@ -29,8 +29,9 @@
 #include <cpp3ds/Resources.hpp>
 #include <cpp3ds/System/InputStream.hpp>
 #include <cpp3ds/System/Err.hpp>
-#include <cpp3ds/Graphics/stb_image/stb_image.h>
+#define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <cpp3ds/Graphics/stb_image/stb_image.h>
 #include <cpp3ds/Graphics/stb_image/stb_image_write.h>
 extern "C"
 {
@@ -57,7 +58,7 @@ namespace
         cpp3ds::InputStream* stream = static_cast<cpp3ds::InputStream*>(user);
         return static_cast<int>(stream->read(data, size));
     }
-    void skip(void* user, unsigned int size)
+    void skip(void* user, int size)
     {
         cpp3ds::InputStream* stream = static_cast<cpp3ds::InputStream*>(user);
         stream->seek(stream->tell() + size);
