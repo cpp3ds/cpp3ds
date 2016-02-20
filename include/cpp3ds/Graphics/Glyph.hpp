@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////
 //
 // SFML - Simple and Fast Multimedia Library
-// Copyright (C) 2007-2014 Laurent Gomila (laurent.gom@gmail.com)
+// Copyright (C) 2007-2015 Laurent Gomila (laurent@sfml-dev.org)
 //
 // This software is provided 'as-is', without any express or implied warranty.
 // In no event will the authors be held liable for any damages arising from the use of this software.
@@ -37,28 +37,28 @@ namespace cpp3ds
 /// \brief Structure describing a glyph
 ///
 ////////////////////////////////////////////////////////////
-class Glyph
-{
-public :
+    class Glyph
+    {
+    public:
 
-    ////////////////////////////////////////////////////////////
-    /// \brief Default constructor
-    ///
-    ////////////////////////////////////////////////////////////
-    Glyph() : advance(0) {}
+        ////////////////////////////////////////////////////////////
+        /// \brief Default constructor
+        ///
+        ////////////////////////////////////////////////////////////
+        Glyph() : advance(0) {}
 
-    ////////////////////////////////////////////////////////////
-    // Member data
-    ////////////////////////////////////////////////////////////
-    int     advance;     ///< Offset to move horizontically to the next character
-    IntRect bounds;      ///< Bounding rectangle of the glyph, in coordinates relative to the baseline
-    IntRect textureRect; ///< Texture coordinates of the glyph inside the font's texture
-};
+        ////////////////////////////////////////////////////////////
+        // Member data
+        ////////////////////////////////////////////////////////////
+        float     advance;     ///< Offset to move horizontally to the next character
+        FloatRect bounds;      ///< Bounding rectangle of the glyph, in coordinates relative to the baseline
+        IntRect   textureRect; ///< Texture coordinates of the glyph inside the font's texture
+    };
+
+} // namespace cpp3ds
 
 
-}
-
-#endif
+#endif // CPP3DS_GLYPH_HPP
 
 
 ////////////////////////////////////////////////////////////

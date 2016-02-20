@@ -89,8 +89,8 @@ void Console::enable(Screen screen, Color color)
 		console.m_memoryText.setCharacterSize(12);
 
 		console.m_screen = screen;
-		console.m_color = color;
 		console.m_limit = 1000;
+		console.setColor(color);
 	}
 }
 
@@ -158,7 +158,7 @@ void Console::update(float delta)
 void Console::write(String text)
 {
 	Text line(text, m_font, 10);
-	line.setColor(m_color);
+	line.setFillColor(m_color);
 	m_lines.push_back(line);
 }
 
@@ -220,7 +220,7 @@ void Console::draw(RenderTarget& target, RenderStates states) const
 
 void Console::setColor(const Color& color)
 {
-	m_memoryText.setColor(color);
+	m_memoryText.setFillColor(color);
 	m_color = color;
 }
 
