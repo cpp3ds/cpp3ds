@@ -347,7 +347,7 @@ void Http::setHost(const std::string& host, unsigned short port)
 
 
 ////////////////////////////////////////////////////////////
-Http::Response Http::sendRequest(const Http::Request& request, Time timeout)
+Http::Response Http::sendRequest(const Http::Request& request, Time timeout, RequestCallback callback)
 {
     // First make sure that the request is valid -- add missing mandatory fields
     Request toSend(request);
@@ -395,14 +395,40 @@ Http::Response Http::sendRequest(const Http::Request& request, Time timeout)
                 // Wait for the server's response
                 std::string receivedStr;
                 std::size_t size = 0;
-                char buffer[1024];
+                std::size_t processed = 0;
+                char buffer[2048];
                 while (m_connection.receive(buffer, sizeof(buffer), size) == Socket::Done)
                 {
-                    receivedStr.append(buffer, buffer + size);
+                    if (callback)
+                    {
+                        // Keep attempting to parse response until it's valid
+                        if (received.getStatus() == Response::InvalidResponse || received.getStatus() == Response::ConnectionFailed)
+                        {
+                            receivedStr.append(buffer, buffer + size);
+                            received.parse(receivedStr);
+                            if (received.getStatus() != Response::InvalidResponse)
+                            {
+                                processed += received.getBody().size();
+                                if (!callback(received.getBody().c_str(), received.getBody().size(), processed, received))
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            processed += size;
+
+                            // Break if user interrupts the download
+                            if (!callback(buffer, size, processed, received))
+                                break;
+                        }
+                    }
+                    else
+                        receivedStr.append(buffer, buffer + size);
                 }
 
                 // Build the Response object from the received data
-                received.parse(receivedStr);
+                if (!callback)
+                    received.parse(receivedStr);
             }
         }
 

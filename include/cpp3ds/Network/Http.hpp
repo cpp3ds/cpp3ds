@@ -34,6 +34,7 @@
 #include <cpp3ds/System/Time.hpp>
 #include <map>
 #include <string>
+#include <functional>
 
 
 namespace cpp3ds
@@ -344,6 +345,8 @@ public:
         std::string  m_body;         ///< Body of the response
     };
 
+    typedef std::function<bool(const void*,size_t,size_t,const Response&)> RequestCallback;
+
     ////////////////////////////////////////////////////////////
     /// \brief Default constructor
     ///
@@ -401,7 +404,7 @@ public:
     /// \return Server's response
     ///
     ////////////////////////////////////////////////////////////
-    Response sendRequest(const Request& request, Time timeout = Time::Zero);
+    Response sendRequest(const Request& request, Time timeout = Time::Zero, RequestCallback callback = nullptr);
 
 private:
 
