@@ -68,7 +68,7 @@ namespace cpp3ds
 
 
 ////////////////////////////////////////////////////////////
-	bool SoundRecorder::start(unsigned int sampleRate)
+	bool SoundRecorder::start(SampleRate sampleRate)
 	{
 		// Check if the device can do audio capture
 		if (!isAvailable())
@@ -76,6 +76,16 @@ namespace cpp3ds
 			err() << "Failed to start capture: your system cannot capture audio data (call SoundRecorder::isAvailable to check it)" << std::endl;
 			return false;
 		}
+
+		// Store the sample rate
+		if (sampleRate == SampleRate_32730)
+			m_sampleRate = 32730;
+		else if (sampleRate == SampleRate_16360)
+			m_sampleRate = 16360;
+		else if (sampleRate == SampleRate_10910)
+			m_sampleRate = 10910;
+		else
+			m_sampleRate = 8180;
 
 		// Check that another capture is not already running
 		if (captureDevice)
@@ -85,7 +95,7 @@ namespace cpp3ds
 		}
 
 		// Open the capture device for capturing 16 bits mono samples
-		captureDevice = alcCaptureOpenDevice(m_deviceName.c_str(), sampleRate, AL_FORMAT_MONO16, sampleRate);
+		captureDevice = alcCaptureOpenDevice(m_deviceName.c_str(), m_sampleRate, AL_FORMAT_MONO16, m_sampleRate);
 		if (!captureDevice)
 		{
 			err() << "Failed to open the audio capture device with the name: " << m_deviceName << std::endl;
@@ -94,9 +104,6 @@ namespace cpp3ds
 
 		// Clear the array of samples
 		m_samples.clear();
-
-		// Store the sample rate
-		m_sampleRate = sampleRate;
 
 		// Notify derived class
 		if (onStart())

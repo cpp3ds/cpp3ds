@@ -28,19 +28,33 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
+#include <cpp3ds/Audio/AlResource.hpp>
 #include <cpp3ds/System/Thread.hpp>
 #include <cpp3ds/System/Time.hpp>
 #include <vector>
 #include <string>
+#ifndef EMULATION
+#include <3ds.h>
+#include <cpp3ds/System/LinearAllocator.hpp>
+#endif
 
 
 namespace cpp3ds
 {
+
+enum SampleRate
+{
+    SampleRate_32730 = 0,
+    SampleRate_16360 = 1,
+    SampleRate_10910 = 2,
+    SampleRate_8180 = 3,
+};
+
 ////////////////////////////////////////////////////////////
 /// \brief Abstract base class for capturing sound data
 ///
 ////////////////////////////////////////////////////////////
-class SoundRecorder
+class SoundRecorder : AlResource
 {
 public :
 
@@ -72,7 +86,7 @@ public :
     /// \see stop, getAvailableDevices
     ///
     ////////////////////////////////////////////////////////////
-    bool start(unsigned int sampleRate = 44100);
+    bool start(SampleRate sampleRate);
 
     ////////////////////////////////////////////////////////////
     /// \brief Stop the capture
@@ -256,11 +270,18 @@ private :
     // Member data
     ////////////////////////////////////////////////////////////
     Thread             m_thread;             ///< Thread running the background recording task
-    std::vector<Int16> m_samples;            ///< Buffer to store captured samples
     unsigned int       m_sampleRate;         ///< Sample rate
     cpp3ds::Time       m_processingInterval; ///< Time period between calls to onProcessSamples
-    bool               m_isCapturing;        ///< Capturing state
+    volatile bool      m_isCapturing;        ///< Capturing state
     std::string        m_deviceName;         ///< Name of the audio capture device
+
+#ifdef EMULATION
+	std::vector<Int16> m_samples;            ///< Buffer to store captured samples
+#else
+	std::vector<Int16, LinearAllocator<Int16>> m_samples;
+	u32 m_bufferSize;
+	volatile u32 m_bufferPos;
+#endif
 };
 
 } // namespace cpp3ds

@@ -26,20 +26,19 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/Audio/SoundRecorder.hpp>
-//#include <cpp3ds/Audio/AudioDevice.hpp>
-//#include <cpp3ds/Audio/ALCheck.hpp>
 #include <cpp3ds/System/Sleep.hpp>
 #include <cpp3ds/System/Err.hpp>
 #include <cstring>
+#include <malloc.h>
+#include <cpp3ds/System/Service.hpp>
 
-
-namespace
-{
-//    ALCdevice* captureDevice = NULL;
-}
 
 namespace cpp3ds
 {
+
+static bool isInitialized = false;
+
+
 ////////////////////////////////////////////////////////////
 SoundRecorder::SoundRecorder() :
 m_thread            (&SoundRecorder::record, this),
@@ -47,228 +46,222 @@ m_sampleRate        (0),
 m_processingInterval(milliseconds(100)),
 m_isCapturing       (false)
 {
-    // Set the device name to the default device
-    m_deviceName = getDefaultDevice();
+	// Set the device name to the default device
+	m_deviceName = getDefaultDevice();
+
+	if (!isInitialized){
+		isInitialized = true;
+		Service::enable(Microphone);
+	}
+
+	m_bufferSize = micGetSampleDataSize();
 }
 
 
 ////////////////////////////////////////////////////////////
 SoundRecorder::~SoundRecorder()
 {
-    // Nothing to do
 }
 
 
 ////////////////////////////////////////////////////////////
-bool SoundRecorder::start(unsigned int sampleRate)
+bool SoundRecorder::start(SampleRate sampleRate)
 {
-    // Check if the device can do audio capture
-    if (!isAvailable())
-    {
-        err() << "Failed to start capture: your system cannot capture audio data (call SoundRecorder::isAvailable to check it)" << std::endl;
-        return false;
-    }
+	// Check if the device can do audio capture
+	if (!isAvailable())
+	{
+		err() << "Failed to start capture: your system cannot capture audio data (call SoundRecorder::isAvailable to check it)" << std::endl;
+		return false;
+	}
 
-    // Check that another capture is not already running
-//    if (captureDevice)
-//    {
-//        err() << "Trying to start audio capture, but another capture is already running" << std::endl;
-//        return false;
-//    }
+	// Check that another capture is not already running
+	if (m_isCapturing)
+	{
+		err() << "Trying to start audio capture, but another capture is already running" << std::endl;
+		return false;
+	}
 
-    // Open the capture device for capturing 16 bits mono samples
-//    captureDevice = alcCaptureOpenDevice(m_deviceName.c_str(), sampleRate, AL_FORMAT_MONO16, sampleRate);
-//    if (!captureDevice)
-//    {
-//        err() << "Failed to open the audio capture device with the name: " << m_deviceName << std::endl;
-//        return false;
-//    }
+	// Clear the array of samples
+	m_samples.clear();
 
-    // Clear the array of samples
-    m_samples.clear();
+	// Store the sample rate
+	if (sampleRate == SampleRate_32730)
+		m_sampleRate = 32730;
+	else if (sampleRate == SampleRate_16360)
+		m_sampleRate = 16360;
+	else if (sampleRate == SampleRate_10910)
+		m_sampleRate = 10910;
+	else
+		m_sampleRate = 8180;
 
-    // Store the sample rate
-    m_sampleRate = sampleRate;
+	// Notify derived class
+	if (onStart())
+	{
+		// Start the capture
+		m_bufferPos = 0;
+		if (R_FAILED(MICU_StartSampling(MICU_ENCODING_PCM16_SIGNED, static_cast<MICU_SampleRate>(sampleRate), 0, m_bufferSize, true)))
+			return false;
 
-    // Notify derived class
-    if (onStart())
-    {
-        // Start the capture
-//        alcCaptureStart(captureDevice);
+//		memset(&m_ndspWaveBuf, 0, sizeof(ndspWaveBuf));
+//		m_ndspWaveBuf.data_vaddr = &m_samples[0];
+//		m_ndspWaveBuf.nsamples = m_samples.size() / 2;
+//		m_ndspWaveBuf.looping = false;
+//		m_ndspWaveBuf.status = NDSP_WBUF_FREE;
+//
+//		ndspSetCapture(&m_ndspWaveBuf);
 
-        // Start the capture in a new thread, to avoid blocking the main thread
-        m_isCapturing = true;
-        m_thread.launch();
+		// Start the capture in a new thread, to avoid blocking the main thread
+		m_isCapturing = true;
+		m_thread.launch();
 
-        return true;
-    }
+		return true;
+	}
 
-    return false;
+	return false;
 }
 
 
 ////////////////////////////////////////////////////////////
 void SoundRecorder::stop()
 {
-    // Stop the capturing thread
-    m_isCapturing = false;
-    m_thread.wait();
+	MICU_StopSampling();
 
-    // Notify derived class
-    onStop();
+	// Stop the capturing thread
+	m_isCapturing = false;
+	m_thread.wait();
+
+	// Notify derived class
+	onStop();
 }
 
 
 ////////////////////////////////////////////////////////////
 unsigned int SoundRecorder::getSampleRate() const
 {
-    return m_sampleRate;
+	return m_sampleRate;
 }
 
 
 ////////////////////////////////////////////////////////////
 std::vector<std::string> SoundRecorder::getAvailableDevices()
 {
-    std::vector<std::string> deviceNameList;
+	std::vector<std::string> deviceNameList;
 
-    return deviceNameList;
+	return deviceNameList;
 }
 
 
 ////////////////////////////////////////////////////////////
 std::string SoundRecorder::getDefaultDevice()
 {
-//    return alcGetString(NULL, ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER);
-	return "";
+	return "3ds mic";
 }
 
 
 ////////////////////////////////////////////////////////////
 bool SoundRecorder::setDevice(const std::string& name)
 {
-    // Store the device name
-    if (name.empty())
-        m_deviceName = getDefaultDevice();
-    else
-        m_deviceName = name;
+	// Store the device name
+	if (name.empty())
+		m_deviceName = getDefaultDevice();
+	else
+		m_deviceName = name;
 
-    if (m_isCapturing)
-    {
-        // Stop the capturing thread
-        m_isCapturing = false;
-        m_thread.wait();
+	if (m_isCapturing)
+	{
+		// Stop the capturing thread
+		m_isCapturing = false;
+		m_thread.wait();
 
-        // Open the requested capture device for capturing 16 bits mono samples
-//        captureDevice = alcCaptureOpenDevice(name.c_str(), m_sampleRate, AL_FORMAT_MONO16, m_sampleRate);
-//        if (!captureDevice)
-//        {
-//            // Notify derived class
-//            onStop();
-//
-//            err() << "Failed to open the audio capture device with the name: " << m_deviceName << std::endl;
-//            return false;
-//        }
+		// Start the capture in a new thread, to avoid blocking the main thread
+		m_isCapturing = true;
+		m_thread.launch();
+	}
 
-        // Start the capture
-//        alcCaptureStart(captureDevice);
-
-        // Start the capture in a new thread, to avoid blocking the main thread
-        m_isCapturing = true;
-        m_thread.launch();
-    }
-
-    return true;
+	return true;
 }
 
 
 ////////////////////////////////////////////////////////////
 const std::string& SoundRecorder::getDevice() const
 {
-    return m_deviceName;
+	return m_deviceName;
 }
 
 
 ////////////////////////////////////////////////////////////
 bool SoundRecorder::isAvailable()
 {
-    return true;
+	return Service::isEnabled(Microphone);
 }
 
 
 ////////////////////////////////////////////////////////////
 void SoundRecorder::setProcessingInterval(cpp3ds::Time interval)
 {
-    m_processingInterval = interval;
+	m_processingInterval = interval;
 }
 
 
 ////////////////////////////////////////////////////////////
 bool SoundRecorder::onStart()
 {
-    // Nothing to do
-    return true;
+	// Nothing to do
+	return true;
 }
 
 
 ////////////////////////////////////////////////////////////
 void SoundRecorder::onStop()
 {
-    // Nothing to do
+	// Nothing to do
 }
 
 
 ////////////////////////////////////////////////////////////
 void SoundRecorder::record()
 {
-    while (m_isCapturing)
-    {
-        // Process available samples
-        processCapturedSamples();
+	while (m_isCapturing)
+	{
+		// Process available samples
+		processCapturedSamples();
+		// Don't bother the CPU while waiting for more captured data
+		sleep(m_processingInterval);
+	}
 
-        // Don't bother the CPU while waiting for more captured data
-        sleep(m_processingInterval);
-    }
-
-    // Capture is finished: clean up everything
-    cleanup();
+	// Capture is finished: clean up everything
+	cleanup();
 }
 
 
 ////////////////////////////////////////////////////////////
 void SoundRecorder::processCapturedSamples()
 {
-    // Get the number of samples available
-//    ALCint samplesAvailable;
-//    alcGetIntegerv(captureDevice, ALC_CAPTURE_SAMPLES, 1, &samplesAvailable);
+	u32 lastOffset = micGetLastSampleOffset();
 
-//    if (samplesAvailable > 0)
-//    {
-//        // Get the recorded samples
-//        m_samples.resize(samplesAvailable);
-//        alcCaptureSamples(captureDevice, &m_samples[0], samplesAvailable);
-//
-//        // Forward them to the derived class
-//        if (!onProcessSamples(&m_samples[0], m_samples.size()))
-//        {
-//            // The user wants to stop the capture
-//            m_isCapturing = false;
-//        }
-//    }
+	if (lastOffset > m_bufferPos)
+	{
+		u32 samplesAvailable = lastOffset - m_bufferPos;
+
+		// Forward them to the derived class
+		if (!onProcessSamples(reinterpret_cast<Int16*>(&Service::m_micBuffer[m_bufferPos]), samplesAvailable / sizeof(Int16)))
+		{
+			// The user wants to stop the capture
+			m_isCapturing = false;
+		}
+
+		m_bufferPos += samplesAvailable;
+	}
+	else
+		m_bufferPos = 0;
 }
 
 
 ////////////////////////////////////////////////////////////
 void SoundRecorder::cleanup()
 {
-    // Stop the capture
-//    alcCaptureStop(captureDevice);
-
-    // Get the samples left in the buffer
-    processCapturedSamples();
-
-    // Close the device
-//    alcCaptureCloseDevice(captureDevice);
-//    captureDevice = NULL;
+	// Get the samples left in the buffer
+	processCapturedSamples();
 }
 
 } // namespace cpp3ds
