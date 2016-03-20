@@ -97,6 +97,7 @@ public:
     /// \return Pointer to the data
     ///
     /// \see getDataSize
+    /// \see getDataPosition
     ///
     ////////////////////////////////////////////////////////////
     const void* getData() const;
@@ -110,9 +111,24 @@ public:
     /// \return Data size, in bytes
     ///
     /// \see getData
+    /// \see getDataPosition
     ///
     ////////////////////////////////////////////////////////////
     std::size_t getDataSize() const;
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Get the current read position in the packet data
+    ///
+    /// This function returns the current read position which can
+    /// be used with the pointer returned by getData.
+    ///
+    /// \return Read position, in bytes
+    ///
+    /// \see getData
+    /// \see getDataSize
+    ///
+    ////////////////////////////////////////////////////////////
+    std::size_t getDataPosition() const;
 
     ////////////////////////////////////////////////////////////
     /// \brief Tell if the reading position has reached the
@@ -127,6 +143,20 @@ public:
     ///
     ////////////////////////////////////////////////////////////
     bool endOfPacket() const;
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Advance the read position
+    ///
+    /// This function can be used after reading data from getData
+    /// to ensure that additional operations don't reread it.
+    ///
+    /// \param sizeInBytes Number of bytes to advance
+    ///
+    /// \see getData
+    /// \see getDataPosition
+    ///
+    ////////////////////////////////////////////////////////////
+    void advance(size_t sizeInBytes);
 
 public:
 

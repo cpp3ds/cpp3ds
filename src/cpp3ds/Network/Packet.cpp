@@ -87,9 +87,23 @@ std::size_t Packet::getDataSize() const
 
 
 ////////////////////////////////////////////////////////////
+std::size_t Packet::getDataPosition() const
+{
+    return m_readPos;
+}
+
+
+////////////////////////////////////////////////////////////
 bool Packet::endOfPacket() const
 {
     return m_readPos >= m_data.size();
+}
+
+
+////////////////////////////////////////////////////////////
+void Packet::advance(size_t sizeInBytes)
+{
+    m_readPos += sizeInBytes;
 }
 
 
