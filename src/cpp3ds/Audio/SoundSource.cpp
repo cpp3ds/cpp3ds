@@ -170,8 +170,14 @@ SoundSource& SoundSource::operator =(const SoundSource& right)
 ////////////////////////////////////////////////////////////
 SoundSource::Status SoundSource::getStatus() const
 {
-	if (m_ndspWaveBuf.status == NDSP_WBUF_PLAYING || m_ndspWaveBuf.status == NDSP_WBUF_QUEUED)
-		return (m_pauseOffset == Time::Zero) ? Playing : Paused;
+	if (m_channel == -1)
+		return Stopped;
+
+	if (ndspChnIsPaused(m_channel))
+		return Paused;
+
+	if (ndspChnIsPlaying(m_channel))
+		return Playing;
 
 	return Stopped;
 }

@@ -94,21 +94,6 @@ void SoundStream::play()
         return;
     }
 
-	m_channel = 0;
-	while (m_channel < 24 && ndspChnIsPlaying(m_channel))
-		m_channel++;
-
-	if (m_channel == 24) {
-		err() << "Failed to play audio stream: all channels are in use." << std::endl;
-		m_channel = -1;
-		return;
-	}
-
-	ndspChnReset(m_channel);
-	ndspChnSetInterp(m_channel, NDSP_INTERP_POLYPHASE);
-	ndspChnSetRate(m_channel, float(m_sampleRate));
-	ndspChnSetFormat(m_channel, (m_channelCount == 1) ? NDSP_FORMAT_MONO_PCM16 : NDSP_FORMAT_STEREO_PCM16);
-
 	bool isStreaming = false;
     Status threadStartState = Stopped;
 
@@ -120,28 +105,37 @@ void SoundStream::play()
     }
 
 
-    if (isStreaming && (threadStartState == Paused))
-    {
-        // If the sound is paused, resume it
-		setPlayingOffset(m_pauseOffset);
-
-		Lock lock(m_threadMutex);
-		m_threadStartState = Playing;
-
-//		for (int i = 0; i < BufferCount; ++i)
-//			m_endBuffers[i] = false;
-
-		// Fill the queue
-//		fillQueue();
-        return;
-    }
-    else if (isStreaming && (threadStartState == Playing))
+    if (isStreaming && (threadStartState == Playing))
     {
         // If the sound is playing, stop it and continue as if it was stopped
         stop();
     }
 
-    // Move to the beginning
+	if (isStreaming && (threadStartState == Paused))
+	{
+		// If the sound is paused, resume it
+		Lock lock(m_threadMutex);
+		m_threadStartState = Playing;
+        ndspChnSetPaused(m_channel, false);
+		return;
+	}
+
+    m_channel = 0;
+    while (m_channel < 24 && ndspChnIsPlaying(m_channel))
+        m_channel++;
+
+    if (m_channel == 24) {
+        err() << "Failed to play audio stream: all channels are in use." << std::endl;
+        m_channel = -1;
+        return;
+    }
+
+    ndspChnReset(m_channel);
+    ndspChnSetInterp(m_channel, NDSP_INTERP_LINEAR);
+    ndspChnSetRate(m_channel, float(m_sampleRate));
+    ndspChnSetFormat(m_channel, (m_channelCount == 1) ? NDSP_FORMAT_MONO_PCM16 : NDSP_FORMAT_STEREO_PCM16);
+
+	// Move to the beginning
     onSeek(Time::Zero);
 
     // Start updating the stream in a separate thread to avoid blocking the application
@@ -163,10 +157,9 @@ void SoundStream::pause()
             return;
 
         m_threadStartState = Paused;
-
-		m_pauseOffset = getPlayingOffset();
-		clearQueue();
     }
+
+    ndspChnSetPaused(m_channel, true);
 }
 
 
@@ -251,12 +244,13 @@ Time SoundStream::getPlayingOffset() const
 {
     if (m_sampleRate && m_channelCount)
     {
-		u32 samplePos = ndspChnGetSamplePos(m_channel);
+		u32 samplePos = ndspChnGetSamplePos(m_channel) * m_channelCount;
 
 		// In case current buffer has finished and yet to be updated to next in queue
-		if (m_ndspWaveBuf.status == NDSP_WBUF_DONE)
-		if (ndspChnGetWaveBufSeq(m_channel) != m_ndspWaveBuf.sequence_id)
-			samplePos += m_ndspWaveBuf.nsamples;
+        if (ndspChnGetWaveBufSeq(m_channel) != m_ndspWaveBuf.sequence_id) {
+            if (samplePos < 400)
+                samplePos += m_ndspWaveBuf.nsamples * m_channelCount;
+        }
 
         return seconds(static_cast<float>(m_samplesProcessed + samplePos) / m_sampleRate / m_channelCount);
     }
@@ -297,7 +291,7 @@ void SoundStream::streamData()
         }
     }
 
-    // Create the buffers
+    // Reset the buffers
     for (int i = 0; i < BufferCount; ++i)
         m_endBuffers[i] = false;
 
@@ -309,7 +303,7 @@ void SoundStream::streamData()
 
         // Check if the thread was launched Paused
         if (m_threadStartState == Paused) {
-//			std::cout << "thread launched while paused" << std::endl;
+            ndspChnSetPaused(m_channel, true); // needed when setPlayingOffset is used while paused ??
 		}
     }
 
@@ -338,25 +332,27 @@ void SoundStream::streamData()
         }
 
 		if (SoundSource::getStatus() != Paused)
-        // Get the number of buffers that have been processed (i.e. ready for reuse)
-		for (int i = 0; i < BufferCount; ++i)
 		{
-			if (m_ndspWaveBuffers[i].status == NDSP_WBUF_DONE)
-			{
-				// Retrieve its size and add it to the samples count
-				if (m_endBuffers[i]) {
-					// This was the last buffer: reset the sample count
-					m_samplesProcessed = 0;
-					m_endBuffers[i] = false;
-				}
-				else {
-					m_samplesProcessed += m_ndspWaveBuffers[i].nsamples;
-				}
+			// Get the number of buffers that have been processed (i.e. ready for reuse)
+			for (int i = 0; i < BufferCount; ++i) {
+				if (m_ndspWaveBuffers[i].status == NDSP_WBUF_DONE) {
+					// Retrieve its size and add it to the samples count
+					if (m_endBuffers[i]) {
+						// This was the last buffer: reset the sample count
+						m_samplesProcessed = 0;
+						m_endBuffers[i] = false;
+					}
+					else {
+						m_samplesProcessed += m_ndspWaveBuffers[i].nsamples * m_channelCount;
+					}
 
-				// Fill it and push it back into the playing queue
-				if (!requestStop) {
-					if (fillAndPushBuffer(i))
-						requestStop = true;
+                    m_ndspWaveBuffers[i].status = NDSP_WBUF_FREE;
+
+					// Fill it and push it back into the playing queue
+					if (!requestStop) {
+						if (fillAndPushBuffer(i))
+							requestStop = true;
+					}
 				}
 			}
 		}
@@ -368,9 +364,6 @@ void SoundStream::streamData()
     // Stop the playback
     // Dequeue any buffer left in the queue
     clearQueue();
-
-	m_ndspWaveBuf.status = NDSP_WBUF_DONE;
-	m_pauseOffset = Time::Zero;
 
 	for (int i = 0; i < BufferCount; ++i)
 		m_buffers->clear();
@@ -419,7 +412,7 @@ bool SoundStream::fillAndPushBuffer(unsigned int bufferNum)
 
 		memset(&ndspBuffer, 0, sizeof(ndspWaveBuf));
 		ndspBuffer.data_vaddr = &buffer[0];
-		ndspBuffer.nsamples = data.sampleCount;
+		ndspBuffer.nsamples = data.sampleCount / m_channelCount;
 		ndspBuffer.looping = false;
 		ndspBuffer.status = NDSP_WBUF_FREE;
 
@@ -428,7 +421,7 @@ bool SoundStream::fillAndPushBuffer(unsigned int bufferNum)
         // Push it into the sound queue
 		ndspChnWaveBufAdd(m_channel, &ndspBuffer);
 
-		m_ndspWaveBuf = ndspBuffer;
+		m_ndspWaveBuf = m_ndspWaveBuffers[(bufferNum + 1) % BufferCount];
     }
 
     return requestStop;
@@ -456,6 +449,8 @@ void SoundStream::clearQueue()
 {
 	ndspChnWaveBufClear(m_channel);
 
+    for (int i = 0; i < BufferCount; ++i)
+        m_ndspWaveBuffers[i].status = NDSP_WBUF_FREE;
 	m_ndspWaveBuf.status = NDSP_WBUF_FREE;
 }
 

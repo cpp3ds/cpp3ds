@@ -111,6 +111,7 @@ bool SoundBuffer::loadFromSamples(const Int16* samples, Uint64 sampleCount, unsi
 {
 	if (samples && sampleCount && channelCount && sampleRate)
 	{
+        m_samples.resize(sampleCount);
 		// Copy the new audio samples
 		m_samples.assign(samples, samples + sampleCount);
 
@@ -191,9 +192,11 @@ SoundBuffer& SoundBuffer::operator =(const SoundBuffer& right)
 {
     SoundBuffer temp(right);
 
-    std::swap(m_samples,     temp.m_samples);
-    std::swap(m_duration,    temp.m_duration);
-    std::swap(m_sounds,      temp.m_sounds); // swap sounds too, so that they are detached when temp is destroyed
+    std::swap(m_samples,      temp.m_samples);
+    std::swap(m_duration,     temp.m_duration);
+    std::swap(m_channelCount, temp.m_channelCount);
+    std::swap(m_sampleRate,   temp.m_sampleRate);
+    std::swap(m_sounds,       temp.m_sounds); // swap sounds too, so that they are detached when temp is destroyed
 
     return *this;
 }

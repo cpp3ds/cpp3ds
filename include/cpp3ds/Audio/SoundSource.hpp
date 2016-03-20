@@ -276,7 +276,6 @@ protected :
     unsigned int m_source; ///< OpenAL source identifier
 	int  m_channel;        ///< Current DSP channel for this sound source
 	Time m_playOffset;
-	Time m_pauseOffset;
 #ifndef EMULATION
 	ndspWaveBuf m_ndspWaveBuf;
 #endif

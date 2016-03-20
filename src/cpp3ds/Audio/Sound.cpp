@@ -60,7 +60,7 @@ Sound::Sound(const Sound& copy)
 {
     if (copy.m_buffer)
         setBuffer(*copy.m_buffer);
-	m_pauseOffset = copy.m_pauseOffset;
+
     setLoop(copy.getLoop());
 	setStateADPCM(copy.getStateADPCM());
 }
@@ -82,6 +82,10 @@ void Sound::play()
 		return;
 	if (getStatus() == Playing)
 		stop();
+	if (getStatus() == Paused) {
+		ndspChnSetPaused(m_channel, false);
+		return;
+	}
 
 	m_channel = 0;
 	while (m_channel < 24 && ndspChnIsPlaying(m_channel))
@@ -93,10 +97,7 @@ void Sound::play()
 		return;
 	}
 
-	setPlayingOffset(m_pauseOffset);
-
-	if (m_pauseOffset != Time::Zero)
-		m_pauseOffset = Time::Zero;
+	setPlayingOffset(Time::Zero);
 
 	u32 size = sizeof(Int16) * m_buffer->getSampleCount();
 
@@ -117,9 +118,7 @@ void Sound::pause()
 	if (getStatus() != Playing)
 		return;
 
-	m_pauseOffset = getPlayingOffset();
-
-	ndspChnWaveBufClear(m_channel);
+	ndspChnSetPaused(m_channel, true);
 }
 
 
@@ -128,9 +127,8 @@ void Sound::stop()
 {
 	if (getStatus() == Stopped)
 		return;
-	m_pauseOffset = Time::Zero;
+
 	ndspChnWaveBufClear(m_channel);
-	m_ndspWaveBuf.status = NDSP_WBUF_DONE;
 }
 
 
@@ -211,8 +209,6 @@ Time Sound::getPlayingOffset() const
 {
 	if (getStatus() == Stopped)
 		return Time::Zero;
-	if (getStatus() == Paused)
-		return m_pauseOffset;
 
 	u32 samplePos = ndspChnGetSamplePos(m_channel);
 	return seconds(static_cast<float>(samplePos) / m_buffer->getSampleRate()) + m_playOffset;
