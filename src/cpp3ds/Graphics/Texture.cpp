@@ -59,6 +59,58 @@ namespace
 
 		return id++;
 	}
+
+    // Grabbed from Citra Emulator (citra/src/video_core/utils.h)
+    static inline u32 morton_interleave(u32 x, u32 y)
+    {
+        u32 i = (x & 7) | ((y & 7) << 8); // ---- -210
+        i = (i ^ (i << 2)) & 0x1313;      // ---2 --10
+        i = (i ^ (i << 1)) & 0x1515;      // ---2 -1-0
+        i = (i | (	i >> 7)) & 0x3F;
+        return i;
+    }
+
+    //Grabbed from Citra Emulator (citra/src/video_core/utils.h)
+    static inline u32 get_morton_offset(u32 x, u32 y, u32 bytes_per_pixel)
+    {
+        u32 i = morton_interleave(x, y);
+        unsigned int offset = (x & ~7) * 8;
+        return (i + offset) * bytes_per_pixel;
+    }
+
+    void imageTile32(u8* dest, const u8* source, unsigned x, unsigned y, unsigned src_w, unsigned src_h, unsigned dest_w, unsigned dest_h)
+    {
+        int i, j;
+        for (j = 0; j < src_h; j++) {
+            for (i = 0; i < src_w; i++) {
+
+                int pos_y = (dest_h - 1 - j - y);
+
+                u32 coarse_y = pos_y & ~7;
+                u32 dst_offset = get_morton_offset(i+x, pos_y, 4) + coarse_y * dest_w * 4;
+
+                u32 v = ((u32 *)source)[i + j*src_w];
+                *(u32 *)(dest + dst_offset) = __builtin_bswap32(v);
+            }
+        }
+    }
+
+    void imageUntile32(u8* dest, const u8* source, unsigned x, unsigned y, unsigned src_w, unsigned src_h, unsigned dest_w, unsigned dest_h)
+    {
+        int i, j;
+        for (j = 0; j < src_h; j++) {
+            for (i = 0; i < src_w; i++) {
+
+                int pos_y = (dest_h - 1 - j - y);
+
+                u32 coarse_y = pos_y & ~7;
+                u32 src_offset = get_morton_offset(i+x, pos_y, 4) + coarse_y * dest_w * 4;
+
+                u32 v = *(u32 *)(source + src_offset);
+                ((u32 *)dest)[i + j*src_w] = __builtin_bswap32(v);
+            }
+        }
+    }
 }
 
 
@@ -128,8 +180,8 @@ bool Texture::create(unsigned int width, unsigned int height)
               << std::endl;
         return false;
     }
-    if (actualSize.x < 64) actualSize.x = 64;
-    if (actualSize.y < 64) actualSize.y = 64;
+    if (actualSize.x < 8) actualSize.x = 8;
+    if (actualSize.y < 8) actualSize.y = 8;
 
     // All the validity checks passed, we can store the new texture settings
     m_size.x        = width;
@@ -260,16 +312,11 @@ Image Texture::copyToImage() const
     // Create an array of pixels
     std::vector<Uint8> pixels(m_size.x * m_size.y * 4);
 
-    u32 *data = (u32*)linearAlloc(m_texture->size);
-    u32 dim = GX_BUFFER_DIM(m_texture->width, m_texture->height);
-    GX_DisplayTransfer((u32*)m_texture->data, dim, data, dim, TEXTURE_TRANSFER_FLAGS);
-    gspWaitForPPF();
-    GSPGPU_FlushDataCache(data, m_texture->size);
+    u32 *data = (u32*)malloc(m_texture->size);
 
-    for (int i = 0; i < m_texture->width * m_texture->height; ++i)
-        data[i] = __builtin_bswap32(data[i]);
+    imageUntile32((u8*)data, (u8*)m_texture->data, 0, 0, m_texture->width, m_texture->height, m_texture->width, m_texture->height);
 
-	if ((m_size == m_actualSize) && !m_pixelsFlipped)
+    if ((m_size == m_actualSize) && !m_pixelsFlipped)
 	{
 		// Texture is not padded nor flipped, we can use a direct copy
         std::memcpy(&pixels[0], data, pixels.size());
@@ -307,7 +354,7 @@ Image Texture::copyToImage() const
     Image image;
     image.create(m_size.x, m_size.y, &pixels[0]);
 
-    linearFree(data);
+    free(data);
 
     return image;
 }
@@ -329,28 +376,11 @@ void Texture::update(const Uint8* pixels, unsigned int width, unsigned int heigh
 
     if (pixels && m_texture)
     {
-        // TODO: use GX_TextureCopy
+        u8* dest = (u8*)m_texture->data;
 
-        const u32 *pixels32 = reinterpret_cast<const u32*>(pixels);
-        u32 *data = (u32*)linearAlloc(m_texture->size);
-        u32 dim = GX_BUFFER_DIM(m_texture->width, m_texture->height);
+        imageTile32(dest, pixels, x, y, width, height, m_texture->width, m_texture->height);
 
-        GX_DisplayTransfer((u32*)m_texture->data, dim, data, dim, TEXTURE_TRANSFER_FLAGS);
-        gspWaitForPPF();
-
-        for (int h = 0; h < height; ++h)
-        {
-            for (int w = 0; w < width; ++w)
-            {
-                data[(y+h)*m_texture->width+x+w] = __builtin_bswap32(pixels32[(h*width) + w]);
-            }
-        }
-        GSPGPU_FlushDataCache(data, m_texture->size);
-
-        GX_DisplayTransfer(data, dim, (u32*)m_texture->data, dim, TEXTURE_TRANSFER_FLAGS | GX_TRANSFER_OUT_TILED(1));
-        gspWaitForPPF();
-
-        linearFree(data);
+        C3D_TexFlush(m_texture);
 
         m_pixelsFlipped = false;
         m_cacheId = getUniqueId();
