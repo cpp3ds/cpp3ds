@@ -27,40 +27,33 @@
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/System/Mutex.hpp>
 
-//#if defined(SFML_SYSTEM_WINDOWS)
-//    #include <SFML/System/Win32/MutexImpl.hpp>
-//#else
-//    #include <SFML/System/Unix/MutexImpl.hpp>
-//#endif
-
 
 namespace cpp3ds
 {
 ////////////////////////////////////////////////////////////
 Mutex::Mutex()
 {
-//    m_mutexImpl = new priv::MutexImpl;
+	RecursiveLock_Init(&m_mutex);
 }
 
 
 ////////////////////////////////////////////////////////////
 Mutex::~Mutex()
 {
-//    delete m_mutexImpl;
 }
 
 
 ////////////////////////////////////////////////////////////
 void Mutex::lock()
 {
-//    m_mutexImpl->lock();
+	RecursiveLock_Lock(&m_mutex);
 }
 
 
 ////////////////////////////////////////////////////////////
 void Mutex::unlock()
 {
-//    m_mutexImpl->unlock();
+	RecursiveLock_Unlock(&m_mutex);
 }
 
 } // namespace cpp3ds

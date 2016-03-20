@@ -25,71 +25,41 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <cpp3ds/System/Thread.hpp>
+#include <cpp3ds/System/Mutex.hpp>
 
 
 namespace cpp3ds
 {
 ////////////////////////////////////////////////////////////
-void Thread::initialize()
+Mutex::Mutex()
 {
+	// Make it recursive to follow the expected behavior
+	pthread_mutexattr_t attributes;
+	pthread_mutexattr_init(&attributes);
+	pthread_mutexattr_settype(&attributes, PTHREAD_MUTEX_RECURSIVE);
 
+	pthread_mutex_init(&m_mutex, &attributes);
 }
 
 
 ////////////////////////////////////////////////////////////
-Thread::~Thread()
+Mutex::~Mutex()
 {
-    delete m_thread;
-    delete m_entryPoint;
+	pthread_mutex_destroy(&m_mutex);
 }
 
 
 ////////////////////////////////////////////////////////////
-void Thread::launch()
+void Mutex::lock()
 {
-    m_thread->launch();
+	pthread_mutex_lock(&m_mutex);
 }
 
 
 ////////////////////////////////////////////////////////////
-void Thread::wait()
+void Mutex::unlock()
 {
-    m_thread->wait();
-}
-
-
-////////////////////////////////////////////////////////////
-void Thread::terminate()
-{
-    m_thread->terminate();
-}
-
-
-////////////////////////////////////////////////////////////
-void Thread::run()
-{
-}
-
-
-////////////////////////////////////////////////////////////
-void Thread::entryPoint(void* userData)
-{
-}
-
-void Thread::setStackSize(size_t stacksize)
-{
-    m_stackSize = stacksize;
-}
-
-void Thread::setPriority(int priority)
-{
-    m_priority = priority;
-}
-
-void Thread::setAffinity(int affinity)
-{
-    m_affinity = affinity;
+	pthread_mutex_unlock(&m_mutex);
 }
 
 } // namespace cpp3ds

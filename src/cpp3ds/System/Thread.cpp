@@ -34,6 +34,12 @@ namespace cpp3ds
 ////////////////////////////////////////////////////////////
 void Thread::initialize()
 {
+	s32 prio = 0;
+	svcGetThreadPriority(&prio, CUR_THREAD_HANDLE);
+
+	m_stackSize = 32 * 1024;
+	m_priority = prio - 1;
+	m_affinity = -2;
 }
 
 
@@ -49,10 +55,7 @@ Thread::~Thread()
 void Thread::launch()
 {
     wait();
-
-	s32 prio = 0;
-	svcGetThreadPriority(&prio, CUR_THREAD_HANDLE);
-	m_thread = threadCreate(&Thread::entryPoint, this, THREAD_STACK_SIZE, prio-1, -2, false);
+	m_thread = threadCreate(&Thread::entryPoint, this, m_stackSize, m_priority, m_affinity, false);
 }
 
 
@@ -62,6 +65,7 @@ void Thread::wait()
 	// TODO: check that this isn't current thread asking to wait for itself
 	if (m_thread != nullptr) {
 		threadJoin(m_thread, U64_MAX);
+		threadFree(m_thread);
 		m_thread = nullptr;
 	}
 }
@@ -93,6 +97,21 @@ void Thread::entryPoint(void* userData)
 	// Forward to the owner
 	owner->run();
 
+}
+
+void Thread::setStackSize(size_t stacksize)
+{
+	m_stackSize = stacksize;
+}
+
+void Thread::setPriority(int priority)
+{
+	m_priority = priority;
+}
+
+void Thread::setAffinity(int affinity)
+{
+	m_affinity = affinity;
 }
 
 } // namespace cpp3ds

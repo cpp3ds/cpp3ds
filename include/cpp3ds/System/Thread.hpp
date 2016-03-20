@@ -36,9 +36,6 @@
 #include <3ds.h>
 #endif
 
-// Stack size (in byte)
-#define THREAD_STACK_SIZE 16384
-
 namespace cpp3ds
 {
 namespace priv
@@ -178,6 +175,10 @@ public :
     ////////////////////////////////////////////////////////////
     void terminate();
 
+    void setStackSize(size_t stacksize);
+    void setPriority(int priority);
+    void setAffinity(int affinity);
+
 private :
 
 	////////////////////////////////////////////////////////////
@@ -203,6 +204,9 @@ private :
     ////////////////////////////////////////////////////////////
     priv::ThreadFunc* m_entryPoint; ///< Abstraction of the function to run
 	bool              m_isActive; ///< Thread state (active or inactive)
+    size_t            m_stackSize;
+    int               m_priority;
+    int               m_affinity;
 #ifdef EMULATION
 	sf::Thread* m_thread;
 #else

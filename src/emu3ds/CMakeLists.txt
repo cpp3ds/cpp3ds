@@ -95,7 +95,7 @@ set(SRC
         ${SRCROOT}/System/I18n.cpp
         ${SRCROOT}/System/Lock.cpp
         ${SRCROOT}/System/MemoryInputStream.cpp
-        ${SRCROOT}/System/Mutex.cpp
+        ${EMUSRCROOT}/System/Mutex.cpp
         ${EMUSRCROOT}/System/Service.cpp
         ${EMUSRCROOT}/System/Sleep.cpp
         ${SRCROOT}/System/String.cpp

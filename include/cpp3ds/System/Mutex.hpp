@@ -29,15 +29,15 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/System/NonCopyable.hpp>
+#ifdef EMULATION
+#include <pthread.h>
+#else
+#include <3ds.h>
+#endif
 
 
 namespace cpp3ds
 {
-namespace priv
-{
-    class MutexImpl;
-}
-
 ////////////////////////////////////////////////////////////
 /// \brief Blocks concurrent access to shared resources
 ///        from multiple threads
@@ -84,7 +84,11 @@ private :
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-//    priv::MutexImpl* m_mutexImpl; ///< OS-specific implementation
+#ifdef EMULATION
+	pthread_mutex_t m_mutex;
+#else
+	RecursiveLock m_mutex; ///< ctrulib handle of the mutex
+#endif
 };
 
 } // namespace cpp3ds
