@@ -5,6 +5,7 @@
 
 #include <cpp3ds/System/Clock.hpp>
 #include <cpp3ds/System/Err.hpp>
+#include <cpp3ds/System/FileSystem.hpp>
 #include <cpp3ds/System/I18n.hpp>
 #include <cpp3ds/System/InputStream.hpp>
 #include <cpp3ds/System/Lock.hpp>
