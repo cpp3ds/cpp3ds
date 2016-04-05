@@ -85,8 +85,11 @@ public :
     /// \return Pointer to a 4x4 matrix
     ///
     ////////////////////////////////////////////////////////////
+    #ifdef EMULATION
     const float* getMatrix() const;
-
+    #else
+    const C3D_Mtx* getMatrix() const;
+    #endif
     ////////////////////////////////////////////////////////////
     /// \brief Return the inverse of the transform
     ///
