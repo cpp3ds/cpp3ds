@@ -27,6 +27,7 @@ Game::Game()
 	if (!Console::isEnabled() && !Console::isEnabledBasic())
 		gfxInitDefault();
 	CitroInit();
+	osSetSpeedupEnable(true);
 	Service::enable(RomFS);
 	I18n::getInstance();   // Init and load localization file(s)
 
@@ -53,29 +54,32 @@ void Game::render()
 {
 	Console& console = Console::getInstance();
 
+	C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
+
 	if (!console.isEnabledBasic() || console.getScreen() != TopScreen) {
-		C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
 		C3D_FrameDrawOn(windowTop.getCitroTarget());
-		windowTop.setView(windowTop.getDefaultView());
+		windowTop.resetGLStates();
 		renderTopScreen(windowTop);
 		if (console.isEnabled() && console.getScreen() == TopScreen) {
 			windowTop.setView(windowTop.getDefaultView());
-			windowTop.draw(Console::getInstance());
+			windowTop.draw(console);
 		}
-		C3D_FrameEnd(0);
 	}
 
 	if (!console.isEnabledBasic() || console.getScreen() != BottomScreen) {
-		C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
 		C3D_FrameDrawOn(windowBottom.getCitroTarget());
-		windowBottom.setView(windowBottom.getDefaultView());
+		windowBottom.resetGLStates();
 		renderBottomScreen(windowBottom);
 		if (console.isEnabled() && console.getScreen() == BottomScreen) {
 			windowBottom.setView(windowBottom.getDefaultView());
-			windowBottom.draw(Console::getInstance());
+			windowBottom.draw(console);
 		}
-		C3D_FrameEnd(0);
 	}
+
+	C3D_FrameEnd(0);
+
+	// This currently is only use to properly use frameTimeLimit
+	windowTop.display();
 }
 
 
