@@ -54,29 +54,34 @@ void Game::render()
 {
 	Console& console = Console::getInstance();
 
-	C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
-
 	if (!console.isEnabledBasic() || console.getScreen() != TopScreen) {
-		C3D_FrameDrawOn(windowTop.getCitroTarget());
+		C3D_RenderTarget* target = windowTop.getCitroTarget();
+		C3D_RenderBufBind(&target->renderBuf);
 		windowTop.resetGLStates();
 		renderTopScreen(windowTop);
 		if (console.isEnabled() && console.getScreen() == TopScreen) {
 			windowTop.setView(windowTop.getDefaultView());
 			windowTop.draw(console);
 		}
+		C3D_Flush();
+		C3D_RenderBufTransfer(&target->renderBuf, (u32*)gfxGetFramebuffer(GFX_TOP, GFX_LEFT, NULL, NULL), target->transferFlags);
 	}
 
 	if (!console.isEnabledBasic() || console.getScreen() != BottomScreen) {
-		C3D_FrameDrawOn(windowBottom.getCitroTarget());
+		C3D_RenderTarget* target = windowBottom.getCitroTarget();
+		C3D_RenderBufBind(&target->renderBuf);
 		windowBottom.resetGLStates();
 		renderBottomScreen(windowBottom);
 		if (console.isEnabled() && console.getScreen() == BottomScreen) {
 			windowBottom.setView(windowBottom.getDefaultView());
 			windowBottom.draw(console);
 		}
+		C3D_Flush();
+		C3D_RenderBufTransfer(&target->renderBuf, (u32*)gfxGetFramebuffer(GFX_BOTTOM, GFX_LEFT, NULL, NULL), target->transferFlags);
 	}
 
-	C3D_FrameEnd(0);
+	gfxSwapBuffersGpu();
+	gspWaitForVBlank();
 
 	// This currently is only use to properly use frameTimeLimit
 	windowTop.display();

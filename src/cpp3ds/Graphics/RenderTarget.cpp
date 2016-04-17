@@ -32,6 +32,7 @@
 #include <cpp3ds/Graphics/VertexArray.hpp>
 #include <cpp3ds/OpenGL.hpp>
 #include <cpp3ds/System/Err.hpp>
+#include <c3d/renderbuffer.h>
 #include "CitroHelpers.hpp"
 
 namespace
@@ -96,7 +97,9 @@ void RenderTarget::clear(const Color& color)
     if (activate(true))
     {
         u32 clearColor = (((color.r)&0xFF)<<24) | (((color.g)&0xFF)<<16) | (((color.b)&0xFF)<<8) | (((color.a)&0xFF)<<0);
-        C3D_RenderTargetSetClear(m_target, C3D_CLEAR_ALL, clearColor, 0);
+//        C3D_RenderTargetSetClear(m_target, C3D_CLEAR_ALL, clearColor, 0);
+        m_target->renderBuf.clearColor = clearColor;
+        C3D_RenderBufClear(&m_target->renderBuf);
     }
 }
 
@@ -210,7 +213,8 @@ void RenderTarget::draw(const Vertex* vertices, unsigned int vertexCount,
             resetGLStates();
 
         // Check if the vertex count is low enough so that we can pre-transform them
-        bool useVertexCache = (vertexCount <= StatesCache::VertexCacheSize);
+//        bool useVertexCache = (vertexCount <= StatesCache::VertexCacheSize);
+        bool useVertexCache = false;
         if (useVertexCache)
         {
             // Pre-transform the vertices and store them into the vertex cache
@@ -356,7 +360,7 @@ void RenderTarget::applyCurrentView()
 	// Set the viewport
     IntRect viewport = getViewport(m_view);
     int top = getSize().y - (viewport.top + viewport.height);
-    C3D_SetViewport(viewport.left, top, viewport.height, viewport.width);
+    C3D_SetViewport(top, viewport.left, viewport.height, viewport.width);
 
 	// Set the projection matrix
     memcpy(MtxStack_Cur(CitroGetProjectionMatrix())->m, m_view.getTransform().getMatrix(), sizeof(C3D_Mtx));
@@ -384,7 +388,6 @@ void RenderTarget::applyBlendMode(const BlendMode& mode)
 void RenderTarget::applyTransform(const Transform& transform)
 {
     memcpy(MtxStack_Cur(CitroGetModelviewMatrix())->m, transform.getMatrix(), sizeof(C3D_Mtx));
-
 }
 
 
