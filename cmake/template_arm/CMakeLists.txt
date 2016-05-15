@@ -26,7 +26,7 @@ compile_shaders(SHADER_OUTPUT ${SHADER_FILES})
 set_source_files_properties(${SHADER_OUTPUT} PROPERTIES GENERATED TRUE)
 file(GLOB_RECURSE ROMFS_FILES ${PROJECT_SOURCE_DIR}/res/romfs/*)
 
-add_executable(${PROJECT_NAME}.elf ${SOURCE_FILES})
+add_executable(${PROJECT_NAME}.elf ${SOURCE_FILES} ${ARM_SOURCE_FILES})
 
 target_link_libraries(${PROJECT_NAME}.elf ${CPP3DS_ARM_LIBS})
 set_target_properties(${PROJECT_NAME}.elf PROPERTIES COMPILE_FLAGS "${CPP3DS_ARM_FLAGS}")

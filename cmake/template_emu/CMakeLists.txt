@@ -14,7 +14,7 @@ link_directories(
 	${EMU_LINK_DIRECTORIES}
 )
 
-add_executable(${PROJECT_NAME}-emu ${SOURCE_FILES})
+add_executable(${PROJECT_NAME}-emu ${SOURCE_FILES} ${EMU_SOURCE_FILES})
 
 qt5_use_modules(${PROJECT_NAME}-emu Core Gui Widgets)
 
