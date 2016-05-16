@@ -216,6 +216,13 @@ public :
     ////////////////////////////////////////////////////////////
     bool loadFromImage(const Image& image, const IntRect& area = IntRect());
 
+#ifndef EMULATION
+    bool loadFromPreprocessedFile(const std::string& filename, size_t width, size_t height, GPU_TEXCOLOR format);
+    bool loadFromPreprocessedMemory(void *data, size_t size, size_t width, size_t height, GPU_TEXCOLOR format, bool copyData = true);
+
+    C3D_Tex* getNativeTexture() { return m_texture; }
+#endif
+
     ////////////////////////////////////////////////////////////
     /// \brief Return the size of the texture
     ///
@@ -501,6 +508,7 @@ private :
     unsigned int m_texture;       ///< Internal texture identifier
 #else
     C3D_Tex*     m_texture;       ///< Internal texture identifier
+    bool         m_ownsData;      ///< Check if this object owns the data and needs to free it
 #endif
 };
 

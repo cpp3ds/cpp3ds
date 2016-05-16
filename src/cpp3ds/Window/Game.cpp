@@ -8,6 +8,8 @@
 
 namespace cpp3ds {
 
+// System font sheets to be fetched and released by Game
+cpp3ds::Texture *system_font_textures = nullptr;
 
 //Apt hook cookie
 static aptHookCookie apt_hook_cookie;
@@ -21,12 +23,12 @@ static void apt_clock_hook(APT_HookType hook, void* param)
 }
 
 
-Game::Game()
+Game::Game(size_t gpuCommandBufSize)
 : m_triggerExit(false)
 {
 	if (!Console::isEnabled() && !Console::isEnabledBasic())
 		gfxInitDefault();
-	CitroInit();
+	CitroInit(gpuCommandBufSize);
 	osSetSpeedupEnable(true);
 	Service::enable(RomFS);
 	I18n::getInstance();   // Init and load localization file(s)
@@ -39,11 +41,27 @@ Game::Game()
 	if (!Shader::Default.loadBinary(defaultShader.data, defaultShader.size, Shader::Vertex)){
 		err() << "Failed to load default_shader.vsh from cpp3ds core.";
 	}
+
+	// Load system font texture sheets
+	if (R_SUCCEEDED(fontEnsureMapped()))
+	{
+		TGLP_s* glyphInfo = fontGetGlyphInfo();
+		system_font_textures = new cpp3ds::Texture[glyphInfo->nSheets];
+		for (int i = 0; i < glyphInfo->nSheets; ++i)
+		{
+			system_font_textures[i].loadFromPreprocessedMemory(
+				fontGetGlyphSheetTex(i), glyphInfo->sheetSize,
+				glyphInfo->sheetWidth, glyphInfo->sheetHeight,
+				(GPU_TEXCOLOR)glyphInfo->sheetFmt, false);
+			system_font_textures[i].setSmooth(true);
+		}
+	}
 }
 
 
 Game::~Game()
 {
+	delete[] system_font_textures;
 	Service::disable(All);
 	CitroDestroy();
 	gfxExit();

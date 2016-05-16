@@ -24,7 +24,11 @@ public:
     void render();
 	void run();
 	void exit();
-	Game();
+#ifdef EMULATION
+	Game(size_t gpuCommandBufSize = 0);
+#else
+	Game(size_t gpuCommandBufSize = C3D_DEFAULT_CMDBUF_SIZE);
+#endif
 	virtual ~Game();
 protected:
     Window windowTop, windowBottom;

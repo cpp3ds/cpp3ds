@@ -9,7 +9,7 @@
 
 namespace cpp3ds {
 
-Game::Game()
+Game::Game(size_t gpuCommandBufSize)
 : m_triggerExit(false)
 {
 	priv::ensureExtensionsInit();

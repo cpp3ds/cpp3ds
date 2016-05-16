@@ -5,9 +5,9 @@ namespace
 	C3D_MtxStack projectionMatrix, modelviewMatrix, textureMatrix;
 }
 
-void CitroInit()
+void CitroInit(size_t commandBufferSize)
 {
-	C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
+	C3D_Init(commandBufferSize);
 
 	// Configure attributes for use with the vertex shader
 	C3D_AttrInfo* attrInfo = C3D_GetAttrInfo();

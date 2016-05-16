@@ -1,7 +1,7 @@
 #pragma once
 #include <citro3d.h>
 
-void CitroInit();
+void CitroInit(size_t commandBufferSize);
 void CitroDestroy();
 void CitroBindUniforms(shaderProgram_s* program);
 void CitroUpdateMatrixStacks();

@@ -37,6 +37,8 @@
 #include <cstring>
 #include <iostream>
 #include <c3d/texture.h>
+#include <cpp3ds/System/FileInputStream.hpp>
+#include <cpp3ds/System/FileSystem.hpp>
 #include "CitroHelpers.hpp"
 
 // Note: vertical flip flag set so 0,0 is top left of texture
@@ -124,6 +126,7 @@ m_texture      (nullptr),
 m_isSmooth     (false),
 m_isRepeated   (false),
 m_pixelsFlipped(false),
+m_ownsData     (true),
 m_cacheId      (getUniqueId())
 {
 
@@ -138,6 +141,7 @@ m_texture      (nullptr),
 m_isSmooth     (copy.m_isSmooth),
 m_isRepeated   (copy.m_isRepeated),
 m_pixelsFlipped(false),
+m_ownsData     (true),
 m_cacheId      (getUniqueId())
 {
     if (copy.m_texture)
@@ -148,12 +152,11 @@ m_cacheId      (getUniqueId())
 ////////////////////////////////////////////////////////////
 Texture::~Texture()
 {
-    // Destroy the OpenGL texture
-    if (m_texture)
-    {
+    if (m_ownsData)
         C3D_TexDelete(m_texture);
+
+    if (m_texture)
         delete m_texture;
-    }
 }
 
 
@@ -296,6 +299,74 @@ bool Texture::loadFromImage(const Image& image, const IntRect& area)
 
 
 ////////////////////////////////////////////////////////////
+bool Texture::loadFromPreprocessedFile(const std::string& filename, size_t width, size_t height, GPU_TEXCOLOR format)
+{
+    if (filename.empty())
+        return false;
+
+    FileInputStream file;
+    file.open(filename);
+
+    size_t size = file.getSize();
+    void *data = malloc(size);
+    file.read(data, size);
+
+    bool ret = loadFromPreprocessedMemory(data, size, width, height, format, true);
+    free(data);
+    return ret;
+}
+
+
+////////////////////////////////////////////////////////////
+bool Texture::loadFromPreprocessedMemory(void *data, size_t size, size_t width, size_t height, GPU_TEXCOLOR format, bool copyData)
+{
+    if (!data)
+        return false;
+
+    m_ownsData      = copyData;
+    m_size.x        = width;
+    m_size.y        = height;
+    m_actualSize    = m_size;
+    m_pixelsFlipped = false;
+
+    ensureGlContext();
+
+    // Create the citro3d texture, or delete if already created
+    if (!m_texture)
+        m_texture = new C3D_Tex();
+    else
+        C3D_TexDelete(m_texture);
+
+    if (!m_texture)
+        return false;
+
+    if (copyData)
+    {
+        C3D_TexInit(m_texture, width, height, format);
+        C3D_TexUpload(m_texture, data);
+    }
+    else
+        m_texture->data = data;
+
+    m_texture->size = size;
+    m_texture->fmt = format;
+    m_texture->height = height;
+    m_texture->width = width;
+
+    C3D_TexSetWrap(m_texture,
+                   m_isRepeated ? GPU_REPEAT : GPU_CLAMP_TO_EDGE,
+                   m_isRepeated ? GPU_REPEAT : GPU_CLAMP_TO_EDGE);
+    C3D_TexSetFilter(m_texture,
+                     m_isSmooth ? GPU_LINEAR : GPU_NEAREST,
+                     m_isSmooth ? GPU_LINEAR : GPU_NEAREST);
+
+    m_cacheId = getUniqueId();
+
+    return true;
+}
+
+
+////////////////////////////////////////////////////////////
 Vector2u Texture::getSize() const
 {
     return m_size;
@@ -312,9 +383,19 @@ Image Texture::copyToImage() const
     // Create an array of pixels
     std::vector<Uint8> pixels(m_size.x * m_size.y * 4);
 
-    u32 *data = (u32*)malloc(m_texture->size);
+    u32 *data = (u32*)linearAlloc(m_texture->size);
 
-    imageUntile32((u8*)data, (u8*)m_texture->data, 0, 0, m_texture->width, m_texture->height, m_texture->width, m_texture->height);
+    if (m_texture->width < 64 || m_texture->height < 64)
+        imageUntile32((u8*)data, (u8*)m_texture->data, 0, 0, m_texture->width, m_texture->height, m_texture->width, m_texture->height);
+    else
+    {
+        u32 dim = GX_BUFFER_DIM(m_texture->width, m_texture->height);
+        GX_DisplayTransfer((u32*)m_texture->data, dim, data, dim, TEXTURE_TRANSFER_FLAGS);
+        gspWaitForPPF();
+        GSPGPU_FlushDataCache(data, m_texture->size);
+        for (int i = 0; i < m_texture->width * m_texture->height; ++i)
+            data[i] = __builtin_bswap32(data[i]);
+    }
 
     if ((m_size == m_actualSize) && !m_pixelsFlipped)
 	{
@@ -354,7 +435,7 @@ Image Texture::copyToImage() const
     Image image;
     image.create(m_size.x, m_size.y, &pixels[0]);
 
-    free(data);
+    linearFree(data);
 
     return image;
 }
@@ -376,11 +457,37 @@ void Texture::update(const Uint8* pixels, unsigned int width, unsigned int heigh
 
     if (pixels && m_texture)
     {
-        u8* dest = (u8*)m_texture->data;
+        if (m_texture->width < 64 || m_texture->height < 64)
+        {
+            u8* dest = (u8*)m_texture->data;
 
-        imageTile32(dest, pixels, x, y, width, height, m_texture->width, m_texture->height);
+            imageTile32(dest, pixels, x, y, width, height, m_texture->width, m_texture->height);
 
-        C3D_TexFlush(m_texture);
+            C3D_TexFlush(m_texture);
+        }
+        else
+        {
+            const u32 *pixels32 = reinterpret_cast<const u32*>(pixels);
+            u32 *data = (u32*)linearAlloc(m_texture->size);
+            u32 dim = GX_BUFFER_DIM(m_texture->width, m_texture->height);
+
+            GX_DisplayTransfer((u32*)m_texture->data, dim, data, dim, TEXTURE_TRANSFER_FLAGS);
+            gspWaitForPPF();
+
+            for (int h = 0; h < height; ++h)
+            {
+                for (int w = 0; w < width; ++w)
+                {
+                    data[(y+h)*m_texture->width+x+w] = __builtin_bswap32(pixels32[(h*width) + w]);
+                }
+            }
+            GSPGPU_FlushDataCache(data, m_texture->size);
+
+            GX_DisplayTransfer(data, dim, (u32*)m_texture->data, dim, TEXTURE_TRANSFER_FLAGS | GX_TRANSFER_OUT_TILED(1));
+            gspWaitForPPF();
+
+            linearFree(data);
+        }
 
         m_pixelsFlipped = false;
         m_cacheId = getUniqueId();
