@@ -316,7 +316,11 @@ public:
         /// \param data Content of the response to parse
         ///
         ////////////////////////////////////////////////////////////
+#ifdef EMULATION
         void parse(const std::string& data);
+#else
+        void parse(httpcContext *context);
+#endif
 
 
         ////////////////////////////////////////////////////////////
@@ -338,11 +342,16 @@ public:
         ////////////////////////////////////////////////////////////
         // Member data
         ////////////////////////////////////////////////////////////
-        FieldTable   m_fields;       ///< Fields of the header
         Status       m_status;       ///< Status code
         unsigned int m_majorVersion; ///< Major HTTP version
         unsigned int m_minorVersion; ///< Minor HTTP version
         std::string  m_body;         ///< Body of the response
+#ifdef EMULATION
+        FieldTable   m_fields;       ///< Fields of the header
+#else
+        mutable FieldTable  m_fields;
+        httpcContext  *m_context;
+#endif
     };
 
     typedef std::function<bool(const void*,size_t,size_t,const Response&)> RequestCallback;
@@ -411,7 +420,12 @@ private:
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
+#ifdef EMULATION
     TcpSocket      m_connection; ///< Connection to the host
+#else
+    httpcContext   m_context;
+    std::string    m_hostUrl;
+#endif
     IpAddress      m_host;       ///< Web host address
     std::string    m_hostName;   ///< Web host name
     unsigned short m_port;       ///< Port used for connection with host

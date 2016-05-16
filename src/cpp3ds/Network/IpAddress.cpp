@@ -42,23 +42,35 @@ namespace
             // because it is also the value returned by inet_addr on error
             return INADDR_BROADCAST;
         }
+        else if (address == "0.0.0.0")
+        {
+            return INADDR_ANY;
+        }
         else
         {
             // Try to convert the address as a byte representation ("xxx.xxx.xxx.xxx")
             cpp3ds::Uint32 ip = inet_addr(address.c_str());
             if (ip != INADDR_NONE)
+            {
                 return ip;
-
-			// Try address as a host name.
-			if (cpp3ds::Service::isEnabled(cpp3ds::Network)) {
-				struct hostent* host = gethostbyname(address.c_str());
-				struct in_addr** addr_list = reinterpret_cast<struct in_addr**>(host->h_addr_list);
-				if (addr_list[0] != NULL)
-					return addr_list[0]->s_addr;
-			}
-
-            // Not a valid address nor a host name
-            return 0;
+            }
+            else
+            {
+                // Not a valid address, try to convert it as a host name
+                addrinfo hints;
+                std::memset(&hints, 0, sizeof(hints));
+                hints.ai_family = AF_INET;
+                addrinfo* result = NULL;
+                if (getaddrinfo(address.c_str(), NULL, &hints, &result) == 0)
+                {
+                    if (result)
+                    {
+                        ip = reinterpret_cast<sockaddr_in*>(result->ai_addr)->sin_addr.s_addr;
+                        freeaddrinfo(result);
+                        return ip;
+                    }
+                }
+            }
         }
     }
 }

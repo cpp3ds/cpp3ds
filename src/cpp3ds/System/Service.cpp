@@ -23,13 +23,14 @@ bool Service::enable(ServiceName service) {
 	switch (service) {
 		case All:
 			return enable(Network) && enable(Audio) &&
-			       enable(Config) && enable(RomFS) && enable(Microphone);
+			       enable(Config) && enable(RomFS) && enable(Microphone) &&
+			       enable(Httpc) && enable(SSL) && enable(AM);
 		case Network:
 			m_socBuffer = (u32*) memalign(0x1000, 0x100000);
 			if (m_socBuffer == nullptr)
 				break;
 			result = socInit(m_socBuffer, 0x100000);
-			if (result != 0) {
+			if (R_FAILED(result)) {
 				err() << "Network service (soc:U) failed to initialize: " << std::hex << result;
 				socExit();
 				free(m_socBuffer);
@@ -44,14 +45,17 @@ bool Service::enable(ServiceName service) {
 				err() << "Audio service (dsp) failed to initialize: " << std::hex << result;
 			break;
 		case Config:
-			success = R_SUCCEEDED(cfguInit());
+			result = cfguInit();
+			success = R_SUCCEEDED(result);
 			break;
 		case RomFS:
-			success = R_SUCCEEDED(romfsInit());
+			result = romfsInit();
+			success = R_SUCCEEDED(result);
 			chdir("romfs:/");
 			break;
 		case WifiStatus:
-			success = R_SUCCEEDED(acInit());
+			result = acInit();
+			success = R_SUCCEEDED(result);
 			break;
 		case Microphone:
 			if (!enable(Audio))
@@ -59,11 +63,27 @@ bool Service::enable(ServiceName service) {
 			m_micBuffer = (u8*) memalign(0x1000, 0x30000);
 			if (m_micBuffer == nullptr)
 				break;
-			success = R_SUCCEEDED(micInit(m_micBuffer, 0x30000));
+			result = micInit(m_micBuffer, 0x30000);
+			success = R_SUCCEEDED(result);
+			break;
+		case Httpc:
+			result = httpcInit(0x4000);
+			success = R_SUCCEEDED(result);
+			break;
+		case SSL:
+			result = sslcInit(0);
+			success = R_SUCCEEDED(result);
+			break;
+		case AM:
+			result = amInit();
+			success = R_SUCCEEDED(result);
 			break;
 		default:
 			break;
 	}
+
+	if (!success)
+		err() << "Service Failed: " << (int)service << " " << std::hex << result << std::endl;
 
 	if (success)
 		m_enabledServices |= service;
@@ -74,7 +94,8 @@ bool Service::enable(ServiceName service) {
 bool Service::disable(ServiceName service) {
 	if (service == All)
 		return disable(Network) && disable(Audio) &&
-			   disable(Config) && disable(RomFS) && disable(Microphone);
+			   disable(Config) && disable(RomFS) && disable(Microphone) &&
+		       disable(Httpc) && disable(SSL) && disable(AM);
 
 	if (!isEnabled(service))
 		return true;
@@ -102,6 +123,15 @@ bool Service::disable(ServiceName service) {
 			micExit();
 			free(m_micBuffer);
 			break;
+		case Httpc:
+			httpcExit();
+			break;
+		case SSL:
+			sslcExit();
+			break;
+		case AM:
+			amExit();
+			break;
 		default:
 			break;
 	}
@@ -113,7 +143,7 @@ bool Service::disable(ServiceName service) {
 
 
 bool Service::isEnabled(ServiceName service) {
-	if (service == Network) {
+	if (service == Network || service == Httpc) {
 		if (!enable(WifiStatus))
 			return false;
 		u32 status;

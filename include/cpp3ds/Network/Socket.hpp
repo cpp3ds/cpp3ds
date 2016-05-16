@@ -31,10 +31,13 @@
 #include <cpp3ds/Network/SocketHandle.hpp>
 #include <cpp3ds/System/NonCopyable.hpp>
 #include <vector>
+#ifdef EMULATION
 #include <mbedtls/net.h>
 #include <mbedtls/entropy.h>
 #include <mbedtls/ctr_drbg.h>
-
+#else
+#include <3ds.h>
+#endif
 
 namespace cpp3ds
 {
@@ -72,12 +75,18 @@ public:
 
     struct SecureData
     {
+#ifdef EMULATION
         mbedtls_net_context socket;
         mbedtls_entropy_context entropy;
         mbedtls_ctr_drbg_context ctr_drbg;
         mbedtls_ssl_context ssl;
         mbedtls_ssl_config conf;
         mbedtls_x509_crt cacert;
+#else
+		sslcContext sslContext;
+		u32 rootCertChain;
+		u32 clientCertContext;
+#endif
     };
 
 public:

@@ -15,6 +15,9 @@ enum ServiceName {
 	RomFS      = 1 << 3,
 	WifiStatus = 1 << 4,
 	Microphone = 1 << 5,
+	Httpc      = 1 << 6,
+	SSL        = 1 << 7,
+	AM         = 1 << 8,
 
 	All         = 0xFFFF
 };

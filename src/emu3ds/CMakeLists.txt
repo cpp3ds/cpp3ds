@@ -77,10 +77,10 @@ set(SRC
 
         # Network
         ${SRCROOT}/Network/Ftp.cpp
-        ${SRCROOT}/Network/Http.cpp
+        ${EMUSRCROOT}/Network/Http.cpp
         ${SRCROOT}/Network/IpAddress.cpp
         ${SRCROOT}/Network/Packet.cpp
-        ${SRCROOT}/Network/Socket.cpp
+        ${EMUSRCROOT}/Network/Socket.cpp
         ${SRCROOT}/Network/SocketImpl.cpp
         ${SRCROOT}/Network/SocketSelector.cpp
         ${SRCROOT}/Network/TcpListener.cpp

@@ -101,36 +101,7 @@ void Http::Request::setBody(const std::string& body)
 ////////////////////////////////////////////////////////////
 std::string Http::Request::prepare() const
 {
-    std::ostringstream out;
-
-    // Convert the method to its string representation
-    std::string method;
-    switch (m_method)
-    {
-        case Get:    method = "GET";    break;
-        case Post:   method = "POST";   break;
-        case Head:   method = "HEAD";   break;
-        case Put:    method = "PUT";    break;
-        case Delete: method = "DELETE"; break;
-    }
-
-    // Write the first line containing the request type
-    out << method << " " << m_uri << " ";
-    out << "HTTP/" << m_majorVersion << "." << m_minorVersion << "\r\n";
-
-    // Write fields
-    for (FieldTable::const_iterator i = m_fields.begin(); i != m_fields.end(); ++i)
-    {
-        out << i->first << ": " << i->second << "\r\n";
-    }
-
-    // Use an extra \r\n to separate the header from the body
-    out << "\r\n";
-
-    // Add the body
-    out << m_body;
-
-    return out.str();
+    return "";
 }
 
 
@@ -161,8 +132,10 @@ const std::string& Http::Response::getField(const std::string& field) const
     }
     else
     {
-        static const std::string empty = "";
-        return empty;
+        char val[255];
+        httpcGetResponseHeader(m_context, field.c_str(), val, sizeof(val));
+        m_fields[field] = val;
+        return m_fields[field];
     }
 }
 
@@ -196,103 +169,21 @@ const std::string& Http::Response::getBody() const
 
 
 ////////////////////////////////////////////////////////////
-void Http::Response::parse(const std::string& data)
+void Http::Response::parse(httpcContext *context)
 {
-    std::istringstream in(data);
+    Result ret;
+    u32 statusCode;
 
-    // Extract the HTTP version from the first line
-    std::string version;
-    if (in >> version)
-    {
-        if ((version.size() >= 8) && (version[6] == '.') &&
-            (toLower(version.substr(0, 5)) == "http/")   &&
-             isdigit(version[5]) && isdigit(version[7]))
-        {
-            m_majorVersion = version[5] - '0';
-            m_minorVersion = version[7] - '0';
-        }
-        else
-        {
-            // Invalid HTTP version
-            m_status = InvalidResponse;
-            return;
-        }
-    }
-
-    // Extract the status code from the first line
-    int status;
-    if (in >> status)
-    {
-        m_status = static_cast<Status>(status);
-    }
-    else
-    {
-        // Invalid status code
-        m_status = InvalidResponse;
-        return;
-    }
-
-    // Ignore the end of the first line
-    in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
-    // Parse the other lines, which contain fields, one by one
-    parseFields(in);
-
-    m_body.clear();
-
-    // Determine whether the transfer is chunked
-    if (toLower(getField("transfer-encoding")) != "chunked")
-    {
-        // Not chunked - just read everything at once
-        std::copy(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>(), std::back_inserter(m_body));
-    }
-    else
-    {
-        // Chunked - have to read chunk by chunk
-        std::size_t length;
-
-        // Read all chunks, identified by a chunk-size not being 0
-        while (in >> std::hex >> length)
-        {
-            // Drop the rest of the line (chunk-extension)
-            in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
-            // Copy the actual content data
-            std::istreambuf_iterator<char> it(in);
-            for (std::size_t i = 0; i < length; i++)
-                m_body.push_back(*it++);
-        }
-
-        // Drop the rest of the line (chunk-extension)
-        in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
-        // Read all trailers (if present)
-        parseFields(in);
-    }
+    m_context = context;
+    ret = httpcGetResponseStatusCode(context, &statusCode, 0);
+    m_status = (Status)statusCode;
 }
 
 
 ////////////////////////////////////////////////////////////
 void Http::Response::parseFields(std::istream &in)
 {
-    std::string line;
-    while (std::getline(in, line) && (line.size() > 2))
-    {
-        std::string::size_type pos = line.find(": ");
-        if (pos != std::string::npos)
-        {
-            // Extract the field name and its value
-            std::string field = line.substr(0, pos);
-            std::string value = line.substr(pos + 2);
 
-            // Remove any trailing \r
-            if (!value.empty() && (*value.rbegin() == '\r'))
-                value.erase(value.size() - 1);
-
-            // Add the field
-            m_fields[toLower(field)] = value;
-        }
-    }
 }
 
 
@@ -315,25 +206,24 @@ Http::Http(const std::string& host, unsigned short port)
 ////////////////////////////////////////////////////////////
 void Http::setHost(const std::string& host, unsigned short port)
 {
+    m_hostUrl = host;
+
     // Check the protocol
     if (toLower(host.substr(0, 7)) == "http://")
     {
         // HTTP protocol
-        m_connection.setSecure(false);
         m_hostName = host.substr(7);
         m_port     = (port != 0 ? port : 80);
     }
     else if (toLower(host.substr(0, 8)) == "https://")
     {
         // HTTPS protocol
-        m_connection.setSecure(true);
         m_hostName = host.substr(8);
         m_port     = (port != 0 ? port : 443);
     }
     else
     {
         // Undefined protocol - use HTTP
-        m_connection.setSecure(false);
         m_hostName = host;
         m_port     = (port != 0 ? port : 80);
     }
@@ -341,6 +231,8 @@ void Http::setHost(const std::string& host, unsigned short port)
     // Remove any trailing '/' from the host name
     if (!m_hostName.empty() && (*m_hostName.rbegin() == '/'))
         m_hostName.erase(m_hostName.size() - 1);
+    if (!m_hostUrl.empty() && (*m_hostUrl.rbegin() == '/'))
+        m_hostUrl.erase(m_hostUrl.size() - 1);
 
     m_host = IpAddress(m_hostName);
 }
@@ -351,18 +243,6 @@ Http::Response Http::sendRequest(const Http::Request& request, Time timeout, Req
 {
     // First make sure that the request is valid -- add missing mandatory fields
     Request toSend(request);
-    if (!toSend.hasField("From"))
-    {
-        toSend.setField("From", "user@sfml-dev.org");
-    }
-    if (!toSend.hasField("User-Agent"))
-    {
-        toSend.setField("User-Agent", "libsfml-network/2.x");
-    }
-    if (!toSend.hasField("Host"))
-    {
-        toSend.setField("Host", m_hostName);
-    }
     if (!toSend.hasField("Content-Length"))
     {
         std::ostringstream out;
@@ -373,69 +253,78 @@ Http::Response Http::sendRequest(const Http::Request& request, Time timeout, Req
     {
         toSend.setField("Content-Type", "application/x-www-form-urlencoded");
     }
-    if ((toSend.m_majorVersion * 10 + toSend.m_minorVersion >= 11) && !toSend.hasField("Connection"))
-    {
-        toSend.setField("Connection", "close");
-    }
 
     // Prepare the response
     Response received;
 
-    // Connect the socket to the host
-    if (m_connection.connect(m_host, m_port, timeout) == Socket::Done)
-    {
-        // Convert the request to string and send it through the connected socket
-        std::string requestStr = toSend.prepare();
-
-        if (!requestStr.empty())
-        {
-            // Send it through the socket
-            if (m_connection.send(requestStr.c_str(), requestStr.size()) == Socket::Done)
-            {
-                // Wait for the server's response
-                std::string receivedStr;
-                std::size_t size = 0;
-                std::size_t processed = 0;
-                char buffer[2048];
-                while (m_connection.receive(buffer, sizeof(buffer), size) == Socket::Done)
-                {
-                    if (callback)
-                    {
-                        // Keep attempting to parse response until it's valid
-                        if (received.getStatus() == Response::InvalidResponse || received.getStatus() == Response::ConnectionFailed)
-                        {
-                            receivedStr.append(buffer, buffer + size);
-                            received.parse(receivedStr);
-                            if (received.getStatus() != Response::InvalidResponse)
-                            {
-                                processed += received.getBody().size();
-                                if (!callback(received.getBody().c_str(), received.getBody().size(), processed, received))
-                                    break;
-                            }
-                        }
-                        else
-                        {
-                            processed += size;
-
-                            // Break if user interrupts the download
-                            if (!callback(buffer, size, processed, received))
-                                break;
-                        }
-                    }
-                    else
-                        receivedStr.append(buffer, buffer + size);
-                }
-
-                // Build the Response object from the received data
-                if (!callback)
-                    received.parse(receivedStr);
-            }
-        }
-
-        // Close the connection
-        m_connection.disconnect();
+    std::string url = m_hostUrl + toSend.m_uri;
+    HTTPC_RequestMethod method;
+    switch (toSend.m_method) {
+        case Request::Get:    method = HTTPC_METHOD_GET;    break;
+        case Request::Post:   method = HTTPC_METHOD_POST;   break;
+        case Request::Head:   method = HTTPC_METHOD_HEAD;   break;
+        case Request::Put:    method = HTTPC_METHOD_PUT;    break;
+        case Request::Delete: method = HTTPC_METHOD_DELETE; break;
     }
 
+    // TODO: Handle return values / errors
+    Result ret;
+    u32 contentSize;
+    ret = httpcOpenContext(&m_context, method, url.c_str(), 0);
+    ret = httpcSetClientCertDefault(&m_context, SSLC_DefaultClientCert_ClCertA);
+    ret = httpcSetSSLOpt(&m_context, SSLCOPT_DisableVerify);
+
+    // Add fields
+    for (auto i = toSend.m_fields.begin(); i != toSend.m_fields.end(); ++i)
+    {
+        httpcAddRequestHeaderField(&m_context, i->first.c_str(), i->second.c_str());
+    }
+
+    if (!toSend.m_body.empty())
+        httpcAddPostDataRaw(&m_context, (u32*)toSend.m_body.c_str(), toSend.m_body.size());
+
+    ret = httpcBeginRequest(&m_context);
+
+    received.parse(&m_context);
+
+    ret = httpcGetDownloadSizeState(&m_context, NULL, &contentSize);
+
+    std::string receivedStr;
+    u32 size = 0;
+    u32 lastProcessed = 0;
+    u32 processed = 0;
+    u8 buffer[4*1024];
+    char *charBuf = reinterpret_cast<char*>(buffer);
+
+
+    Result dlret = HTTPC_RESULTCODE_DOWNLOADPENDING;
+
+    while (dlret == HTTPC_RESULTCODE_DOWNLOADPENDING)
+    {
+
+        dlret = httpcReceiveData(&m_context, buffer, sizeof(buffer));
+
+        if (R_FAILED(ret = httpcGetDownloadSizeState(&m_context, &processed, NULL)))
+            break;
+
+        size = processed - lastProcessed;
+        lastProcessed = processed;
+
+        if (callback)
+        {
+            // Break if user interrupts the download
+            if (!callback(buffer, size, processed, received))
+                break;
+        }
+        else
+        {
+            receivedStr.append(charBuf, charBuf + size);
+        }
+    }
+
+    httpcCloseContext(&m_context);
+
+    received.m_body = receivedStr;
     return received;
 }
 
