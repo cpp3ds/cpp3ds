@@ -7,7 +7,6 @@ export DEVKITPRO=${HOME}/devkitPro
 export DEVKITARM=${DEVKITPRO}/devkitARM
 export PATH=${DEVKITARM}/bin/:${PATH}
 export CTRULIB=${DEVKITPRO}/libctru
-export GL3DS=${HOME}/gl3ds
 export PORTLIBS=${DEVKITPRO}/portlibs/armv6k
 
 # Install devkitARM
@@ -33,6 +32,6 @@ cp 3ds-tools/* $DEVKITARM/bin
 git clone https://github.com/smealum/ctrulib.git
 cd ctrulib/libctru && make -j4 install && cd -
 
-# Build gl3ds
-git clone https://github.com/cpp3ds/gl3ds.git ${GL3DS}
-cd ${GL3DS} && make -j4 && cd -
+# Build citro3d
+git clone https://github.com/fincs/citro3d.git
+cd citro3d && make -j4 install && cd -

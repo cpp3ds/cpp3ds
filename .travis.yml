@@ -3,7 +3,8 @@ os:
 
 language: cpp
 
-sudo: false
+sudo: required
+dist: trusty
 
 addons:
   apt:
@@ -20,6 +21,7 @@ addons:
       - libopenal-dev
       - libgtest-dev
       - cmake
+      - libsfml-dev
 
 before_install:
   - source .build-deps.sh
