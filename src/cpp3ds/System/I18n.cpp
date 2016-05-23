@@ -45,11 +45,16 @@ I18n& I18n::getInstance()
 I18n::I18n()
 {
 	Uint8 langcode;
+	Int32 ret;
 	Service::enable(Config);
 #ifdef EMULATION
 	langcode = 1; // TODO: get actual locale of PC
 #else
-	CFGU_GetSystemLanguage(&langcode);
+	ret = CFGU_GetSystemLanguage(&langcode);
+	if (!ret) {
+		// If the syscall fails, as it does with Citra-emu, default to English
+		langcode = 1;
+	}
 #endif
 	m_language = static_cast<Language>(langcode);
 	loadFromLanguage(m_language);
