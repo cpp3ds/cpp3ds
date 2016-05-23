@@ -24,8 +24,8 @@ tar -xaf portlibs-3ds-r1.tar.xz
 ln -s $(pwd)/portlibs $DEVKITPRO/portlibs
 
 # Download latest 3ds-tools
-wget https://github.com/cpp3ds/3ds-tools/releases/download/r3/3ds-tools-linux-r3.tar.gz
-tar -xaf 3ds-tools-linux-r3.tar.gz
+wget https://github.com/cpp3ds/3ds-tools/releases/download/r4/3ds-tools-linux-r4.tar.gz
+tar -xaf 3ds-tools-linux-r4.tar.gz
 cp 3ds-tools/* $DEVKITARM/bin
 
 # Get latest ctrulib
