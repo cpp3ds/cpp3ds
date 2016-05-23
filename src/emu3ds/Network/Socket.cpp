@@ -28,17 +28,21 @@
 #include <cpp3ds/Network/Socket.hpp>
 #include <cpp3ds/Network/SocketImpl.hpp>
 #include <cpp3ds/System/Err.hpp>
-#include <mbedtls/certs.h>
-#include <stdlib.h>
 
 
 namespace
 {
-    static int entropy_func(void *data, unsigned char *output, size_t len)
+    bool initializedSSL = false;
+
+    void initSSL()
     {
-        for (int i = 0; i < len; ++i)
-            output[i] = rand() % 256;
-        return 0;
+        if (!initializedSSL)
+        {
+            SSL_library_init();
+            SSL_load_error_strings();
+            OpenSSL_add_all_algorithms();
+            initializedSSL = true;
+        }
     }
 }
 
@@ -49,10 +53,13 @@ namespace cpp3ds
 Socket::Socket(Type type, bool secure) :
 m_type      (type),
 m_socket    (priv::SocketImpl::invalidSocket()),
-m_isBlocking(true),
-m_isSecure  (secure)
+m_isBlocking(true)
 {
-    m_secureData.socket.fd = priv::SocketImpl::invalidSocket();
+    m_secureData.ssl = nullptr;
+    m_secureData.sslMethod = nullptr;
+    m_secureData.sslContext = nullptr;
+
+    setSecure(secure);
 }
 
 
@@ -68,21 +75,8 @@ Socket::~Socket()
 void Socket::setBlocking(bool blocking)
 {
     // Apply if the socket is already created
-    if (m_isSecure)
-    {
-        if (m_secureData.socket.fd != priv::SocketImpl::invalidSocket())
-        {
-            if (blocking)
-                mbedtls_net_set_block(&m_secureData.socket);
-            else
-                mbedtls_net_set_nonblock(&m_secureData.socket);
-        }
-    }
-    else
-    {
-        if (m_socket != priv::SocketImpl::invalidSocket())
-            priv::SocketImpl::setBlocking(m_socket, blocking);
-    }
+    if (m_socket != priv::SocketImpl::invalidSocket())
+        priv::SocketImpl::setBlocking(m_socket, blocking);
 
     m_isBlocking = blocking;
 }
@@ -102,7 +96,7 @@ void Socket::setSecure(bool secure)
     m_isSecure = secure;
 
     if ((secure && !oldSecure && m_socket != priv::SocketImpl::invalidSocket()) ||
-        (!secure && oldSecure && m_secureData.socket.fd != priv::SocketImpl::invalidSocket()))
+        (!secure && oldSecure && m_secureData.ssl))
     {
         close();
         create();
@@ -120,7 +114,7 @@ bool Socket::isSecure() const
 ////////////////////////////////////////////////////////////
 SocketHandle Socket::getHandle() const
 {
-    return m_isSecure ? m_secureData.socket.fd : m_socket;
+    return m_socket;
 }
 
 
@@ -135,46 +129,20 @@ Socket::SecureData& Socket::getSecureData() const
 void Socket::create()
 {
     // Don't create the socket if it already exists
-    if (m_isSecure)
+    if (m_socket == priv::SocketImpl::invalidSocket())
     {
-        if (m_secureData.socket.fd == priv::SocketImpl::invalidSocket())
-        {
-            int ret;
-            mbedtls_net_init(&m_secureData.socket);
-            mbedtls_ssl_init(&m_secureData.ssl);
-            mbedtls_ssl_config_init(&m_secureData.conf);
-            mbedtls_x509_crt_init(&m_secureData.cacert);
-            mbedtls_ctr_drbg_init(&m_secureData.ctr_drbg);
-            mbedtls_entropy_init( &m_secureData.entropy );
-
-            srand(time(nullptr));
-            if (ret = mbedtls_ctr_drbg_seed(&m_secureData.ctr_drbg, entropy_func, &m_secureData.entropy, NULL, 0 ))
-                err() << "mbedtls_ctr_drbg_seed failed: " << ret << std::endl;
-            if ((ret = mbedtls_x509_crt_parse(&m_secureData.cacert, (const unsigned char *) mbedtls_test_cas_pem, mbedtls_test_cas_pem_len)) < 0)
-                err() << "mbedtls_x509_crt_parse failed: -0x" << std::hex << ret << std::endl;
-
-            // use mbedtls_ssl_conf_endpoint to set socket as server
-            if ((ret = mbedtls_ssl_config_defaults(&m_secureData.conf, MBEDTLS_SSL_IS_CLIENT, MBEDTLS_SSL_TRANSPORT_STREAM, MBEDTLS_SSL_PRESET_DEFAULT)) != 0)
-                err() << "mbedtls_ssl_config_defaults failed: " << ret << std::endl;
-            mbedtls_ssl_conf_authmode(&m_secureData.conf, MBEDTLS_SSL_VERIFY_OPTIONAL);
-            mbedtls_ssl_conf_ca_chain(&m_secureData.conf, &m_secureData.cacert, NULL);
-            mbedtls_ssl_conf_rng(&m_secureData.conf, mbedtls_ctr_drbg_random, &m_secureData.ctr_drbg);
-            if ((ret = mbedtls_ssl_setup(&m_secureData.ssl, &m_secureData.conf)) != 0)
-                err() << "mbedtls_ssl_setup failed: " << ret << std::endl;
-            if ((ret = mbedtls_ssl_set_hostname(&m_secureData.ssl, "mbed TLS Server")) != 0)
-                err() << "mbedtls_ssl_set_hostname failed: " << ret << std::endl;
-            mbedtls_ssl_set_bio(&m_secureData.ssl, &m_secureData.socket, mbedtls_net_send, mbedtls_net_recv, NULL);
-
-            setBlocking(m_isBlocking);
-        }
+        SocketHandle handle = socket(PF_INET, m_type == Tcp ? SOCK_STREAM : SOCK_DGRAM, IPPROTO_IP);
+        create(handle);
     }
-    else
+    if (m_isSecure && !m_secureData.ssl)
     {
-        if (m_socket == priv::SocketImpl::invalidSocket())
-        {
-            SocketHandle handle = socket(PF_INET, m_type == Tcp ? SOCK_STREAM : SOCK_DGRAM, IPPROTO_IP);
-            create(handle);
-        }
+        // TODO: handle errors
+        initSSL();
+        m_secureData.sslMethod = TLSv1_client_method();
+        m_secureData.sslContext = SSL_CTX_new(m_secureData.sslMethod);
+        m_secureData.ssl = SSL_new(m_secureData.sslContext);
+        SSL_set_verify(m_secureData.ssl, SSL_VERIFY_NONE, nullptr);
+        SSL_set_fd(m_secureData.ssl, m_socket);
     }
 }
 
@@ -235,16 +203,16 @@ void Socket::close()
     }
 
     // Close the secure socket
-    if (m_secureData.socket.fd != priv::SocketImpl::invalidSocket())
+    if (m_secureData.ssl)
     {
-        mbedtls_net_free(&m_secureData.socket);
-        mbedtls_ssl_free(&m_secureData.ssl);
-        mbedtls_ssl_config_free(&m_secureData.conf);
-        mbedtls_x509_crt_free(&m_secureData.cacert);
-        mbedtls_ctr_drbg_free(&m_secureData.ctr_drbg);
-        mbedtls_entropy_free(&m_secureData.entropy);
-        m_secureData.socket.fd = priv::SocketImpl::invalidSocket();
+        SSL_shutdown(m_secureData.ssl);
+        SSL_free (m_secureData.ssl);
+        SSL_CTX_free (m_secureData.sslContext);
     }
+
+    m_secureData.ssl = nullptr;
+    m_secureData.sslMethod = nullptr;
+    m_secureData.sslContext = nullptr;
 }
 
 } // namespace cpp3ds

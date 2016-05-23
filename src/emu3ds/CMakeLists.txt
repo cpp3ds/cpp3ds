@@ -135,8 +135,9 @@ unset(FREETYPE_INCLUDE_DIRS CACHE)
 
 find_package(JPEG REQUIRED)
 find_package(Freetype REQUIRED)
+find_package(OpenSSL REQUIRED)
 
-include_directories(${FREETYPE_INCLUDE_DIRS} ${JPEG_INCLUDE_DIR})
+include_directories(${FREETYPE_INCLUDE_DIRS} ${JPEG_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
 
 add_library(cpp3ds-emu STATIC
         ${SRC}

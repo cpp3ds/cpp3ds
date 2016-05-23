@@ -32,9 +32,9 @@
 #include <cpp3ds/System/NonCopyable.hpp>
 #include <vector>
 #ifdef EMULATION
-#include <mbedtls/net.h>
-#include <mbedtls/entropy.h>
-#include <mbedtls/ctr_drbg.h>
+#define OPENSSL_NO_BIO
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 #else
 #include <3ds.h>
 #endif
@@ -76,12 +76,9 @@ public:
     struct SecureData
     {
 #ifdef EMULATION
-        mbedtls_net_context socket;
-        mbedtls_entropy_context entropy;
-        mbedtls_ctr_drbg_context ctr_drbg;
-        mbedtls_ssl_context ssl;
-        mbedtls_ssl_config conf;
-        mbedtls_x509_crt cacert;
+        SSL_CTX *sslContext;
+        const SSL_METHOD *sslMethod;
+        ::SSL *ssl;
 #else
 		sslcContext sslContext;
 		u32 rootCertChain;

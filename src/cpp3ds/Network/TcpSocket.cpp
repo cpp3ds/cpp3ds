@@ -34,9 +34,7 @@
 #include <algorithm>
 #include <cstring>
 #include <iostream>
-#ifdef EMULATION
-#include <mbedtls/net.h>
-#else
+#ifndef EMULATION
 #include <3ds.h>
 #endif
 
@@ -143,110 +141,99 @@ Socket::Status TcpSocket::connect(const IpAddress& remoteAddress, unsigned short
     // Create the internal socket if it doesn't exist
     create();
 
-#ifdef EMULATION
-    if (isSecure())
-    {
-        char port[5];
-        sprintf(port, "%d", remotePort);
-        if (mbedtls_net_connect(&getSecureData().socket, remoteAddress.toString().c_str(), port, MBEDTLS_NET_PROTO_TCP) != 0)
-            return priv::SocketImpl::getErrorStatus();
+    // Create the remote address
+    sockaddr_in address = priv::SocketImpl::createAddress(remoteAddress.toInteger(), remotePort);
 
-        int ret;
-        while((ret = mbedtls_ssl_handshake(&getSecureData().ssl)) != 0)
-            if(ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE)
-                return Error;
+    if (timeout <= Time::Zero)
+    {
+        // ----- We're not using a timeout: just try to connect -----
+
+        // Connect the socket
+        if (::connect(getHandle(), reinterpret_cast<sockaddr*>(&address), sizeof(address)) == -1)
+            return priv::SocketImpl::getErrorStatus();
+#ifndef EMULATION
+        if (isSecure())
+            sslc_init(getSecureData(), getHandle(), remoteAddress.toString().c_str());
+#else
+        if (isSecure())
+            SSL_connect(getSecureData().ssl);
+#endif
+        // Connection succeeded
+        return Done;
     }
     else
-#endif
     {
-        // Create the remote address
-        sockaddr_in address = priv::SocketImpl::createAddress(remoteAddress.toInteger(), remotePort);
+        // ----- We're using a timeout: we'll need a few tricks to make it work -----
 
-        if (timeout <= Time::Zero)
+        // Save the previous blocking state
+        bool blocking = isBlocking();
+
+        // Switch to non-blocking to enable our connection timeout
+        if (blocking)
+            setBlocking(false);
+
+        // Try to connect to the remote address
+        if (::connect(getHandle(), reinterpret_cast<sockaddr*>(&address), sizeof(address)) >= 0)
         {
-            // ----- We're not using a timeout: just try to connect -----
-
-            // Connect the socket
-            if (::connect(getHandle(), reinterpret_cast<sockaddr*>(&address), sizeof(address)) == -1)
-                return priv::SocketImpl::getErrorStatus();
+            // We got instantly connected! (it may no happen a lot...)
+            setBlocking(blocking);
 #ifndef EMULATION
-			if (isSecure())
+            if (isSecure())
                 sslc_init(getSecureData(), getHandle(), remoteAddress.toString().c_str());
+#else
+            if (isSecure())
+                SSL_connect(getSecureData().ssl);
 #endif
-            // Connection succeeded
             return Done;
         }
-        else
+
+        // Get the error status
+        Status status = priv::SocketImpl::getErrorStatus();
+
+        // If we were in non-blocking mode, return immediately
+        if (!blocking)
+            return status;
+
+        // Otherwise, wait until something happens to our socket (success, timeout or error)
+        if (status == Socket::NotReady)
         {
-            // ----- We're using a timeout: we'll need a few tricks to make it work -----
+            // Setup the selector
+            fd_set selector;
+            FD_ZERO(&selector);
+            FD_SET(getHandle(), &selector);
 
-            // Save the previous blocking state
-            bool blocking = isBlocking();
+            // Setup the timeout
+            timeval time;
+            time.tv_sec  = static_cast<long>(timeout.asMicroseconds() / 1000000);
+            time.tv_usec = static_cast<long>(timeout.asMicroseconds() % 1000000);
 
-            // Switch to non-blocking to enable our connection timeout
-            if (blocking)
-                setBlocking(false);
-
-            // Try to connect to the remote address
-            if (::connect(getHandle(), reinterpret_cast<sockaddr*>(&address), sizeof(address)) >= 0)
+            // Wait for something to write on our socket (which means that the connection request has returned)
+            if (select(static_cast<int>(getHandle() + 1), NULL, &selector, NULL, &time) > 0)
             {
-                // We got instantly connected! (it may no happen a lot...)
-                setBlocking(blocking);
-#ifndef EMULATION
-                if (isSecure())
-                    sslc_init(getSecureData(), getHandle(), remoteAddress.toString().c_str());
-#endif
-                return Done;
-            }
-
-            // Get the error status
-            Status status = priv::SocketImpl::getErrorStatus();
-
-            // If we were in non-blocking mode, return immediately
-            if (!blocking)
-                return status;
-
-            // Otherwise, wait until something happens to our socket (success, timeout or error)
-            if (status == Socket::NotReady)
-            {
-                // Setup the selector
-                fd_set selector;
-                FD_ZERO(&selector);
-                FD_SET(getHandle(), &selector);
-
-                // Setup the timeout
-                timeval time;
-                time.tv_sec  = static_cast<long>(timeout.asMicroseconds() / 1000000);
-                time.tv_usec = static_cast<long>(timeout.asMicroseconds() % 1000000);
-
-                // Wait for something to write on our socket (which means that the connection request has returned)
-                if (select(static_cast<int>(getHandle() + 1), NULL, &selector, NULL, &time) > 0)
+                // At this point the connection may have been either accepted or refused.
+                // To know whether it's a success or a failure, we must check the address of the connected peer
+                if (getRemoteAddress() != cpp3ds::IpAddress::None)
                 {
-                    // At this point the connection may have been either accepted or refused.
-                    // To know whether it's a success or a failure, we must check the address of the connected peer
-                    if (getRemoteAddress() != cpp3ds::IpAddress::None)
-                    {
-                        // Connection accepted
-                        status = Done;
-                    }
-                    else
-                    {
-                        // Connection refused
-                        status = priv::SocketImpl::getErrorStatus();
-                    }
+                    // Connection accepted
+                    status = Done;
                 }
                 else
                 {
-                    // Failed to connect before timeout is over
+                    // Connection refused
                     status = priv::SocketImpl::getErrorStatus();
                 }
             }
-
-            // Switch back to blocking mode
-            setBlocking(true);
-
-            return status;
+            else
+            {
+                // Failed to connect before timeout is over
+                status = priv::SocketImpl::getErrorStatus();
+            }
         }
+
+        // Switch back to blocking mode
+        setBlocking(true);
+
+        return status;
     }
 }
 
@@ -291,7 +278,7 @@ Socket::Status TcpSocket::send(const void* data, std::size_t size, std::size_t& 
         // Send a chunk of data
         if (isSecure())
 #ifdef EMULATION
-            result = mbedtls_ssl_write(&getSecureData().ssl, static_cast<const unsigned char*>(data) + sent, size - sent);
+            result = SSL_write(getSecureData().ssl, static_cast<const unsigned char*>(data) + sent, size - sent);
 #else
             result = sslcWrite(&getSecureData().sslContext, static_cast<const unsigned char*>(data) + sent, size - sent);
 #endif
@@ -331,7 +318,7 @@ Socket::Status TcpSocket::receive(void* data, std::size_t size, std::size_t& rec
     int sizeReceived;
     if (isSecure())
 #ifdef EMULATION
-        sizeReceived = mbedtls_ssl_read(&getSecureData().ssl, static_cast<unsigned char*>(data), size);
+        sizeReceived = SSL_read(getSecureData().ssl, static_cast<unsigned char*>(data), size);
 #else
         sizeReceived = sslcRead(&getSecureData().sslContext, data, size, false);
 #endif
