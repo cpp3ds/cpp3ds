@@ -107,7 +107,6 @@ bool GlContext::makeCurrent()
 ////////////////////////////////////////////////////////////
 void GlContext::setVerticalSyncEnabled(bool enabled)
 {
-	// TODO: add vsync function to gl3ds
 }
 
 

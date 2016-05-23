@@ -151,8 +151,7 @@ Image Window::capture() const
 		for (int i = 0; i < height; ++i)
 		{
 			Uint8* ptr = &pixels[i * width * 4];
-			// TODO: implement glReadPixels in gl3ds
-//			glCheck(glReadPixels(0, height - i - 1, width, 1, GL_RGBA, GL_UNSIGNED_BYTE, ptr));
+			// TODO: implement this using citro3d
 		}
 
 		image.create(width, height, &pixels[0]);

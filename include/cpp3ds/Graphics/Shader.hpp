@@ -35,6 +35,7 @@
 #include <cpp3ds/System/Vector2.hpp>
 #include <cpp3ds/System/Vector3.hpp>
 #include <map>
+#include <vector>
 #include <string>
 #ifndef EMULATION
 #include <3ds.h>

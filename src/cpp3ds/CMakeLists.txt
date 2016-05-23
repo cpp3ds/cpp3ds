@@ -5,7 +5,6 @@ include_directories(
         ${DEVKITPRO}/portlibs/armv6k/include
         ${DEVKITPRO}/portlibs/3ds/include
         ${LIBCTRU_INCLUDE_DIRS}
-        ${GL3DS}/include
 )
 
 add_subdirectory(Audio)

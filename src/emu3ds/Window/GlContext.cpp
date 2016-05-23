@@ -185,15 +185,11 @@ bool GlContext::makeCurrent()
 ////////////////////////////////////////////////////////////
 void GlContext::setVerticalSyncEnabled(bool enabled)
 {
-	// TODO: add vsync function to gl3ds
 }
 
 
 ////////////////////////////////////////////////////////////
 void GlContext::display() {
-#ifndef EMULATION
-    gl3ds_flushContext(m_context);
-#endif
 }
 
 

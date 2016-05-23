@@ -10,17 +10,16 @@ addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
-      - kalakris-cmake
       - ubuntu-sdk-team
     packages:
-      - gcc-4.9
-      - g++-4.9
+      - gcc-6
+      - g++-6
+      - lib32stdc++6
       - libvorbis-dev
       - libglew-dev
       - qt5-default
       - libopenal-dev
       - libgtest-dev
-      - cmake
       - libsfml-dev
 
 before_install:

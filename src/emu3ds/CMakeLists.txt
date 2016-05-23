@@ -150,4 +150,4 @@ set_source_files_properties(${SRC} PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} 
 
 add_custom_target(ui ALL DEPENDS ${ui_header})
 add_dependencies(cpp3ds-emu ui cpp3ds-res)
-qt5_use_modules(cpp3ds-emu Core Gui Widgets)
+target_link_libraries(cpp3ds-emu Qt5::Core Qt5::Gui Qt5::Widgets)

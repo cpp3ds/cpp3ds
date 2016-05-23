@@ -6,8 +6,6 @@ cp $DEVKITARM/bin/makerom cpp3ds/bin/
 cp $DEVKITARM/bin/3dsxtool cpp3ds/bin/
 cp $DEVKITARM/bin/bannertool cpp3ds/bin/
 cp $DEVKITARM/bin/nihstro-assemble cpp3ds/bin/
-cp -r $GL3DS/lib/ cpp3ds/
-cp -r $GL3DS/include/ cpp3ds/
 cp -r $PORTLIBS/lib/ cpp3ds/
 cp -r $PORTLIBS/include/ cpp3ds/
 cp -r build/lib/ cpp3ds/

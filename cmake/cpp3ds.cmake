@@ -38,7 +38,6 @@ if(NOT IS_DIRECTORY ${DEVKITARM})
 endif()
 
 find_package(CTRULIB)
-set(GL3DS "$ENV{GL3DS}")
 
 
 ##############
