@@ -20,9 +20,11 @@ addons:
       - qt5-default
       - libopenal-dev
       - libgtest-dev
-      - libsfml-dev
 
 before_install:
+  - echo "deb http://cz.archive.ubuntu.com/ubuntu xenial main universe" | sudo tee -a /etc/apt/sources.list
+  - sudo apt-get update -q
+  - sudo apt-get install libsfml-dev -y
   - source .build-deps.sh
 
 script:
