@@ -24,5 +24,5 @@ add_executable(${PROJECT_NAME}-emu ${SOURCE_FILES} ${EMU_SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME}-emu ${CPP3DS_EMU_LIBS} Qt5::Core Qt5::Gui Qt5::Widgets)
 
 set_target_properties(${PROJECT_NAME}-emu PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${CPP3DS_EMU_FLAGS} -std=c++11")
-set_target_properties(${PROJECT_NAME}-emu PROPERTIES COMPILE_DEFINITIONS "EMULATION")
+set_target_properties(${PROJECT_NAME}-emu PROPERTIES COMPILE_DEFINITIONS "EMULATION;_GLIBCXX_USE_CXX11_ABI=1")
 set_target_properties(${PROJECT_NAME}-emu PROPERTIES LINK_FLAGS "${CMAKE_CXX_FLAGS} ${CPP3DS_EMU_FLAGS} -Wl,--wrap=main")

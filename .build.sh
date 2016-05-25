@@ -2,6 +2,6 @@
 set -ex
 
 mkdir build && cd build
-cmake -DBUILD_EMULATOR=ON -DENABLE_OGG=ON -DBUILD_EXAMPLES=OFF ..
+cmake -DCMAKE_AR=gcc-ar-5 -DCMAKE_RANLIB=gcc-ranlib-5 -DBUILD_EMULATOR=ON -DENABLE_OGG=ON -DBUILD_EXAMPLES=OFF ..
 make -j4
 cd ..

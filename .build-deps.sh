@@ -1,8 +1,8 @@
 #!/bin/sh
 set -ex
 
-export CC=gcc-6
-export CXX=g++-6
+export CC=gcc-5
+export CXX=g++-5
 export DEVKITPRO=${HOME}/devkitPro
 export DEVKITARM=${DEVKITPRO}/devkitARM
 export PATH=${DEVKITARM}/bin/:${PATH}

@@ -12,19 +12,16 @@ addons:
       - ubuntu-toolchain-r-test
       - ubuntu-sdk-team
     packages:
-      - gcc-6
-      - g++-6
-      - lib32stdc++6
+      - gcc-5
+      - g++-5
       - libvorbis-dev
       - libglew-dev
       - qt5-default
       - libopenal-dev
       - libgtest-dev
+      - libsfml-dev
 
 before_install:
-  - echo "deb http://cz.archive.ubuntu.com/ubuntu xenial main universe" | sudo tee -a /etc/apt/sources.list
-  - sudo apt-get update -q
-  - sudo apt-get install libsfml-dev -y
   - source .build-deps.sh
 
 script:

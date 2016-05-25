@@ -145,7 +145,7 @@ add_library(cpp3ds-emu STATIC
         ${RESOURCE_HEADER}
         ${RESOURCE_OUTPUT}
 )
-set_target_properties(cpp3ds-emu PROPERTIES COMPILE_DEFINITIONS "EMULATION")
+set_target_properties(cpp3ds-emu PROPERTIES COMPILE_DEFINITIONS "EMULATION;_GLIBCXX_USE_CXX11_ABI=1")
 set_source_files_properties(${SRC} PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${CPP3DS_EMU_FLAGS}")
 
 add_custom_target(ui ALL DEPENDS ${ui_header})
