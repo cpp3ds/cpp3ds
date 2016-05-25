@@ -12,8 +12,8 @@ addons:
       - ubuntu-toolchain-r-test
       - ubuntu-sdk-team
     packages:
-      - gcc-5
-      - g++-5
+      - gcc-6
+      - g++-6
       - libvorbis-dev
       - libglew-dev
       - qt5-default

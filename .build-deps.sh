@@ -1,14 +1,14 @@
 #!/bin/sh
 set -ex
 
-export CC=gcc-5
-export CXX=g++-5
+export CC=gcc-6
+export CXX=g++-6
 export DEVKITPRO=${HOME}/devkitPro
 export DEVKITARM=${DEVKITPRO}/devkitARM
 export PATH=${DEVKITARM}/bin/:${PATH}
 export CTRULIB=${DEVKITPRO}/libctru
 export PORTLIBS=${DEVKITPRO}/portlibs/armv6k
-
+g++-6 -v
 # Install devkitARM
 if [ "$APPVEYOR" = "True" ]; then
 	appveyor DownloadFile http://sourceforge.net/projects/devkitpro/files/devkitARM/devkitARM_r44/devkitARM_r44-win32.exe

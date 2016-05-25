@@ -1,4 +1,5 @@
 #include <iostream>
+#define _GLIBCXX_USE_CXX11_ABI 1
 #include <SFML/Graphics.hpp>
 #include <cpp3ds/Emulator/Emulator.hpp>
 

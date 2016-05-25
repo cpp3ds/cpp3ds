@@ -6,6 +6,8 @@ SET(CMAKE_C_COMPILER ${DEVKITARM}/bin/arm-none-eabi-gcc)
 SET(CMAKE_CXX_COMPILER ${DEVKITARM}/bin/arm-none-eabi-g++)
 SET(CMAKE_SIZE ${DEVKITARM}/bin/arm-none-eabi-size)
 SET(CMAKE_OBJCOPY ${DEVKITARM}/bin/arm-none-eabi-objcopy)
+SET(CMAKE_AR ${DEVKITARM}/bin/arm-none-eabi-ar)
+SET(CMAKE_RANLIB ${DEVKITARM}/bin/arm-none-eabi-ranlib)
 
 set(CMAKE_FIND_ROOT_PATH ${DEVKITARM} ${DEVKITPRO} ${DEVKITPRO}/portlibs/3ds ${DEVKITPRO}/portlibs/armv6k)
 # adjust the default behaviour of the FIND_XXX() commands:
