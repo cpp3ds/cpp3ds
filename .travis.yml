@@ -4,31 +4,16 @@ os:
 language: cpp
 
 sudo: required
-dist: trusty
-
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-      - ubuntu-sdk-team
-    packages:
-      - gcc-6
-      - g++-6
-      - libvorbis-dev
-      - libglew-dev
-      - qt5-default
-      - libopenal-dev
-      - libgtest-dev
-      - libsfml-dev
-
-before_install:
-  - source .build-deps.sh
+services:
+  - docker
 
 script:
-  - source .build.sh
+  - docker build -t cpp3ds .
 
 before_deploy:
-  - source .deploy-prepare.sh
+  - export RELEASE_FILENAME=cpp3ds-$TRAVIS_OS_NAME-$TRAVIS_TAG.tar.xz
+  - docker run --rm -v "$PWD":/usr/build -w /opt cpp3ds sh /usr/build/.build.sh /usr/build/$RELEASE_FILENAME
+  - sudo chmod 777 $RELEASE_FILENAME
 
 deploy:
   provider: releases
