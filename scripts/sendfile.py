@@ -3,16 +3,19 @@ import os, socket, sys, struct, getopt
 
 def sendfile(filename, ip):
 	statinfo = os.stat(filename)
-	fbiinfo = struct.pack('!q', statinfo.st_size)
 	with open(filename, 'rb') as f:
 		sock = socket.socket()
 		sock.connect((ip, 5000))
-		sock.send(fbiinfo)
-		while True:
-			chunk = f.read(16384)
-			if not chunk:
-				break  # EOF
-			sock.sendall(chunk)
+		sock.send(struct.pack('!i', 1))
+		if struct.unpack("!b", sock.recv(1))[0] == 1:
+			sock.send(struct.pack('!q', statinfo.st_size))
+			while True:
+				chunk = f.read(1024 * 256)
+				if not chunk:
+					break  # EOF
+				sock.sendall(chunk)
+		else:
+			print("Canceled by FBI")
 		sock.close()
 
 def show_usage_exit():
