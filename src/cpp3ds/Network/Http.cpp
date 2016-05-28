@@ -32,6 +32,7 @@
 #include <iterator>
 #include <sstream>
 #include <limits>
+#include <3ds/services/httpc.h>
 
 
 namespace
@@ -130,9 +131,9 @@ const std::string& Http::Response::getField(const std::string& field) const
     {
         return it->second;
     }
-    else
+    else if (m_context && m_context->httphandle)
     {
-        char val[255];
+        char val[1024];
         httpcGetResponseHeader(m_context, field.c_str(), val, sizeof(val));
         m_fields[field] = val;
         return m_fields[field];
@@ -192,7 +193,7 @@ Http::Http() :
 m_host(),
 m_port(0)
 {
-
+    m_context.httphandle = 0;
 }
 
 
@@ -200,6 +201,15 @@ m_port(0)
 Http::Http(const std::string& host, unsigned short port)
 {
     setHost(host, port);
+    m_context.httphandle = 0;
+}
+
+
+////////////////////////////////////////////////////////////
+Http::~Http()
+{
+    if (m_context.httphandle)
+        httpcCloseContext(&m_context);
 }
 
 
@@ -241,8 +251,19 @@ void Http::setHost(const std::string& host, unsigned short port)
 ////////////////////////////////////////////////////////////
 Http::Response Http::sendRequest(const Http::Request& request, Time timeout, RequestCallback callback)
 {
+    if (m_context.httphandle)
+    {
+        // TODO: check for failure
+        httpcCloseContext(&m_context);
+        m_context.httphandle = 0;
+    }
+
     // First make sure that the request is valid -- add missing mandatory fields
     Request toSend(request);
+    if (!toSend.hasField("User-Agent"))
+    {
+        toSend.setField("User-Agent", "libcpp3ds-network/2.x");
+    }
     if (!toSend.hasField("Content-Length"))
     {
         std::ostringstream out;
@@ -321,8 +342,6 @@ Http::Response Http::sendRequest(const Http::Request& request, Time timeout, Req
             receivedStr.append(charBuf, charBuf + size);
         }
     }
-
-    httpcCloseContext(&m_context);
 
     received.m_body = receivedStr;
     return received;

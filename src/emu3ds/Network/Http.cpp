@@ -313,6 +313,13 @@ Http::Http(const std::string& host, unsigned short port)
 
 
 ////////////////////////////////////////////////////////////
+Http::~Http()
+{
+    //
+}
+
+
+////////////////////////////////////////////////////////////
 void Http::setHost(const std::string& host, unsigned short port)
 {
     // Check the protocol
