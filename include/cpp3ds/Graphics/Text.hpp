@@ -40,6 +40,7 @@
 
 namespace cpp3ds
 {
+
 ////////////////////////////////////////////////////////////
 /// \brief Graphical text that can be drawn to a render target
 ///
@@ -123,6 +124,8 @@ namespace cpp3ds
         ///
         ////////////////////////////////////////////////////////////
         void setFont(const Font& font);
+
+        void useSystemFont();
 
         ////////////////////////////////////////////////////////////
         /// \brief Set the character size
@@ -337,6 +340,8 @@ namespace cpp3ds
         ////////////////////////////////////////////////////////////
         virtual void draw(RenderTarget& target, RenderStates states) const;
 
+        void drawSystemFont(RenderTarget& target, RenderStates states) const;
+
         ////////////////////////////////////////////////////////////
         /// \brief Make sure the text's geometry is updated
         ///
@@ -345,6 +350,9 @@ namespace cpp3ds
         ///
         ////////////////////////////////////////////////////////////
         void ensureGeometryUpdate() const;
+
+        void ensureGeometryUpdateSystemFont() const;
+        Vector2f findCharacterPosSystemFont(std::size_t index) const;
 
         ////////////////////////////////////////////////////////////
         // Member data
@@ -360,6 +368,10 @@ namespace cpp3ds
         mutable VertexArray m_outlineVertices;    ///< Vertex array containing the outline geometry
         mutable FloatRect   m_bounds;             ///< Bounding rectangle of the text (in local coordinates)
         mutable bool        m_geometryNeedUpdate; ///< Does the geometry need to be recomputed?
+        bool                m_useSystemFont;      ///< Flag to use 3DS system font
+#ifndef EMULATION
+        mutable std::vector<Uint16> m_systemGlyphTextures;
+#endif
     };
 
 } // namespace cpp3ds

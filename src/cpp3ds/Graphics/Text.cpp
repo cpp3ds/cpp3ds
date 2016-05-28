@@ -30,6 +30,11 @@
 #include <cpp3ds/Graphics/RenderTarget.hpp>
 #include <cpp3ds/Resources.hpp>
 #include <cmath>
+#include <iostream>
+#ifndef EMULATION
+#include "CitroHelpers.hpp"
+#include <citro3d.h>
+#endif
 
 
 namespace
@@ -73,6 +78,11 @@ void addGlyphQuad(cpp3ds::VertexArray& vertices, cpp3ds::Vector2f position, cons
 
 namespace cpp3ds
 {
+
+#ifndef EMULATION
+extern cpp3ds::Texture *system_font_textures;
+#endif
+
 namespace priv
 {
 	// Default font for Text objects for user convenience
@@ -92,7 +102,8 @@ Text::Text() :
         m_vertices          (Triangles),
         m_outlineVertices   (Triangles),
         m_bounds            (),
-        m_geometryNeedUpdate(false)
+        m_geometryNeedUpdate(false),
+        m_useSystemFont     (false)
 {
 
 }
@@ -110,7 +121,8 @@ Text::Text(const String& string, const Font& font, unsigned int characterSize) :
         m_vertices          (Triangles),
         m_outlineVertices   (Triangles),
         m_bounds            (),
-        m_geometryNeedUpdate(true)
+        m_geometryNeedUpdate(true),
+        m_useSystemFont     (false)
 {
 
 }
@@ -134,7 +146,18 @@ void Text::setFont(const Font& font)
     {
         m_font = &font;
         m_geometryNeedUpdate = true;
+        m_useSystemFont = false;
     }
+}
+
+
+////////////////////////////////////////////////////////////
+void Text::useSystemFont()
+{
+#ifndef EMULATION
+    m_geometryNeedUpdate = true;
+    m_useSystemFont = true;
+#endif
 }
 
 
@@ -257,8 +280,18 @@ float Text::getOutlineThickness() const
 
 
 ////////////////////////////////////////////////////////////
+Vector2f Text::findCharacterPosSystemFont(std::size_t index) const
+{
+    return Vector2f();
+}
+
+
+////////////////////////////////////////////////////////////
 Vector2f Text::findCharacterPos(std::size_t index) const
 {
+    if (m_useSystemFont)
+        return findCharacterPosSystemFont(index);
+
     // Make sure that we have a valid font
     if (!m_font)
         return Vector2f();
@@ -319,9 +352,57 @@ FloatRect Text::getGlobalBounds() const
 
 
 ////////////////////////////////////////////////////////////
+void Text::drawSystemFont(RenderTarget& target, RenderStates states) const
+{
+    ensureGeometryUpdate();
+    states.transform *= getTransform();
+#ifndef EMULATION
+    if (target.m_cache.viewChanged)
+        target.applyCurrentView();
+    if (states.blendMode != target.m_cache.lastBlendMode)
+        target.applyBlendMode(states.blendMode);
+    if (states.shader)
+        target.applyShader(states.shader);
+
+    target.applyTransform(states.transform);
+    Mtx_Identity(MtxStack_Cur(CitroGetTextureMatrix()));
+    CitroUpdateMatrixStacks();
+
+    C3D_BufInfo* bufInfo = C3D_GetBufInfo();
+    BufInfo_Init(bufInfo);
+    BufInfo_Add(bufInfo, &m_vertices[0], sizeof(Vertex), 3, 0x210);
+
+    C3D_TexEnv* env = C3D_GetTexEnv(0);
+    C3D_TexEnvSrc(env, C3D_RGB, GPU_PRIMARY_COLOR, 0, 0);
+    C3D_TexEnvSrc(env, C3D_Alpha, GPU_TEXTURE0, GPU_PRIMARY_COLOR, 0);
+    C3D_TexEnvOp(env, C3D_Both, 0, 0, 0);
+    C3D_TexEnvFunc(env, C3D_RGB, GPU_REPLACE);
+    C3D_TexEnvFunc(env, C3D_Alpha, GPU_MODULATE);
+
+    int vertexIndex = 0;
+    int lastTextureIndex = -1;
+    for (Uint16 textureIndex : m_systemGlyphTextures)
+    {
+        if (lastTextureIndex != textureIndex) {
+            lastTextureIndex = textureIndex;
+            C3D_TexBind(0, system_font_textures[textureIndex].getNativeTexture());
+        }
+        C3D_DrawArrays(GPU_TRIANGLE_STRIP, vertexIndex, 4);
+        vertexIndex += 4;
+    }
+    Texture::bind(NULL);
+#endif
+}
+
+
+////////////////////////////////////////////////////////////
 void Text::draw(RenderTarget& target, RenderStates states) const
 {
-    if (m_font)
+    if (m_useSystemFont)
+    {
+        drawSystemFont(target, states);
+    }
+    else if (m_font)
     {
         ensureGeometryUpdate();
 
@@ -338,10 +419,70 @@ void Text::draw(RenderTarget& target, RenderStates states) const
 
 
 ////////////////////////////////////////////////////////////
+void Text::ensureGeometryUpdateSystemFont() const
+{
+#ifndef EMULATION
+    m_systemGlyphTextures.clear();
+
+    float maxX = 0.f;
+    float x = 0.f;
+    float y = 0.f;
+    float scaleX = static_cast<float>(m_characterSize) / 25.f;
+    float scaleY = scaleX;
+    bool baseline = false;
+
+    ssize_t  units;
+    uint32_t code;
+
+    auto str = m_string.toUtf8();
+    const uint8_t* p = str.c_str();
+    float firstX = x;
+    int lastSheet = -1;
+    int vertexIndex = 0;
+    do
+    {
+        if (!*p) break;
+        units = decode_utf8(&code, p);
+        if (units == -1)
+            break;
+        p += units;
+        if (code == '\n')
+        {
+            x = firstX;
+            y += scaleY*fontGetInfo()->lineFeed;
+        }
+        else if (code > 0)
+        {
+            int glyphIdx = fontGlyphIndexFromCodePoint(code);
+            fontGlyphPos_s data;
+            fontCalcGlyphPos(&data, glyphIdx, GLYPH_POS_CALC_VTXCOORD, scaleX, scaleY);
+
+            m_systemGlyphTextures.push_back(data.sheetIndex);
+
+            m_vertices.append(Vertex(Vector2f(x+data.vtxcoord.left,  y+data.vtxcoord.bottom), m_fillColor, Vector2f(data.texcoord.left,  data.texcoord.bottom)));
+            m_vertices.append(Vertex(Vector2f(x+data.vtxcoord.right, y+data.vtxcoord.bottom), m_fillColor, Vector2f(data.texcoord.right, data.texcoord.bottom)));
+            m_vertices.append(Vertex(Vector2f(x+data.vtxcoord.left,  y+data.vtxcoord.top), m_fillColor, Vector2f(data.texcoord.left,  data.texcoord.top)));
+            m_vertices.append(Vertex(Vector2f(x+data.vtxcoord.right, y+data.vtxcoord.top), m_fillColor, Vector2f(data.texcoord.right, data.texcoord.top)));
+
+            x += data.xAdvance;
+            if (x > maxX)
+                maxX = x;
+        }
+    } while (code > 0);
+
+    m_bounds.left = 0;
+    m_bounds.top = 0;
+    m_bounds.width = maxX;
+    m_bounds.height = y + scaleY * fontGetInfo()->lineFeed;
+#endif
+}
+
+
+////////////////////////////////////////////////////////////
 void Text::ensureGeometryUpdate() const
 {
 	// Load system's opensans.tff if user attempts drawing without font
-	if (m_font == &priv::system_font && !priv::system_font_loaded)
+	if (!m_useSystemFont && m_font == &priv::system_font && !priv::system_font_loaded)
 	{
 		priv::system_font_loaded = true;
 		priv::ResourceInfo font = priv::core_resources["opensans.ttf"];
@@ -363,6 +504,12 @@ void Text::ensureGeometryUpdate() const
     // No font or text: nothing to draw
     if (!m_font || m_string.isEmpty())
         return;
+
+    if (m_useSystemFont)
+    {
+        ensureGeometryUpdateSystemFont();
+        return;
+    }
 
     // Compute values related to the text style
     bool  bold               = (m_style & Bold) != 0;

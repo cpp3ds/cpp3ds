@@ -87,6 +87,7 @@ void Console::enable(Screen screen, Color color)
 
 		console.m_memoryText.setFont(console.m_font);
 		console.m_memoryText.setCharacterSize(12);
+		console.m_memoryText.useSystemFont();
 
 		console.m_screen = screen;
 		console.m_limit = 1000;
@@ -159,6 +160,7 @@ void Console::write(String text)
 {
 	Text line(text, m_font, 10);
 	line.setFillColor(m_color);
+	line.useSystemFont();
 	m_lines.push_back(line);
 }
 
