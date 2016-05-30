@@ -20,12 +20,14 @@ Requirements
  
 - DevkitARM
 - ctrulib
-- [gl3ds](https://github.com/cpp3ds/gl3ds)
+- citro3d
 
 For emulator:
 
-- [SFML 2.1](http://www.sfml-dev.org/index.php)
+- [SFML 2.3](http://www.sfml-dev.org/index.php)
 - [Qt 5](https://qt-project.org/)
+- OpenAL
+- libvorbis
 
 For unit tests:
 

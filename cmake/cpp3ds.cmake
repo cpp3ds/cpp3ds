@@ -302,16 +302,8 @@ function(__add_ncch_banner target IMAGE SOUND)
 endfunction()
 
 
-function(add_cia_target target RSF IMAGE SOUND )
+function(add_cia_target target RSF IMAGE SOUND)
     get_filename_component(target_we ${target} NAME_WE)
-    if(${ARGC} GREATER 6)
-        set(APP_TITLE ${ARGV4})
-        set(APP_DESCRIPTION ${ARGV5})
-        set(APP_AUTHOR ${ARGV6})
-    endif()
-    if(${ARGC} EQUAL 8)
-        set(APP_ICON ${ARGV7})
-    endif()
     if(NOT APP_TITLE)
         set(APP_TITLE ${target})
     endif()
@@ -320,6 +312,9 @@ function(add_cia_target target RSF IMAGE SOUND )
     endif()
     if(NOT APP_AUTHOR)
         set(APP_AUTHOR "Unspecified Author")
+    endif()
+    if(NOT APP_VERSION)
+        set(APP_VERSION 0)
     endif()
     if(NOT APP_ICON)
         if(EXISTS ${target}.png)
@@ -343,6 +338,7 @@ function(add_cia_target target RSF IMAGE SOUND )
             -o ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.cia
             -elf $<TARGET_FILE:${target}>
             -rsf ${RSF}
+            -ver ${APP_VERSION}
             -banner ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.bnr
             -icon ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.smdh
 			-DAPP_TITLE=${APP_TITLE}
