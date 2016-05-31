@@ -415,7 +415,7 @@ public:
     /// \return Server's response
     ///
     ////////////////////////////////////////////////////////////
-    Response sendRequest(const Request& request, Time timeout = Time::Zero, RequestCallback callback = nullptr);
+    Response sendRequest(const Request& request, Time timeout = Time::Zero, RequestCallback callback = nullptr, size_t bufferSize = 4096);
 
 private:
 

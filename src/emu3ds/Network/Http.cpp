@@ -354,7 +354,7 @@ void Http::setHost(const std::string& host, unsigned short port)
 
 
 ////////////////////////////////////////////////////////////
-Http::Response Http::sendRequest(const Http::Request& request, Time timeout, RequestCallback callback)
+Http::Response Http::sendRequest(const Http::Request& request, Time timeout, RequestCallback callback, size_t bufferSize)
 {
     // First make sure that the request is valid -- add missing mandatory fields
     Request toSend(request);
@@ -403,8 +403,8 @@ Http::Response Http::sendRequest(const Http::Request& request, Time timeout, Req
                 std::string receivedStr;
                 std::size_t size = 0;
                 std::size_t processed = 0;
-                char buffer[4*1024];
-                while (m_connection.receive(buffer, sizeof(buffer), size) == Socket::Done)
+                char *buffer = new char[bufferSize];
+                while (m_connection.receive(buffer, bufferSize, size) == Socket::Done)
                 {
                     if (callback)
                     {
@@ -432,6 +432,8 @@ Http::Response Http::sendRequest(const Http::Request& request, Time timeout, Req
                     else
                         receivedStr.append(buffer, buffer + size);
                 }
+
+                delete[] buffer;
 
                 // Build the Response object from the received data
                 if (!callback)

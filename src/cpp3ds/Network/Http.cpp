@@ -249,7 +249,7 @@ void Http::setHost(const std::string& host, unsigned short port)
 
 
 ////////////////////////////////////////////////////////////
-Http::Response Http::sendRequest(const Http::Request& request, Time timeout, RequestCallback callback)
+Http::Response Http::sendRequest(const Http::Request& request, Time timeout, RequestCallback callback, size_t bufferSize)
 {
     if (m_context.httphandle)
     {
@@ -314,7 +314,7 @@ Http::Response Http::sendRequest(const Http::Request& request, Time timeout, Req
     u32 size = 0;
     u32 lastProcessed = 0;
     u32 processed = 0;
-    u8 buffer[4*1024];
+    u8 *buffer = new u8[bufferSize];
     char *charBuf = reinterpret_cast<char*>(buffer);
 
 
@@ -323,7 +323,7 @@ Http::Response Http::sendRequest(const Http::Request& request, Time timeout, Req
     while (dlret == HTTPC_RESULTCODE_DOWNLOADPENDING)
     {
 
-        dlret = httpcReceiveData(&m_context, buffer, sizeof(buffer));
+        dlret = httpcReceiveData(&m_context, buffer, bufferSize);
 
         if (R_FAILED(ret = httpcGetDownloadSizeState(&m_context, &processed, NULL)))
             break;
@@ -343,6 +343,7 @@ Http::Response Http::sendRequest(const Http::Request& request, Time timeout, Req
         }
     }
 
+    delete[] buffer;
     received.m_body = receivedStr;
     return received;
 }
