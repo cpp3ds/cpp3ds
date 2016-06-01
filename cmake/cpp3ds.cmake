@@ -330,7 +330,10 @@ function(add_cia_target target RSF IMAGE SOUND)
     if( NOT ${target_we}.smdh)
         __add_smdh(${target_we}.smdh ${APP_TITLE} ${APP_DESCRIPTION} ${APP_AUTHOR} ${APP_ICON})
     endif()
-    __add_ncch_banner(${target_we}.bnr ${IMAGE} ${SOUND})
+    if(NOT BANNER)
+        set(BANNER ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.bnr)
+        __add_ncch_banner(${target_we}.bnr ${IMAGE} ${SOUND})
+    endif()
     add_custom_command(OUTPUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.cia
             COMMAND ${MAKEROM} -f cia
             -target t
@@ -339,7 +342,7 @@ function(add_cia_target target RSF IMAGE SOUND)
             -elf $<TARGET_FILE:${target}>
             -rsf ${RSF}
             -ver ${APP_VERSION}
-            -banner ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.bnr
+            -banner ${BANNER}
             -icon ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.smdh
 			-DAPP_TITLE=${APP_TITLE}
 			-DAPP_PRODUCT_CODE=${APP_PRODUCT_CODE}
