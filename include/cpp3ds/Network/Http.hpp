@@ -364,6 +364,8 @@ public:
 
     ~Http();
 
+    void close();
+
     ////////////////////////////////////////////////////////////
     /// \brief Construct the HTTP client with the target host
     ///

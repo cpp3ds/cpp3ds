@@ -208,8 +208,18 @@ Http::Http(const std::string& host, unsigned short port)
 ////////////////////////////////////////////////////////////
 Http::~Http()
 {
+    close();
+}
+
+
+////////////////////////////////////////////////////////////
+void Http::close()
+{
     if (m_context.httphandle)
+    {
         httpcCloseContext(&m_context);
+        m_context.httphandle = 0;
+    }
 }
 
 
@@ -251,12 +261,7 @@ void Http::setHost(const std::string& host, unsigned short port)
 ////////////////////////////////////////////////////////////
 Http::Response Http::sendRequest(const Http::Request& request, Time timeout, RequestCallback callback, size_t bufferSize)
 {
-    if (m_context.httphandle)
-    {
-        // TODO: check for failure
-        httpcCloseContext(&m_context);
-        m_context.httphandle = 0;
-    }
+    close();
 
     // First make sure that the request is valid -- add missing mandatory fields
     Request toSend(request);
