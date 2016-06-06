@@ -347,7 +347,7 @@ function(add_cia_target target RSF IMAGE SOUND)
 			-DAPP_TITLE=${APP_TITLE}
 			-DAPP_PRODUCT_CODE=${APP_PRODUCT_CODE}
 			-DAPP_UNIQUE_ID=${APP_UNIQUE_ID}
-            DEPENDS ${target} ${RSF} ${ROMFS_FILES} ${SHADER_OUTPUT} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.bnr ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.smdh
+            DEPENDS ${target} ${RSF} ${ROMFS_FILES} ${SHADER_OUTPUT} ${BANNER} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.smdh
             WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
             VERBATIM
     )
