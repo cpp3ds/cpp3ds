@@ -67,13 +67,17 @@ void Window::create(const ContextSettings& settings)
 ////////////////////////////////////////////////////////////
 void Window::close()
 {
+#ifndef TEST
 	_emulator->stop();
+#endif
 }
 
 
 ////////////////////////////////////////////////////////////
 bool Window::isOpen() const {
+#ifndef TEST
 	return _emulator->getState() != EMU_STOPPED;
+#endif
 }
 
 
@@ -96,14 +100,18 @@ Vector2u Window::getSize() const
 ////////////////////////////////////////////////////////////
 void Window::setVerticalSyncEnabled(bool enabled)
 {
+#ifndef TEST
 	_emulator->screen->setVerticalSyncEnabled(enabled);
+#endif
 }
 
 
 ////////////////////////////////////////////////////////////
 void Window::setFramerateLimit(unsigned int limit)
 {
+#ifndef TEST
 	_emulator->screen->setFramerateLimit(limit);
+#endif
 }
 
 

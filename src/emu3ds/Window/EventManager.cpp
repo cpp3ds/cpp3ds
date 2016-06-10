@@ -8,6 +8,10 @@ namespace cpp3ds {
 
 // TODO: configurable key-mapping
 std::map<sf::Keyboard::Key, cpp3ds::Keyboard::Key> keyMap = {
+	{sf::Keyboard::Up,    cpp3ds::Keyboard::Up},
+	{sf::Keyboard::Left,  cpp3ds::Keyboard::Left},
+	{sf::Keyboard::Right, cpp3ds::Keyboard::Right},
+	{sf::Keyboard::Down,  cpp3ds::Keyboard::Down},
 	{sf::Keyboard::A, cpp3ds::Keyboard::A},
 	{sf::Keyboard::B, cpp3ds::Keyboard::B},
 	{sf::Keyboard::X, cpp3ds::Keyboard::X},
@@ -52,6 +56,7 @@ bool EventManager::filterEvent(const Event& event) {
 
 ////////////////////////////////////////////////////////////
 void EventManager::processEvents() {
+#ifndef TEST
 	int BOTTOM_X = 40,
 		BOTTOM_Y = 240,
 		BOTTOM_WIDTH = 320;
@@ -111,6 +116,7 @@ void EventManager::processEvents() {
 				break;
 		}
 	}
+#endif
 }
 
 ////////////////////////////////////////////////////////////

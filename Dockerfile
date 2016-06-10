@@ -7,6 +7,7 @@ COPY . /usr/src/cpp3ds
 WORKDIR /usr/src
 
 RUN apt-get update && apt-get -y install \
+    libgtest-dev \
 	libsfml-dev \
 	libglew-dev \
 	qt5-default \
@@ -29,12 +30,19 @@ RUN wget -q https://github.com/cpp3ds/3ds-tools/releases/download/r4/3ds-tools-l
     cp 3ds-tools/* $DEVKITARM/bin && \
     rm tools.tar.gz
 
+WORKDIR /usr/src/gtest
+RUN cmake . && \
+    make -j4 && \
+    cp *.a /usr/lib && \
+    make clean
+
 WORKDIR /usr/src/cpp3ds
 RUN mkdir build && \
     cd build && \
-    cmake -DBUILD_EMULATOR=ON -DENABLE_OGG=ON -DBUILD_EXAMPLES=OFF .. && \
+    cmake -DBUILD_EMULATOR=ON -DENABLE_OGG=ON -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=ON .. && \
     make -j4 && \
     cd .. && \
+    ./bin/tests && \
     mkdir $CPP3DS && \
     cp -r build/lib $CPP3DS && \
     cp -r include $CPP3DS && \

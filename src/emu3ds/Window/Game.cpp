@@ -5,7 +5,7 @@
 #include <cpp3ds/System/Clock.hpp>
 #include <cpp3ds/Window/Keyboard.hpp>
 #include <cpp3ds/Graphics/Sprite.hpp>
-#include <Audio/AudioDevice.hpp>
+#include "../Audio/AudioDevice.hpp"
 
 namespace cpp3ds {
 
@@ -39,6 +39,7 @@ void Game::exit()
 
 void Game::render()
 {
+#ifndef TEST
 	_emulator->screen->clear();
 
 	// Top Screen
@@ -54,6 +55,7 @@ void Game::render()
 	m_frameTextureBottom.display();
 	m_frameSpriteBottom.setTexture(m_frameTextureBottom.getTexture());
 	_emulator->screen->draw(m_frameSpriteBottom);
+#endif
 }
 
 
@@ -64,7 +66,9 @@ void Game::run()
 	Clock clock;
 	Time deltaTime;
 
+#ifndef TEST
 	_emulator->screen->setFramerateLimit(60);
+#endif
 
 	while (windowTop.isOpen())
 	{
@@ -80,6 +84,8 @@ void Game::run()
 		update(deltaTime.asSeconds());
 
 		render();
+
+#ifndef TEST
 		_emulator->screen->display();
 		// TODO: pause non-drawing services (sound, networking, etc.)
 		if (_emulator->getState() == EMU_PAUSED){
@@ -93,6 +99,7 @@ void Game::run()
 			while (eventmanager.pollEvent(event)) {}
 			priv::AudioDevice::resume();
 		}
+#endif
 	}
 }
 

@@ -29,7 +29,9 @@ float Keyboard::getSliderVolume() {
 
 ////////////////////////////////////////////////////////////
 void Keyboard::update() {
+#ifndef TEST
 	m_slider3d = _emulator->get_slider3d();
+#endif
 	m_sliderVolume = 0;
 }
 
