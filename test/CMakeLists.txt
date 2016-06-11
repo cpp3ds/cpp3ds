@@ -14,9 +14,10 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/cpp3ds)
 set(EMUSRCROOT ${PROJECT_SOURCE_DIR}/src/emu3ds)
 set(TESTSRCROOT ${PROJECT_SOURCE_DIR}/test)
 
-set(SRC
+set(SRCTESTS
     ${TESTSRCROOT}/main.cpp
-
+)
+set(SRC
     # Audio
     ${EMUSRCROOT}/Audio/ALCheck.cpp
     ${EMUSRCROOT}/Audio/AlResource.cpp
@@ -122,12 +123,15 @@ find_package(OpenSSL REQUIRED)
 
 include_directories(${FREETYPE_INCLUDE_DIRS} ${JPEG_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
 
-add_executable(tests ${SRC} ${RESOURCE_OUTPUT})
-add_dependencies(tests cpp3ds-res)
-target_link_libraries(tests ${GTEST_BOTH_LIBRARIES} sfml-graphics sfml-window sfml-system sfml-audio openal GLEW GL jpeg freetype vorbisenc vorbisfile vorbis ogg ssl crypto pthread)
+add_library(cpp3ds-test STATIC ${SRC} ${RESOURCE_OUTPUT})
+add_dependencies(cpp3ds-test cpp3ds-res)
+set_target_properties(cpp3ds-test PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${CPP3DS_TEST_FLAGS} -std=c++11")
+set_target_properties(cpp3ds-test PROPERTIES COMPILE_DEFINITIONS "EMULATION;TEST")
 
+add_executable(tests ${SRCTESTS})
+add_dependencies(tests cpp3ds-test)
+target_link_libraries(tests ${GTEST_BOTH_LIBRARIES} sfml-graphics sfml-window sfml-system sfml-audio openal GLEW GL jpeg freetype vorbisenc vorbisfile vorbis ogg ssl crypto pthread)
 set_target_properties(tests PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${CPP3DS_TEST_FLAGS} -std=c++11")
 set_target_properties(tests PROPERTIES COMPILE_DEFINITIONS "EMULATION;TEST")
 set_target_properties(tests PROPERTIES LINK_FLAGS "${CMAKE_CXX_FLAGS} ${CPP3DS_TEST_FLAGS}")
-
 add_test(AllTests tests)
