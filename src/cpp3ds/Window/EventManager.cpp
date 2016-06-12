@@ -6,7 +6,7 @@
 namespace cpp3ds {
 
 EventManager::EventManager() {
-	m_joystickThreshold = 10.f;
+	m_joystickThreshold = 15.f;
 }
 
 bool EventManager::pollEvent(Event& event) {
