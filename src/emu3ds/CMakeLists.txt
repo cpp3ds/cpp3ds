@@ -115,6 +115,8 @@ set(SRC
 )
 
 if(ENABLE_OGG)
+	find_package(Vorbis REQUIRED)
+	include_directories(${VORBIS_INCLUDE_DIRS})
     list(APPEND SRC
             ${SRCROOT}/Audio/SoundFileReaderOgg.cpp
             ${SRCROOT}/Audio/SoundFileWriterOgg.cpp)
