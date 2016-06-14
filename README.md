@@ -1,5 +1,7 @@
-cpp3ds [![Build Status](https://travis-ci.org/cpp3ds/cpp3ds.png?branch=master)](https://travis-ci.org/cpp3ds/cpp3ds)
+cpp3ds
 ======
+
+[![Build Status](https://travis-ci.org/cpp3ds/cpp3ds.png?branch=master)](https://travis-ci.org/cpp3ds/cpp3ds) [![Codecov branch](https://img.shields.io/codecov/c/github/cpp3ds/cpp3ds/master.svg?maxAge=86400)](https://codecov.io/gh/cpp3ds/cpp3ds) [![Docker pulls](https://img.shields.io/docker/pulls/thecruel/cpp3ds.svg?maxAge=86400)](https://hub.docker.com/r/thecruel/cpp3ds/) [![AUR package](https://img.shields.io/aur/version/cpp3ds-git.svg?maxAge=86400)](https://aur.archlinux.org/packages/cpp3ds-git/)
 
 Basic C++ gaming framework and library for Nintendo 3DS.
 

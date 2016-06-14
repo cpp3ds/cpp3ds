@@ -1,7 +1,7 @@
 FROM thecruel/devkitarm-3ds:latest
 MAINTAINER Thomas Edvalson "machin3@gmail.com"
 
-ENV CPP3DS /opt/cpp3ds
+ENV CPP3DS /usr/src/cpp3ds
 
 COPY . /usr/src/cpp3ds
 WORKDIR /usr/src
@@ -41,12 +41,6 @@ RUN mkdir build && \
     cd build && \
     cmake -DBUILD_EMULATOR=ON -DENABLE_OGG=ON -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=ON .. && \
     make -j4 && \
+    mv lib .. && \
     cd .. && \
-    ./bin/tests && \
-    mkdir $CPP3DS && \
-    cp -r build/lib $CPP3DS && \
-    cp -r include $CPP3DS && \
-    cp -r cmake $CPP3DS && \
-    cp -r scripts $CPP3DS && \
-    cd .. && \
-    rm -r cpp3ds
+    ./bin/tests

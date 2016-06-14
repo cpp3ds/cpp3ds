@@ -12,8 +12,12 @@ script:
 
 before_deploy:
   - export RELEASE_FILENAME=cpp3ds-$TRAVIS_OS_NAME-$TRAVIS_TAG.tar.xz
-  - docker run --rm -v "$PWD":/usr/build -w /opt cpp3ds sh /usr/build/.build.sh /usr/build/$RELEASE_FILENAME
+  - docker run --rm -v "$PWD":/usr/build -w /usr/src cpp3ds sh /usr/build/.build.sh /usr/build/$RELEASE_FILENAME
   - sudo chmod 777 $RELEASE_FILENAME
+
+after_success:
+  - docker run --rm -v "$PWD":/usr/build -w /usr/src/cpp3ds cpp3ds cp -r . /usr/build
+  - bash <(curl -s https://codecov.io/bash)
 
 deploy:
   provider: releases
