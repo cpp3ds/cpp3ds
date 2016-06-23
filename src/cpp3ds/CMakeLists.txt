@@ -10,6 +10,8 @@ include_directories(
 set(CMAKE_C_FLAGS "")
 set(CMAKE_CXX_FLAGS "-std=c++11")
 
+add_definitions(-D_3DS)
+
 add_subdirectory(Audio)
 add_subdirectory(Graphics)
 add_subdirectory(Network)

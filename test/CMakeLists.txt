@@ -131,7 +131,6 @@ set_target_properties(cpp3ds-test PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} $
 set_target_properties(cpp3ds-test PROPERTIES COMPILE_DEFINITIONS "EMULATION;TEST")
 
 add_executable(tests ${SRCTESTS} ${SRC} ${RESOURCE_OUTPUT})
-#add_dependencies(tests cpp3ds-test)
 target_link_libraries(tests ${GTEST_BOTH_LIBRARIES} sfml-graphics sfml-window sfml-system sfml-audio openal GLEW GL jpeg freetype vorbisenc vorbisfile vorbis ogg ssl crypto pthread)
 set_target_properties(tests PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${CPP3DS_TEST_FLAGS} -std=c++11")
 set_target_properties(tests PROPERTIES COMPILE_DEFINITIONS "EMULATION;TEST")

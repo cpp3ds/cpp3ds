@@ -27,6 +27,7 @@ file(GLOB_RECURSE ROMFS_FILES ${PROJECT_SOURCE_DIR}/res/romfs/*)
 add_executable(${PROJECT_NAME}.elf ${SOURCE_FILES} ${ARM_SOURCE_FILES})
 
 target_link_libraries(${PROJECT_NAME}.elf ${CPP3DS_ARM_LIBS})
+set_target_properties(${PROJECT_NAME}.elf PROPERTIES COMPILE_DEFINITIONS "_3DS")
 set_target_properties(${PROJECT_NAME}.elf PROPERTIES COMPILE_FLAGS "${CPP3DS_ARM_FLAGS}")
 set_target_properties(${PROJECT_NAME}.elf PROPERTIES LINK_FLAGS "-specs=3dsx.specs -march=armv6k -mtune=mpcore -mfloat-abi=hard -gc-sections")
 SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
