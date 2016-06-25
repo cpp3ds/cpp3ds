@@ -25,7 +25,7 @@ RUN wget -q https://github.com/cpp3ds/3ds_portlibs/releases/download/r3/portlibs
     ln -s $(pwd)/portlibs $DEVKITPRO/portlibs && \
     ln -s $DEVKITPRO/portlibs/3ds $DEVKITPRO/portlibs/armv6k
 
-RUN wget -q https://github.com/cpp3ds/3ds-tools/releases/download/r4/3ds-tools-linux-r4.tar.gz -O tools.tar.gz && \
+RUN wget -q https://github.com/cpp3ds/3ds-tools/releases/download/r5/3ds-tools-linux-r5.tar.gz -O tools.tar.gz && \
     tar -xaf tools.tar.gz && \
     cp 3ds-tools/* $DEVKITARM/bin && \
     rm tools.tar.gz
