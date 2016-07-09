@@ -27,19 +27,16 @@
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/System/Thread.hpp>
 #include <malloc.h>
-
+#include <iostream>
 
 namespace cpp3ds
 {
 ////////////////////////////////////////////////////////////
 void Thread::initialize()
 {
-	s32 prio = 0;
-	svcGetThreadPriority(&prio, CUR_THREAD_HANDLE);
-
 	m_stackSize = 32 * 1024;
-	m_priority = prio - 1;
 	m_affinity = -2;
+	setRelativePriority(1);
 }
 
 
@@ -106,6 +103,16 @@ void Thread::setStackSize(size_t stacksize)
 
 void Thread::setPriority(int priority)
 {
+	m_priority = priority;
+}
+
+void Thread::setRelativePriority(int relPriority)
+{
+	s32 priority;
+	svcGetThreadPriority(&priority, CUR_THREAD_HANDLE);
+	priority += relPriority;
+	if (priority < 0x18) priority = 0x18;
+	if (priority > 0x3F) priority = 0x3F;
 	m_priority = priority;
 }
 

@@ -177,6 +177,7 @@ public :
 
     void setStackSize(size_t stacksize);
     void setPriority(int priority);
+    void setRelativePriority(int priority);
     void setAffinity(int affinity);
 
 private :

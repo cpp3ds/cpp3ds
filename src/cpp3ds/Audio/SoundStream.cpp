@@ -46,7 +46,7 @@ SoundStream::SoundStream()
 , m_loop            (false)
 , m_samplesProcessed(0)
 {
-
+	m_thread.setPriority(0x19);
 }
 
 

@@ -87,6 +87,11 @@ void Thread::setPriority(int priority)
     m_priority = priority;
 }
 
+void Thread::setRelativePriority(int priority)
+{
+    m_priority = priority;
+}
+
 void Thread::setAffinity(int affinity)
 {
     m_affinity = affinity;
