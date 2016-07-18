@@ -267,7 +267,7 @@ Http::Response Http::sendRequest(const Http::Request& request, Time timeout, Req
     Request toSend(request);
     if (!toSend.hasField("User-Agent"))
     {
-        toSend.setField("User-Agent", "libcpp3ds-network/2.x");
+        toSend.setField("User-Agent", "Mozilla/5.0 (Nintendo 3DS; Mobile; rv:10.0) Gecko/20100101 libcpp3ds-network");
     }
     if (!toSend.hasField("Content-Length"))
     {
@@ -296,7 +296,7 @@ Http::Response Http::sendRequest(const Http::Request& request, Time timeout, Req
     // TODO: Handle return values / errors
     Result ret;
     u32 contentSize;
-    ret = httpcOpenContext(&m_context, method, url.c_str(), 0);
+    ret = httpcOpenContext(&m_context, method, url.c_str(), 1);
     ret = httpcSetClientCertDefault(&m_context, SSLC_DefaultClientCert_ClCertA);
     ret = httpcSetSSLOpt(&m_context, SSLCOPT_DisableVerify);
 
