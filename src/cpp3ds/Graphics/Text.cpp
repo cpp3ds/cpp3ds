@@ -356,7 +356,7 @@ void Text::drawSystemFont(RenderTarget& target, RenderStates states) const
 {
     ensureGeometryUpdate();
     states.transform *= getTransform();
-#ifndef EMULATION
+#ifdef _3DS
     if (target.m_cache.viewChanged)
         target.applyCurrentView();
     if (states.blendMode != target.m_cache.lastBlendMode)
@@ -390,8 +390,8 @@ void Text::drawSystemFont(RenderTarget& target, RenderStates states) const
         C3D_DrawArrays(GPU_TRIANGLE_STRIP, vertexIndex, 4);
         vertexIndex += 4;
     }
-    Texture::bind(NULL);
 #endif
+    target.applyTexture(NULL);
 }
 
 
