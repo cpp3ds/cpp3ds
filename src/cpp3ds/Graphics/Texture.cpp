@@ -152,11 +152,12 @@ m_cacheId      (getUniqueId())
 ////////////////////////////////////////////////////////////
 Texture::~Texture()
 {
-    if (m_ownsData)
-        C3D_TexDelete(m_texture);
-
     if (m_texture)
+    {
+        if (m_ownsData)
+            C3D_TexDelete(m_texture);
         delete m_texture;
+    }
 }
 
 
