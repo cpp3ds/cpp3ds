@@ -33,6 +33,7 @@
 #include <sstream>
 #include <limits>
 #include <3ds/services/httpc.h>
+#include <cpp3ds/System/I18n.hpp>
 
 
 namespace
@@ -170,13 +171,17 @@ const std::string& Http::Response::getBody() const
 
 
 ////////////////////////////////////////////////////////////
-void Http::Response::parse(httpcContext *context)
+void Http::Response::parse(httpcContext *context, Time timeout)
 {
     Result ret;
-    u32 statusCode;
+    u32 statusCode = ConnectionFailed;
 
     m_context = context;
-    ret = httpcGetResponseStatusCode(context, &statusCode, 0);
+    if (R_FAILED(ret = httpcGetResponseStatusCodeTimeout(context, &statusCode, (u64)timeout.asMicroseconds() * 1000)))
+    {
+        err() << _("Failed to get HTTP status: 0x%08lX", ret).toAnsiString() << std::endl;
+        return;
+    }
     m_status = (Status)statusCode;
 }
 
@@ -217,6 +222,7 @@ void Http::close()
 {
     if (m_context.httphandle)
     {
+        httpcCancelConnection(&m_context);
         httpcCloseContext(&m_context);
         m_context.httphandle = 0;
     }
@@ -263,6 +269,10 @@ Http::Response Http::sendRequest(const Http::Request& request, Time timeout, Req
 {
     close();
 
+    // Use 90 second default timeout for httpc
+    if (timeout == Time::Zero)
+        timeout = seconds(90);
+
     // First make sure that the request is valid -- add missing mandatory fields
     Request toSend(request);
     if (!toSend.hasField("User-Agent"))
@@ -295,7 +305,7 @@ Http::Response Http::sendRequest(const Http::Request& request, Time timeout, Req
 
     // TODO: Handle return values / errors
     Result ret;
-    u32 contentSize;
+    u32 contentSize = 0;
     ret = httpcOpenContext(&m_context, method, url.c_str(), 1);
     ret = httpcSetClientCertDefault(&m_context, SSLC_DefaultClientCert_ClCertA);
     ret = httpcSetSSLOpt(&m_context, SSLCOPT_DisableVerify);
@@ -311,7 +321,9 @@ Http::Response Http::sendRequest(const Http::Request& request, Time timeout, Req
 
     ret = httpcBeginRequest(&m_context);
 
-    received.parse(&m_context);
+    received.parse(&m_context, timeout);
+    if (received.getStatus() == Response::ConnectionFailed)
+        return received;
 
     ret = httpcGetDownloadSizeState(&m_context, NULL, &contentSize);
 
@@ -321,14 +333,13 @@ Http::Response Http::sendRequest(const Http::Request& request, Time timeout, Req
     u32 processed = 0;
     u8 *buffer = new u8[bufferSize];
     char *charBuf = reinterpret_cast<char*>(buffer);
-
-
     Result dlret = HTTPC_RESULTCODE_DOWNLOADPENDING;
 
     while (dlret == HTTPC_RESULTCODE_DOWNLOADPENDING)
     {
-
-        dlret = httpcReceiveData(&m_context, buffer, bufferSize);
+        dlret = httpcReceiveDataTimeout(&m_context, buffer, bufferSize, (u64)timeout.asMicroseconds() * 1000);
+        if (dlret != HTTPC_RESULTCODE_DOWNLOADPENDING && dlret != 0)
+            err() << _("Failed to receieve HTTP data: 0x%08lX", dlret).toAnsiString() << std::endl;
 
         if (R_FAILED(ret = httpcGetDownloadSizeState(&m_context, &processed, NULL)))
             break;

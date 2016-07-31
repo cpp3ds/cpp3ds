@@ -319,7 +319,7 @@ public:
 #ifdef EMULATION
         void parse(const std::string& data);
 #else
-        void parse(httpcContext *context);
+        void parse(httpcContext *context, Time timeout);
 #endif
 
 
