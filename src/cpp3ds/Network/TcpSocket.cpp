@@ -215,6 +215,13 @@ Socket::Status TcpSocket::connect(const IpAddress& remoteAddress, unsigned short
                 if (getRemoteAddress() != cpp3ds::IpAddress::None)
                 {
                     // Connection accepted
+#ifdef _3DS
+                    if (isSecure())
+                        sslc_init(getSecureData(), getHandle(), remoteAddress.toString().c_str());
+#else
+                    if (isSecure())
+                        SSL_connect(getSecureData().ssl);
+#endif
                     status = Done;
                 }
                 else

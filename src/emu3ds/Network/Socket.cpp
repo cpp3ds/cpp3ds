@@ -53,7 +53,8 @@ namespace cpp3ds
 Socket::Socket(Type type, bool secure) :
 m_type      (type),
 m_socket    (priv::SocketImpl::invalidSocket()),
-m_isBlocking(true)
+m_isBlocking(true),
+m_isSecure  (secure)
 {
     m_secureData.ssl = nullptr;
     m_secureData.sslMethod = nullptr;
@@ -142,7 +143,8 @@ void Socket::create()
         m_secureData.sslContext = SSL_CTX_new(m_secureData.sslMethod);
         m_secureData.ssl = SSL_new(m_secureData.sslContext);
         SSL_set_verify(m_secureData.ssl, SSL_VERIFY_NONE, nullptr);
-        SSL_set_fd(m_secureData.ssl, m_socket);
+        if (!SSL_set_fd(m_secureData.ssl, m_socket))
+            err() << "SSL_set_fd() failed." << std::endl;
     }
 }
 
