@@ -354,6 +354,8 @@ bool Texture::loadFromPreprocessedMemory(void *data, size_t size, size_t width, 
     m_texture->height = height;
     m_texture->width = width;
 
+    C3D_TexFlush(m_texture);
+
     C3D_TexSetWrap(m_texture,
                    m_isRepeated ? GPU_REPEAT : GPU_CLAMP_TO_EDGE,
                    m_isRepeated ? GPU_REPEAT : GPU_CLAMP_TO_EDGE);
@@ -386,17 +388,8 @@ Image Texture::copyToImage() const
 
     u32 *data = (u32*)linearAlloc(m_texture->size);
 
-    if (m_texture->width < 64 || m_texture->height < 64)
         imageUntile32((u8*)data, (u8*)m_texture->data, 0, 0, m_texture->width, m_texture->height, m_texture->width, m_texture->height);
-    else
-    {
-        u32 dim = GX_BUFFER_DIM(m_texture->width, m_texture->height);
-        GX_DisplayTransfer((u32*)m_texture->data, dim, data, dim, TEXTURE_TRANSFER_FLAGS);
-        gspWaitForPPF();
         GSPGPU_FlushDataCache(data, m_texture->size);
-        for (int i = 0; i < m_texture->width * m_texture->height; ++i)
-            data[i] = __builtin_bswap32(data[i]);
-    }
 
     if ((m_size == m_actualSize) && !m_pixelsFlipped)
 	{
@@ -458,37 +451,11 @@ void Texture::update(const Uint8* pixels, unsigned int width, unsigned int heigh
 
     if (pixels && m_texture)
     {
-        if (m_texture->width < 64 || m_texture->height < 64)
-        {
             u8* dest = (u8*)m_texture->data;
 
             imageTile32(dest, pixels, x, y, width, height, m_texture->width, m_texture->height);
 
             C3D_TexFlush(m_texture);
-        }
-        else
-        {
-            const u32 *pixels32 = reinterpret_cast<const u32*>(pixels);
-            u32 *data = (u32*)linearAlloc(m_texture->size);
-            u32 dim = GX_BUFFER_DIM(m_texture->width, m_texture->height);
-
-            GX_DisplayTransfer((u32*)m_texture->data, dim, data, dim, TEXTURE_TRANSFER_FLAGS);
-            gspWaitForPPF();
-
-            for (int h = 0; h < height; ++h)
-            {
-                for (int w = 0; w < width; ++w)
-                {
-                    data[(y+h)*m_texture->width+x+w] = __builtin_bswap32(pixels32[(h*width) + w]);
-                }
-            }
-            GSPGPU_FlushDataCache(data, m_texture->size);
-
-            GX_DisplayTransfer(data, dim, (u32*)m_texture->data, dim, TEXTURE_TRANSFER_FLAGS | GX_TRANSFER_OUT_TILED(1));
-            gspWaitForPPF();
-
-            linearFree(data);
-        }
 
         m_pixelsFlipped = false;
         m_cacheId = getUniqueId();
