@@ -272,28 +272,10 @@ void RenderTarget::draw(const Vertex* vertices, unsigned int vertexCount,
         // Setup the pointers to the vertices' components
         if (vertices)
         {
-            #ifdef EMULATION
-                const char* data = reinterpret_cast<const char*>(vertices);
-                glCheck(glVertexPointer(2, GL_FLOAT, sizeof(Vertex), data + 0));
-                glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Vertex), data + 8)); // 8 = sizeof(Vector2f)
-                glCheck(glTexCoordPointer(2, GL_FLOAT, sizeof(Vertex), data + 12)); // 12 = 8 + sizeof(Color)
-            #else
-				// Temorary workaround until gl3ds can get VAO gl*Pointer functions working
-				u32 bufferOffsets[] = {0};
-				u64 bufferPermutations[] = {0x210};
-				u8 bufferAttribCounts[] = {3};
-				GPU_SetAttributeBuffers(
-					3, // number of attributes
-					(u32*)osConvertVirtToPhys(vertices),
-					GPU_ATTRIBFMT(0, 2, GPU_FLOAT) | GPU_ATTRIBFMT(1, 4, GPU_UNSIGNED_BYTE) | GPU_ATTRIBFMT(2, 2, GPU_FLOAT),
-					0xFF8, //0b1100
-					0x210,
-					1, //number of buffers
-					bufferOffsets,
-					bufferPermutations,
-					bufferAttribCounts // number of attributes for each buffer
-				);
-            #endif
+            const char* data = reinterpret_cast<const char*>(vertices);
+            glCheck(glVertexPointer(2, GL_FLOAT, sizeof(Vertex), data + 0));
+            glCheck(glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Vertex), data + 8)); // 8 = sizeof(Vector2f)
+            glCheck(glTexCoordPointer(2, GL_FLOAT, sizeof(Vertex), data + 12)); // 12 = 8 + sizeof(Color)
         }
 
         // Find the OpenGL primitive type
