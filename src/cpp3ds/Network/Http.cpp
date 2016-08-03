@@ -179,7 +179,10 @@ void Http::Response::parse(httpcContext *context, Time timeout)
     m_context = context;
     if (R_FAILED(ret = httpcGetResponseStatusCodeTimeout(context, &statusCode, (u64)timeout.asMicroseconds() * 1000)))
     {
-        err() << _("Failed to get HTTP status: 0x%08lX", ret).toAnsiString() << std::endl;
+        if (ret == HTTPC_RESULTCODE_TIMEDOUT)
+            m_status = TimedOut;
+        else
+            err() << _("Failed to get HTTP status: 0x%08lX", ret).toAnsiString() << std::endl;
         return;
     }
     m_status = (Status)statusCode;
@@ -294,6 +297,8 @@ Http::Response Http::sendRequest(const Http::Request& request, Time timeout, Req
     Response received;
 
     std::string url = m_hostUrl + toSend.m_uri;
+    if (url.empty())
+        return received;
     HTTPC_RequestMethod method;
     switch (toSend.m_method) {
         case Request::Get:    method = HTTPC_METHOD_GET;    break;
@@ -303,13 +308,19 @@ Http::Response Http::sendRequest(const Http::Request& request, Time timeout, Req
         case Request::Delete: method = HTTPC_METHOD_DELETE; break;
     }
 
-    // TODO: Handle return values / errors
     Result ret;
     u32 contentSize = 0;
-    ret = httpcOpenContext(&m_context, method, url.c_str(), 1);
-    ret = httpcSetClientCertDefault(&m_context, SSLC_DefaultClientCert_ClCertA);
-    ret = httpcSetSSLOpt(&m_context, SSLCOPT_DisableVerify);
+    if (R_FAILED(ret = httpcOpenContext(&m_context, method, url.c_str(), 1)) ||
+        R_FAILED(ret = httpcSetClientCertDefault(&m_context, SSLC_DefaultClientCert_ClCertA)) ||
+        R_FAILED(ret = httpcSetSSLOpt(&m_context, SSLCOPT_DisableVerify)))
+    {
+        if (m_context.httphandle)
+            err() << "lolwut" << std::endl;
+        err() << _("Failed to open HTTPC context: 0x%08lX", ret).toAnsiString() << std::endl;
+        return received;
+    }
 
+    // TODO: Handle return values / errors
     // Add fields
     for (auto i = toSend.m_fields.begin(); i != toSend.m_fields.end(); ++i)
     {
@@ -319,7 +330,11 @@ Http::Response Http::sendRequest(const Http::Request& request, Time timeout, Req
     if (!toSend.m_body.empty())
         httpcAddPostDataRaw(&m_context, (u32*)toSend.m_body.c_str(), toSend.m_body.size());
 
-    ret = httpcBeginRequest(&m_context);
+    if (R_FAILED(ret = httpcBeginRequest(&m_context)))
+    {
+        err() << _("Failed to make HTTPC request: 0x%08lX", ret).toAnsiString() << std::endl;
+        return received;
+    }
 
     received.parse(&m_context, timeout);
     if (received.getStatus() == Response::ConnectionFailed)
@@ -339,7 +354,13 @@ Http::Response Http::sendRequest(const Http::Request& request, Time timeout, Req
     {
         dlret = httpcReceiveDataTimeout(&m_context, buffer, bufferSize, (u64)timeout.asMicroseconds() * 1000);
         if (dlret != HTTPC_RESULTCODE_DOWNLOADPENDING && dlret != 0)
-            err() << _("Failed to receieve HTTP data: 0x%08lX", dlret).toAnsiString() << std::endl;
+        {
+            if (dlret == HTTPC_RESULTCODE_TIMEDOUT)
+                received.m_status = Response::TimedOut;
+            else
+                err() << _("Failed to receieve HTTP data: 0x%08lX", dlret).toAnsiString() << std::endl;
+            break;
+        }
 
         if (R_FAILED(ret = httpcGetDownloadSizeState(&m_context, &processed, NULL)))
             break;

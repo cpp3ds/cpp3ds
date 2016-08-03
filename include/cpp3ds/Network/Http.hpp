@@ -231,7 +231,8 @@ public:
 
             // 10xx: cpp3ds custom codes
             InvalidResponse  = 1000, ///< Response is not a valid HTTP one
-            ConnectionFailed = 1001  ///< Connection with server failed
+            ConnectionFailed = 1001, ///< Connection with server failed
+            TimedOut         = 1002, ///< Connection timed out
         };
 
         ////////////////////////////////////////////////////////////
