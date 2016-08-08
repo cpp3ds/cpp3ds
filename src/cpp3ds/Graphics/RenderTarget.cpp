@@ -243,6 +243,10 @@ void RenderTarget::draw(const Vertex* vertices, unsigned int vertexCount,
         if (states.blendMode != m_cache.lastBlendMode)
             applyBlendMode(states.blendMode);
 
+        // Apply the scissor mode
+        if (states.scissor != m_cache.lastScissor)
+            applyScissor(states.scissor);
+
         // Apply the texture
         Uint64 textureId = states.texture ? states.texture->m_cacheId : 0;
         if (textureId != m_cache.lastTextureId)
@@ -324,6 +328,7 @@ void RenderTarget::resetGLStates()
         applyBlendMode(BlendAlpha);
         applyTransform(Transform::Identity);
         applyTexture(NULL);
+        applyScissor(UintRect());
         if (shaderAvailable)
             applyShader(NULL);
 
@@ -381,6 +386,26 @@ void RenderTarget::applyBlendMode(const BlendMode& mode)
                    factorToGlConstant(mode.alphaDstFactor));
 
     m_cache.lastBlendMode = mode;
+}
+
+
+////////////////////////////////////////////////////////////
+void RenderTarget::applyScissor(const UintRect& rect)
+{
+    if (rect == UintRect())
+        C3D_SetScissor(GPU_SCISSOR_DISABLE, 0, 0, 0, 0);
+    else {
+        // Keep in mind the sideway 3ds screen, so it seems screwy
+        int bottom = getSize().x - rect.left;
+        int top = getSize().y - rect.top;
+        int left = top - rect.height;
+        int right = bottom - rect.width;
+        if (bottom < 0) bottom = 0;
+        if (top < 0) top = 0;
+        if (left < 0) left = 0;
+        if (right < 0) right = 0;
+        C3D_SetScissor(GPU_SCISSOR_NORMAL, left, right, top, bottom);
+    }
 }
 
 

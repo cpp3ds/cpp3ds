@@ -363,6 +363,8 @@ void Text::drawSystemFont(RenderTarget& target, RenderStates states) const
         target.applyBlendMode(states.blendMode);
     if (states.shader)
         target.applyShader(states.shader);
+    if (states.scissor != target.m_cache.lastScissor)
+        target.applyScissor(states.scissor);
 
     target.applyTransform(states.transform);
     Mtx_Identity(MtxStack_Cur(CitroGetTextureMatrix()));

@@ -187,13 +187,14 @@ bool operator !=(const Rect<T>& left, const Rect<T>& right);
 #include <cpp3ds/Graphics/Rect.inl>
 
 // Create typedefs for the most common types
-typedef Rect<int>   IntRect;
-typedef Rect<float> FloatRect;
+typedef Rect<int>    IntRect;
+typedef Rect<size_t> UintRect;
+typedef Rect<float>  FloatRect;
 
-} // namespace sf
+} // namespace cpp3ds
 
 
-#endif // SFML_RECT_HPP
+#endif // CPP3DS_RECT_HPP
 
 
 ////////////////////////////////////////////////////////////

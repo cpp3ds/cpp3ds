@@ -250,6 +250,10 @@ void RenderTarget::draw(const Vertex* vertices, unsigned int vertexCount,
         if (states.blendMode != m_cache.lastBlendMode)
             applyBlendMode(states.blendMode);
 
+        // Apply the scissor mode
+        if (states.scissor != m_cache.lastScissor)
+            applyScissor(states.scissor);
+
         // Apply the texture
         Uint64 textureId = states.texture ? states.texture->m_cacheId : 0;
         if (textureId != m_cache.lastTextureId)
@@ -377,6 +381,7 @@ void RenderTarget::resetGLStates()
         applyBlendMode(BlendAlpha);
         applyTransform(Transform::Identity);
         applyTexture(NULL);
+        applyScissor(UintRect());
         if (shaderAvailable)
             applyShader(NULL);
 
@@ -432,6 +437,20 @@ void RenderTarget::applyBlendMode(const BlendMode& mode)
 		equationToGlConstant(mode.alphaEquation)));
 
     m_cache.lastBlendMode = mode;
+}
+
+
+////////////////////////////////////////////////////////////
+void RenderTarget::applyScissor(const UintRect& rect)
+{
+	if (rect == UintRect()) {
+		glCheck(glDisable(GL_SCISSOR_TEST));
+	} else {
+		int y = getSize().y - (rect.top + rect.height);
+		if (y < 0) y = 0;
+		glCheck(glEnable(GL_SCISSOR_TEST));
+		glScissor(rect.left, y, rect.width, rect.height);
+	}
 }
 
 

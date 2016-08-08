@@ -92,6 +92,14 @@ public :
     RenderStates(const Shader* theShader);
 
     ////////////////////////////////////////////////////////////
+    /// \brief Construct a default set of render states with a custom scissor
+    ///
+    /// \param theScissor Scissor rect to use
+    ///
+    ////////////////////////////////////////////////////////////
+    RenderStates(const UintRect& theScissor);
+
+    ////////////////////////////////////////////////////////////
     /// \brief Construct a set of render states with all its attributes
     ///
     /// \param theBlendMode Blend mode to use
@@ -101,7 +109,7 @@ public :
     ///
     ////////////////////////////////////////////////////////////
     RenderStates(const BlendMode& theBlendMode, const Transform& theTransform,
-                 const Texture* theTexture, const Shader* theShader);
+                 const Texture* theTexture, const Shader* theShader, const IntRect& theScissor);
 
     ////////////////////////////////////////////////////////////
     // Static member data
@@ -115,6 +123,7 @@ public :
     Transform      transform; ///< Transform
     const Texture* texture;   ///< Texture
     const Shader*  shader;    ///< Shader
+    UintRect       scissor;   ///< Scissor
 };
 
 }

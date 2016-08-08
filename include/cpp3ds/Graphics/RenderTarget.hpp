@@ -362,6 +362,14 @@ private:
     void applyBlendMode(const BlendMode& mode);
 
     ////////////////////////////////////////////////////////////
+    /// \brief Apply a new scissor rect
+    ///
+    /// \param rect Scissor rect to use (Empty IntRect() to disable)
+    ///
+    ////////////////////////////////////////////////////////////
+    void applyScissor(const UintRect& rect);
+
+    ////////////////////////////////////////////////////////////
     /// \brief Apply a new transform
     ///
     /// \param transform Transform to apply
@@ -413,6 +421,7 @@ private:
         Uint64    lastTextureId;  ///< Cached texture
         bool      useVertexCache; ///< Did we previously use the vertex cache?
         Vertex*   vertexCache;    ///< Pre-transformed vertices cache
+        UintRect  lastScissor;
     };
 
     ////////////////////////////////////////////////////////////

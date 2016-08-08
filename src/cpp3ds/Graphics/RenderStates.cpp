@@ -44,7 +44,8 @@ RenderStates::RenderStates() :
 blendMode(BlendAlpha),
 transform(),
 texture  (NULL),
-shader   (NULL)
+shader   (NULL),
+scissor  ()
 {
 }
 
@@ -54,7 +55,8 @@ RenderStates::RenderStates(const Transform& theTransform) :
 blendMode(BlendAlpha),
 transform(theTransform),
 texture  (NULL),
-shader   (NULL)
+shader   (NULL),
+scissor  ()
 {
 }
 
@@ -64,7 +66,8 @@ RenderStates::RenderStates(const BlendMode& theBlendMode) :
 blendMode(theBlendMode),
 transform(),
 texture  (NULL),
-shader   (NULL)
+shader   (NULL),
+scissor  ()
 {
 }
 
@@ -74,7 +77,8 @@ RenderStates::RenderStates(const Texture* theTexture) :
 blendMode(BlendAlpha),
 transform(),
 texture  (theTexture),
-shader   (NULL)
+shader   (NULL),
+scissor  ()
 {
 }
 
@@ -84,18 +88,31 @@ RenderStates::RenderStates(const Shader* theShader) :
 blendMode(BlendAlpha),
 transform(),
 texture  (NULL),
-shader   (theShader)
+shader   (theShader),
+scissor  ()
+{
+}
+
+
+////////////////////////////////////////////////////////////
+RenderStates::RenderStates(const UintRect& theScissor) :
+blendMode(BlendAlpha),
+transform(),
+texture  (NULL),
+shader   (NULL),
+scissor  (theScissor)
 {
 }
 
 
 ////////////////////////////////////////////////////////////
 RenderStates::RenderStates(const BlendMode& theBlendMode, const Transform& theTransform,
-                           const Texture* theTexture, const Shader* theShader) :
+                           const Texture* theTexture, const Shader* theShader, const IntRect& theScissor) :
 blendMode(theBlendMode),
 transform(theTransform),
 texture  (theTexture),
-shader   (theShader)
+shader   (theShader),
+scissor  (theScissor)
 {
 }
 
