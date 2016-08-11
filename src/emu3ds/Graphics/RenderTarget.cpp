@@ -451,6 +451,7 @@ void RenderTarget::applyScissor(const UintRect& rect)
 		glCheck(glEnable(GL_SCISSOR_TEST));
 		glScissor(rect.left, y, rect.width, rect.height);
 	}
+	m_cache.lastScissor = rect;
 }
 
 

@@ -406,6 +406,7 @@ void RenderTarget::applyScissor(const UintRect& rect)
         if (right < 0) right = 0;
         C3D_SetScissor(GPU_SCISSOR_NORMAL, left, right, top, bottom);
     }
+    m_cache.lastScissor = rect;
 }
 
 
