@@ -14,9 +14,10 @@ const std::string FileSystem::getFilePath(const std::string& filename)
 
 #ifdef EMULATION
 	std::string newpath;
-	if (filename.find(pathPrefix + "romfs/") == 0) {
+	if (filename.find(pathPrefix + "romfs/") == 0)
 		return filename;
-	}
+	if (filename.find(pathPrefix + "sdmc/") == 0)
+		return filename;
 	if (filename.find("sdmc:/") == 0) {
 		newpath = filename;
 		newpath.erase(0, 5);
