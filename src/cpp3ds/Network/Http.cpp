@@ -282,6 +282,10 @@ Http::Response Http::sendRequest(const Http::Request& request, Time timeout, Req
     {
         toSend.setField("User-Agent", "Mozilla/5.0 (Nintendo 3DS; Mobile; rv:10.0) Gecko/20100101 libcpp3ds-network");
     }
+    if (!toSend.hasField("Connection"))
+    {
+        toSend.setField("Connection", "Keep-Alive");
+    }
     if (!toSend.hasField("Content-Length"))
     {
         std::ostringstream out;
@@ -358,7 +362,11 @@ Http::Response Http::sendRequest(const Http::Request& request, Time timeout, Req
             if (dlret == HTTPC_RESULTCODE_TIMEDOUT)
                 received.m_status = Response::TimedOut;
             else
+            {
                 err() << _("Failed to receieve HTTP data: 0x%08lX", dlret).toAnsiString() << std::endl;
+                if (callback)
+                    callback(buffer, 0, processed, received); // Send 0 length callback
+            }
             break;
         }
 

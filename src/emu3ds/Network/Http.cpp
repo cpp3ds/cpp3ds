@@ -389,7 +389,7 @@ Http::Response Http::sendRequest(const Http::Request& request, Time timeout, Req
     }
     if ((toSend.m_majorVersion * 10 + toSend.m_minorVersion >= 11) && !toSend.hasField("Connection"))
     {
-        toSend.setField("Connection", "close");
+        toSend.setField("Connection", "Keep-Alive");
     }
 
     // Prepare the response
