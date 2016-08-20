@@ -76,7 +76,7 @@ Sound::~Sound()
 
 
 ////////////////////////////////////////////////////////////
-void Sound::play()
+void Sound::play(int channel)
 {
 	if (!m_buffer || m_buffer->getSampleCount() == 0)
 		return;
@@ -87,11 +87,15 @@ void Sound::play()
 		return;
 	}
 
-	m_channel = 0;
-	while (m_channel < 24 && ndspChnIsPlaying(m_channel))
-		m_channel++;
+	m_channel = channel;
+	if (channel == -1)
+	{
+		m_channel = 0;
+		while (m_channel < 24 && ndspChnIsPlaying(m_channel))
+			m_channel++;
+	}
 
-	if (m_channel == 24) {
+	if (m_channel >= 24) {
 		err() << "Sound::play() failed because all channels are in use." << std::endl;
 		m_channel = -1;
 		return;
