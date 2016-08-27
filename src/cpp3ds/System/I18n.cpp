@@ -6,6 +6,7 @@
 #include <cpp3ds/System/I18n.hpp>
 #include <cpp3ds/System/String.hpp>
 #include <cpp3ds/System/Service.hpp>
+#include <cpp3ds/System/FileSystem.hpp>
 
 #define TOKEN_COMMENT  '#'
 
@@ -108,7 +109,7 @@ void I18n::loadLanguageFile(const std::string& filename)
 
 bool I18n::loadFromFile(const std::string filename)
 {
-	std::ifstream file(filename);
+	std::ifstream file(FileSystem::getFilePath(filename));
 	if (file)
 	{
 		m_content.clear();

@@ -73,7 +73,7 @@ String::String(const char* ansiString, const std::locale& locale)
         if (length > 0)
         {
             m_string.reserve(length + 1);
-            Utf32::fromAnsi(ansiString, ansiString + length, std::back_inserter(m_string), locale);
+            Utf8::toUtf32(ansiString, ansiString + length, std::back_inserter(m_string));
         }
     }
 }
@@ -83,7 +83,7 @@ String::String(const char* ansiString, const std::locale& locale)
 String::String(const std::string& ansiString, const std::locale& locale)
 {
     m_string.reserve(ansiString.length() + 1);
-    Utf32::fromAnsi(ansiString.begin(), ansiString.end(), std::back_inserter(m_string), locale);
+    Utf8::toUtf32(ansiString.begin(), ansiString.end(), std::back_inserter(m_string));
 }
 
 
@@ -154,7 +154,7 @@ std::string String::toAnsiString(const std::locale& locale) const
     output.reserve(m_string.length() + 1);
 
     // Convert
-    Utf32::toAnsi(m_string.begin(), m_string.end(), std::back_inserter(output), 0, locale);
+    Utf32::toUtf8(m_string.begin(), m_string.end(), std::back_inserter(output));
 
     return output;
 }
@@ -168,7 +168,7 @@ std::wstring String::toWideString() const
     output.reserve(m_string.length() + 1);
 
     // Convert
-    Utf32::toWide(m_string.begin(), m_string.end(), std::back_inserter(output), 0);
+    Utf32::toUtf8(m_string.begin(), m_string.end(), std::back_inserter(output));
 
     return output;
 }
