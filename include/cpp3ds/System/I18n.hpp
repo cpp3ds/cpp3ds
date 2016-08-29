@@ -52,7 +52,7 @@ public:
 
 	static void loadLanguage(Language language);
 
-	static inline void loadLanguageFile(const std::string& filename);
+	static void loadLanguageFile(const std::string& filename);
 
 	static Language getLanguage();
 
