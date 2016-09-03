@@ -51,14 +51,12 @@ I18n::I18n()
 #ifdef EMULATION
 	langcode = 1; // TODO: get actual locale of PC
 #else
-	ret = CFGU_GetSystemLanguage(&langcode);
-	if (!ret) {
+	if (R_FAILED(ret = CFGU_GetSystemLanguage(&langcode)))
 		// If the syscall fails, as it does with Citra-emu, default to English
 		langcode = 1;
-	}
+	std::cout << (int)langcode << std::endl;
 #endif
-	m_language = static_cast<Language>(langcode);
-	loadFromLanguage(m_language);
+	loadFromLanguage(static_cast<Language>(langcode));
 }
 
 
@@ -90,12 +88,13 @@ void I18n::loadLanguage(Language language)
 
 Language I18n::getLanguage()
 {
-	return static_cast<Language>(getInstance().m_language);
+	return getInstance().m_language;
 }
 
 
 bool I18n::loadFromLanguage(const Language language)
 {
+	m_language = language;
 	std::string filename = "lang/" + getLangString(language) + ".lang";
 	return loadFromFile(filename);
 }
@@ -107,12 +106,18 @@ void I18n::loadLanguageFile(const std::string& filename)
 }
 
 
+void I18n::clearLoadedLanguage()
+{
+	getInstance().m_content.clear();
+}
+
+
 bool I18n::loadFromFile(const std::string filename)
 {
+	m_content.clear();
 	std::ifstream file(FileSystem::getFilePath(filename));
 	if (file)
 	{
-		m_content.clear();
 		std::string line;
 		std::string content;
 		const std::map<std::string, std::string> replaceList = {

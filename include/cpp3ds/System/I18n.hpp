@@ -43,6 +43,8 @@ enum Language {
 	Portuguese,
 	Russian,
 	ChineseTraditional,
+
+	COUNT,
 };
 
 class I18n {
@@ -51,9 +53,8 @@ public:
 	static I18n& getInstance();
 
 	static void loadLanguage(Language language);
-
 	static void loadLanguageFile(const std::string& filename);
-
+	static void clearLoadedLanguage();
 	static Language getLanguage();
 
 	template<typename ... Args>
