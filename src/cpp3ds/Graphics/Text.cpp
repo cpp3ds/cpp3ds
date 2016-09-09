@@ -400,6 +400,9 @@ void Text::drawSystemFont(RenderTarget& target, RenderStates states) const
 ////////////////////////////////////////////////////////////
 void Text::draw(RenderTarget& target, RenderStates states) const
 {
+    if (m_string.isEmpty())
+        return;
+
     if (m_useSystemFont)
     {
         drawSystemFont(target, states);
