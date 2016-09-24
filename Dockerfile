@@ -19,7 +19,7 @@ RUN apt-get update && apt-get -y install \
 
 RUN apt-get -y clean
 
-RUN wget -q https://github.com/cpp3ds/3ds_portlibs/releases/download/r3/portlibs-3ds-r3.tar.xz -O portlibs.tar.xz && \
+RUN wget -q https://github.com/cpp3ds/3ds_portlibs/releases/download/r4/portlibs-3ds-r4.tar.xz -O portlibs.tar.xz && \
     tar -xaf portlibs.tar.xz && \
     rm portlibs.tar.xz && \
     ln -s $(pwd)/portlibs $DEVKITPRO/portlibs && \
