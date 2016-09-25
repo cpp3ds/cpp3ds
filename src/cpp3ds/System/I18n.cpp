@@ -70,7 +70,7 @@ const std::string I18n::getLangString(const Language langcode) const
 		case Italian:            return "it";
 		case Spanish:            return "es";
 		case ChineseSimplified:  return "zh";
-		case Korean:             return "ko";
+		case Korean:             return "kr";
 		case Dutch:              return "nl";
 		case Portuguese:         return "pt";
 		case Russian:            return "ru";
