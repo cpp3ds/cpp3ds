@@ -47,6 +47,17 @@
 	GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT(GX_TRANSFER_FMT_RGBA8) | \
 	GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO))
 
+#ifdef _3DS
+typedef struct
+{
+	u16 format;         //< Format matching ctrulib enum GPU_TEXCOLOR
+	u16 width;          //< Width (original width to next power of 2)
+	u16 height;         //< Height (original height to next power of 2)
+	u16 widthOriginal;  //< Width of original input
+	u16 heightOriginal; //< Height of original input
+} Header;
+#endif
+
 namespace
 {
 	cpp3ds::Mutex mutex;
@@ -111,6 +122,34 @@ namespace
                 u32 v = *(u32 *)(source + src_offset);
                 ((u32 *)dest)[i + j*src_w] = __builtin_bswap32(v);
             }
+        }
+    }
+
+    inline size_t fmtSize(GPU_TEXCOLOR fmt)
+    {
+        switch (fmt)
+        {
+            case GPU_RGBA8:
+                return 32;
+            case GPU_RGB8:
+                return 24;
+            case GPU_RGBA5551:
+            case GPU_RGB565:
+            case GPU_RGBA4:
+            case GPU_LA8:
+            case GPU_HILO8:
+                return 16;
+            case GPU_L8:
+            case GPU_A8:
+            case GPU_LA4:
+            case GPU_ETC1A4:
+                return 8;
+            case GPU_L4:
+            case GPU_A4:
+            case GPU_ETC1:
+                return 4;
+            default:
+                return 0;
         }
     }
 }
@@ -300,6 +339,40 @@ bool Texture::loadFromImage(const Image& image, const IntRect& area)
 
 
 ////////////////////////////////////////////////////////////
+bool Texture::loadFromPreprocessedFile(const std::string& filename)
+{
+    if (filename.empty())
+        return false;
+
+    Header header;
+    FileInputStream file;
+    if (!file.open(filename))
+        return false;
+
+    file.read(&header, sizeof(Header));
+    size_t size = file.getSize() - sizeof(Header);
+
+    // Verify header
+    GPU_TEXCOLOR format = static_cast<GPU_TEXCOLOR>(header.format);
+    if (size != header.width * header.height * fmtSize(format) / 8)
+    {
+        err() << "Improper file header: " << filename << std::endl;
+        return false;
+    }
+
+    void *data = malloc(size);
+    file.read(data, size);
+
+    bool ret = loadFromPreprocessedMemory(data, size, header.width, header.height, format, true);
+    m_size.x = header.widthOriginal;
+    m_size.y = header.heightOriginal;
+
+    free(data);
+    return ret;
+}
+
+
+////////////////////////////////////////////////////////////
 bool Texture::loadFromPreprocessedFile(const std::string& filename, size_t width, size_t height, GPU_TEXCOLOR format)
 {
     if (filename.empty())
@@ -307,6 +380,8 @@ bool Texture::loadFromPreprocessedFile(const std::string& filename, size_t width
 
     FileInputStream file;
     file.open(filename);
+    if (!file.open(filename))
+        return false;
 
     size_t size = file.getSize();
     void *data = malloc(size);

@@ -217,6 +217,7 @@ public :
     bool loadFromImage(const Image& image, const IntRect& area = IntRect());
 
 #ifndef EMULATION
+    bool loadFromPreprocessedFile(const std::string& filename);
     bool loadFromPreprocessedFile(const std::string& filename, size_t width, size_t height, GPU_TEXCOLOR format);
     bool loadFromPreprocessedMemory(void *data, size_t size, size_t width, size_t height, GPU_TEXCOLOR format, bool copyData = true);
 
