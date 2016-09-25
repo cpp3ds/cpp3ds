@@ -17,11 +17,10 @@ set(SRC
 )
 
 if(ENABLE_OGG)
-    find_package(Vorbis REQUIRED)
-    include_directories(${VORBIS_INCLUDE_DIRS})
+    find_package(Tremor REQUIRED)
+    include_directories(${TREMOR_INCLUDE_DIRS})
     list(APPEND SRC
-        ${SRCROOT}/SoundFileReaderOgg.cpp
-        ${SRCROOT}/SoundFileWriterOgg.cpp)
+        ${SRCROOT}/SoundFileReaderOgg.cpp)
 endif()
 if(ENABLE_MP3)
 	find_package(mpg123 REQUIRED)

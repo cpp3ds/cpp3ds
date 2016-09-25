@@ -144,7 +144,11 @@ Uint64 SoundFileReaderOgg::read(Int16* samples, Uint64 maxCount)
     while (count < maxCount)
     {
         int bytesToRead = static_cast<int>(maxCount - count) * sizeof(Int16);
+#ifdef _3DS
+        long bytesRead = ov_read(&m_vorbis, reinterpret_cast<char*>(samples), bytesToRead, NULL);
+#else
         long bytesRead = ov_read(&m_vorbis, reinterpret_cast<char*>(samples), bytesToRead, 0, 2, 1, NULL);
+#endif
         if (bytesRead > 0)
         {
             long samplesRead = bytesRead / sizeof(Int16);

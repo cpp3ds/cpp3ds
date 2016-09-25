@@ -29,7 +29,11 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <cpp3ds/Audio/SoundFileReader.hpp>
+#ifdef _3DS
+#include <tremor/ivorbisfile.h>
+#else
 #include <vorbis/vorbisfile.h>
+#endif
 
 
 namespace cpp3ds
