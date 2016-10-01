@@ -46,7 +46,7 @@ SoundStream::SoundStream()
 , m_loop            (false)
 , m_samplesProcessed(0)
 {
-	m_thread.setPriority(0x19);
+	m_thread.setPriority(0x1A);
 }
 
 
@@ -121,7 +121,7 @@ void SoundStream::play()
 	}
 
     m_channel = 0;
-    while (m_channel < 24 && ndspChnIsPlaying(m_channel))
+    while (m_channel < 24 && (ndspChnIsPlaying(m_channel) || ndspChnIsPaused(m_channel)))
         m_channel++;
 
     if (m_channel == 24) {
@@ -437,7 +437,7 @@ bool SoundStream::fillQueue()
     {
         if (fillAndPushBuffer(i))
             requestStop = true;
-		sleep(milliseconds(10));
+		sleep(milliseconds(20));
     }
 
     return requestStop;

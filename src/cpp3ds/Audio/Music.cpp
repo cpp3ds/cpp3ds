@@ -138,7 +138,7 @@ void Music::initialize()
     m_duration = m_file.getDuration();
 
     // Resize the internal buffer so that it can contain 1 second of audio samples
-    m_samples.resize(m_file.getSampleRate() * m_file.getChannelCount());
+    m_samples.resize(m_file.getSampleRate() * m_file.getChannelCount() / 16);
 
     // Initialize the stream
     SoundStream::initialize(m_file.getChannelCount(), m_file.getSampleRate());

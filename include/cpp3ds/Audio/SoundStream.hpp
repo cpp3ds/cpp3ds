@@ -284,7 +284,7 @@ private:
 
     enum
     {
-        BufferCount = 3 ///< Number of audio buffers used by the streaming loop
+        BufferCount = 30 ///< Number of audio buffers used by the streaming loop
     };
 
     ////////////////////////////////////////////////////////////
