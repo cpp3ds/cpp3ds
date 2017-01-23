@@ -120,15 +120,20 @@ void SoundStream::play()
 		return;
 	}
 
-    m_channel = 0;
-    while (m_channel < 24 && (ndspChnIsPlaying(m_channel) || ndspChnIsPaused(m_channel)))
-        m_channel++;
+	{
+		Lock lock(g_activeNdspChannelsMutex);
+		m_channel = 0;
+		while (m_channel < 24 && ((g_activeNdspChannels >> m_channel) & 1))
+			m_channel++;
 
-    if (m_channel == 24) {
-        err() << "Failed to play audio stream: all channels are in use." << std::endl;
-        m_channel = -1;
-        return;
-    }
+		if (m_channel == 24) {
+			err() << "Failed to play audio stream: all channels are in use." << std::endl;
+			m_channel = -1;
+			return;
+		}
+
+		g_activeNdspChannels |= 1 << m_channel;
+	}
 
     ndspChnReset(m_channel);
     ndspChnSetInterp(m_channel, NDSP_INTERP_LINEAR);
@@ -180,6 +185,11 @@ void SoundStream::stop()
 
     // Reset the playing position
     m_samplesProcessed = 0;
+
+	{
+		Lock lock(g_activeNdspChannelsMutex);
+		g_activeNdspChannels &= ~(1 << m_channel);
+	}
 }
 
 

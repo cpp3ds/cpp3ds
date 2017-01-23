@@ -68,7 +68,7 @@ Sound::~Sound()
 
 
 ////////////////////////////////////////////////////////////
-void Sound::play(int channel)
+void Sound::play()
 {
     alCheck(alSourcePlay(m_source));
 }

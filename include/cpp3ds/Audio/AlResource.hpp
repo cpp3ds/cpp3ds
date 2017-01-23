@@ -28,10 +28,17 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
+#include <cpp3ds/Config.hpp>
+#include <cpp3ds/System/Mutex.hpp>
 
 
 namespace cpp3ds
 {
+#ifdef _3DS
+extern Mutex  g_activeNdspChannelsMutex;
+extern Uint32 g_activeNdspChannels;
+#endif
+
 ////////////////////////////////////////////////////////////
 /// \brief Base class for classes that require an OpenAL context
 ///

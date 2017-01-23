@@ -300,7 +300,7 @@ private:
     bool          m_loop;                    ///< Loop flag (true to loop, false to play once)
     Uint64        m_samplesProcessed;        ///< Number of buffers processed since beginning of the stream
     bool          m_endBuffers[BufferCount]; ///< Each buffer is marked as "end buffer" or not, for proper duration calculation
-#ifndef EMULATION
+#ifdef _3DS
 	ndspWaveBuf   m_ndspWaveBuffers[BufferCount];
 	std::vector<Int16, LinearAllocator<Int16>> m_buffers[BufferCount];
 #else

@@ -30,6 +30,10 @@
 
 namespace cpp3ds
 {
+
+Mutex  g_activeNdspChannelsMutex;
+Uint32 g_activeNdspChannels = 0;
+
 ////////////////////////////////////////////////////////////
 AlResource::AlResource()
 {

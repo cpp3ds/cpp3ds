@@ -30,6 +30,7 @@
 #include <3ds.h>
 #include <string.h>
 #include <cpp3ds/System/Err.hpp>
+#include <cpp3ds/System/Lock.hpp>
 
 namespace cpp3ds
 {
@@ -76,7 +77,7 @@ Sound::~Sound()
 
 
 ////////////////////////////////////////////////////////////
-void Sound::play(int channel)
+void Sound::play()
 {
 	if (!m_buffer || m_buffer->getSampleCount() == 0)
 		return;
@@ -87,11 +88,10 @@ void Sound::play(int channel)
 		return;
 	}
 
-	m_channel = channel;
-	if (channel == -1)
 	{
+		Lock lock(g_activeNdspChannelsMutex);
 		m_channel = 0;
-		while (m_channel < 24 && ndspChnIsPlaying(m_channel))
+		while (m_channel < 24 && ((g_activeNdspChannels >> m_channel) & 1))
 			m_channel++;
 	}
 
@@ -133,6 +133,11 @@ void Sound::stop()
 		return;
 
 	ndspChnWaveBufClear(m_channel);
+
+	{
+		Lock lock(g_activeNdspChannelsMutex);
+		g_activeNdspChannels &= ~(1 << m_channel);
+	}
 }
 
 
