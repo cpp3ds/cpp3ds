@@ -88,6 +88,7 @@ void Sound::play()
 		return;
 	}
 
+	if (m_channel == -1)
 	{
 		Lock lock(g_activeNdspChannelsMutex);
 		m_channel = 0;
@@ -136,6 +137,7 @@ void Sound::stop()
 
 	ndspChnWaveBufClear(m_channel);
 
+	// TODO: set ndsp callback to make channel inactive after playback finishes
 	{
 		Lock lock(g_activeNdspChannelsMutex);
 		g_activeNdspChannels &= ~(1 << m_channel);
