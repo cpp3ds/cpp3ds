@@ -9,7 +9,7 @@ SET(CMAKE_OBJCOPY ${DEVKITARM}/bin/arm-none-eabi-objcopy)
 SET(CMAKE_AR ${DEVKITARM}/bin/arm-none-eabi-ar)
 SET(CMAKE_RANLIB ${DEVKITARM}/bin/arm-none-eabi-ranlib)
 
-set(CMAKE_FIND_ROOT_PATH $ENV{PORTLIBS}/3ds $ENV{PORTLIBS}/armv6k ${DEVKITARM} ${DEVKITPRO} ${DEVKITPRO}/portlibs/3ds ${DEVKITPRO}/portlibs/armv6k)
+set(CMAKE_FIND_ROOT_PATH ${DEVKITARM} ${DEVKITPRO} ${DEVKITPRO}/portlibs/3ds ${DEVKITPRO}/portlibs/armv6k ${DEVKITPRO}/portlibs/3ds/lib ${DEVKITPRO}/portlibs/armv6k/lib)
 # adjust the default behaviour of the FIND_XXX() commands:
 # search headers and libraries in the target environment, search 
 # programs in the host environment

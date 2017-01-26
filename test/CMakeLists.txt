@@ -108,6 +108,12 @@ if(ENABLE_OGG)
             ${SRCROOT}/Audio/SoundFileReaderOgg.cpp
             ${SRCROOT}/Audio/SoundFileWriterOgg.cpp)
 endif()
+if(ENABLE_AAC)
+    find_package(Faad REQUIRED)
+    include_directories(${FAAD_INCLUDE_DIRS})
+    list(APPEND SRC
+            ${SRCROOT}/Audio/SoundFileReaderAAC.cpp)
+endif()
 if(ENABLE_MP3)
     find_package(mpg123 REQUIRED)
     include_directories(${MPG123_INCLUDE_DIRS})
@@ -131,7 +137,7 @@ set_target_properties(cpp3ds-test PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} $
 set_target_properties(cpp3ds-test PROPERTIES COMPILE_DEFINITIONS "EMULATION;TEST")
 
 add_executable(tests ${SRCTESTS} ${SRC} ${RESOURCE_OUTPUT})
-target_link_libraries(tests ${GTEST_BOTH_LIBRARIES} sfml-graphics sfml-window sfml-system sfml-audio openal GLEW GL jpeg freetype vorbisenc vorbisfile vorbis ogg ssl crypto pthread)
+target_link_libraries(tests ${GTEST_BOTH_LIBRARIES} sfml-graphics sfml-window sfml-system sfml-audio openal GLEW GL jpeg freetype vorbisenc vorbisfile vorbis ogg faad ssl crypto pthread)
 set_target_properties(tests PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${CPP3DS_TEST_FLAGS} -std=c++11")
 set_target_properties(tests PROPERTIES COMPILE_DEFINITIONS "EMULATION;TEST")
 set_target_properties(tests PROPERTIES LINK_FLAGS "${CMAKE_CXX_FLAGS} ${CPP3DS_TEST_FLAGS}")

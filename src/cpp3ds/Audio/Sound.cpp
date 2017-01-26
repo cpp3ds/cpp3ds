@@ -93,12 +93,14 @@ void Sound::play()
 		m_channel = 0;
 		while (m_channel < 24 && ((g_activeNdspChannels >> m_channel) & 1))
 			m_channel++;
-	}
 
-	if (m_channel >= 24) {
-		err() << "Sound::play() failed because all channels are in use." << std::endl;
-		m_channel = -1;
-		return;
+		if (m_channel == 24) {
+			err() << "Failed to play audio stream: all channels are in use." << std::endl;
+			m_channel = -1;
+			return;
+		}
+
+		g_activeNdspChannels |= 1 << m_channel;
 	}
 
 	setPlayingOffset(Time::Zero);
@@ -110,7 +112,7 @@ void Sound::play()
 	ndspChnSetRate(m_channel, float(m_buffer->getSampleRate()));
 	ndspChnSetFormat(m_channel, (m_buffer->getChannelCount() == 1) ? NDSP_FORMAT_MONO_PCM16 : NDSP_FORMAT_STEREO_PCM16);
 
-	DSP_FlushDataCache((u8*)m_buffer->getSamples(), size);
+	DSP_FlushDataCache(m_buffer->getSamples(), size);
 
 	ndspChnWaveBufAdd(m_channel, &m_ndspWaveBuf);
 }
@@ -137,6 +139,7 @@ void Sound::stop()
 	{
 		Lock lock(g_activeNdspChannelsMutex);
 		g_activeNdspChannels &= ~(1 << m_channel);
+		m_channel = -1;
 	}
 }
 

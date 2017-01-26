@@ -134,8 +134,6 @@ if(ENABLE_MP3)
 			${SRCROOT}/Audio/SoundFileReaderMp3.cpp)
 endif()
 
-find_package(Fmt REQUIRED)
-
 # ImageLoader.cpp must be compiled with the -fno-strict-aliasing
 # when gcc is used; otherwise saving PNGs may crash in stb_image_write
 set_source_files_properties(${SRCROOT}/ImageLoader.cpp PROPERTIES COMPILE_FLAGS -fno-strict-aliasing)

@@ -76,9 +76,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 
 # compile flags
 set(ARCH "-march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft")
-set(CPP3DS_ARM_FLAGS "-g -O2 ${ARCH} -ffunction-sections -fdata-sections")
-set(CPP3DS_TEST_FLAGS "-g -O2 -coverage")
-set(CPP3DS_EMU_FLAGS "-g -O2")
+set(CPP3DS_ARM_FLAGS "-g -O3 ${ARCH} -ffunction-sections -fdata-sections")
+set(CPP3DS_TEST_FLAGS "-g -O3 -coverage")
+set(CPP3DS_EMU_FLAGS "-g -O3")
 
 add_subdirectory(src)
 
