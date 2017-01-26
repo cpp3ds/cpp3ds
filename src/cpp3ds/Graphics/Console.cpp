@@ -22,7 +22,7 @@ namespace cpp3ds {
 extern "C" {
 
 #ifndef EMULATION
-ssize_t console_write(struct _reent *r, int fd, const char *ptr, size_t len) {
+ssize_t console_write(struct _reent *r, void *fd, const char *ptr, size_t len) {
 	cpp3ds::String s;
 	int i = 0;
 	while (i < len) {

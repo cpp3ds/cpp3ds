@@ -16,7 +16,8 @@ RUN apt-get update && apt-get -y install \
 	libpng-dev \
 	libfreetype6-dev \
 	libvorbis-dev \
-	libfaad2
+	libfaad2 \
+	libfmt3-dev
 
 RUN apt-get -y clean
 

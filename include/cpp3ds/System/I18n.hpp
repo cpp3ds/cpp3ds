@@ -10,22 +10,9 @@
 #include <cstring>
 #include <memory>
 #include <cpp3ds/System/String.hpp>
+#include <fmt/format.h>
 
 #define _(key, ...) (cpp3ds::I18n::getInstance().translate(key, ##__VA_ARGS__))
-
-
-namespace {
-
-	template<typename ... Args>
-	cpp3ds::String string_format( const std::string& format, Args ... args )
-	{
-		size_t size = snprintf( nullptr, 0, format.c_str(), args ... ) + 1; // Extra space for '\0'
-		std::unique_ptr<char[]> buf( new char[ size ] );
-		snprintf( buf.get(), size, format.c_str(), args ... );
-		std::string stringUtf8( buf.get(), buf.get() + size - 1 ); // We don't want the '\0' inside
-		return cpp3ds::String::fromUtf8(stringUtf8.begin(), stringUtf8.end());
-	}
-}
 
 
 namespace cpp3ds {
@@ -65,7 +52,7 @@ public:
 			trans = std::string(key);
 		else
 			trans = it->second;
-		return string_format(trans, args ...);
+		return fmt::sprintf(trans, args ...);
 	}
 
 	template<typename ... Args>
