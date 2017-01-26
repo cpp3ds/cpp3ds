@@ -34,6 +34,9 @@
 #include <cpp3ds/Audio/SoundFileReaderOgg.hpp>
 //#include <cpp3ds/Audio/SoundFileWriterOgg.hpp>
 #endif
+#ifdef CPP3DS_ENABLE_AAC
+#include <cpp3ds/Audio/SoundFileReaderAAC.hpp>
+#endif
 #ifdef CPP3DS_ENABLE_MP3
 #include <cpp3ds/Audio/SoundFileReaderMp3.hpp>
 #endif
@@ -58,6 +61,9 @@ namespace
 #ifdef CPP3DS_ENABLE_OGG
             cpp3ds::SoundFileFactory::registerReader<cpp3ds::priv::SoundFileReaderOgg>();
 //            cpp3ds::SoundFileFactory::registerWriter<cpp3ds::priv::SoundFileWriterOgg>();
+#endif
+#ifdef CPP3DS_ENABLE_AAC
+            cpp3ds::SoundFileFactory::registerReader<cpp3ds::priv::SoundFileReaderAAC>();
 #endif
 #ifdef CPP3DS_ENABLE_MP3
 			cpp3ds::SoundFileFactory::registerReader<cpp3ds::priv::SoundFileReaderMp3>();

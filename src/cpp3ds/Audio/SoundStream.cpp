@@ -47,6 +47,7 @@ SoundStream::SoundStream()
 , m_samplesProcessed(0)
 {
 	m_thread.setPriority(0x1A);
+	m_thread.setStackSize(1024*64);
 }
 
 
@@ -54,15 +55,8 @@ SoundStream::SoundStream()
 SoundStream::~SoundStream()
 {
     // Stop the sound if it was playing
-
-    // Request the thread to terminate
-    {
-        Lock lock(m_threadMutex);
-        m_isStreaming = false;
-    }
-
-    // Wait for the thread to terminate
-    m_thread.wait();
+	if (m_threadStartState != Stopped)
+		stop();
 }
 
 
@@ -420,13 +414,11 @@ bool SoundStream::fillAndPushBuffer(unsigned int bufferNum)
         // Fill the buffer
 		buffer.assign(data.samples, data.samples + data.sampleCount);
 
-		memset(&ndspBuffer, 0, sizeof(ndspWaveBuf));
-		ndspBuffer.data_vaddr = &buffer[0];
-		ndspBuffer.nsamples = data.sampleCount / m_channelCount;
-		ndspBuffer.looping = false;
-		ndspBuffer.status = NDSP_WBUF_FREE;
+		DSP_FlushDataCache(buffer.data(), buffer.size() * sizeof(Int16));
 
-		DSP_FlushDataCache((u8*)&buffer[0], data.sampleCount);
+		memset(&ndspBuffer, 0, sizeof(ndspWaveBuf));
+		ndspBuffer.data_vaddr = buffer.data();
+		ndspBuffer.nsamples = data.sampleCount / m_channelCount;
 
         // Push it into the sound queue
 		ndspChnWaveBufAdd(m_channel, &ndspBuffer);

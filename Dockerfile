@@ -15,11 +15,12 @@ RUN apt-get update && apt-get -y install \
 	libjpeg-dev \
 	libpng-dev \
 	libfreetype6-dev \
-	libvorbis-dev
+	libvorbis-dev \
+	libfaad2
 
 RUN apt-get -y clean
 
-RUN wget -q https://github.com/cpp3ds/3ds_portlibs/releases/download/r4/portlibs-3ds-r4.tar.xz -O portlibs.tar.xz && \
+RUN wget -q https://github.com/cpp3ds/3ds_portlibs/releases/download/r5/portlibs-3ds-r5.tar.xz -O portlibs.tar.xz && \
     tar -xaf portlibs.tar.xz && \
     rm portlibs.tar.xz && \
     ln -s $(pwd)/portlibs $DEVKITPRO/portlibs && \
@@ -39,7 +40,7 @@ RUN cmake . && \
 WORKDIR /usr/src/cpp3ds
 RUN mkdir build && \
     cd build && \
-    cmake -DBUILD_EMULATOR=ON -DENABLE_OGG=ON -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=ON .. && \
+    cmake -DBUILD_EMULATOR=ON -DENABLE_OGG=ON -DENABLE_AAC=ON -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=ON .. && \
     make -j4 && \
     mv lib .. && \
     cd .. && \

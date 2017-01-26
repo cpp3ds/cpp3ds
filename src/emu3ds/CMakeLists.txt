@@ -121,6 +121,12 @@ if(ENABLE_OGG)
             ${SRCROOT}/Audio/SoundFileReaderOgg.cpp
             ${SRCROOT}/Audio/SoundFileWriterOgg.cpp)
 endif()
+if(ENABLE_AAC)
+	find_package(Faad REQUIRED)
+	include_directories(${FAAD_INCLUDE_DIRS})
+    list(APPEND SRC
+            ${SRCROOT}/Audio/SoundFileReaderAAC.cpp)
+endif()
 if(ENABLE_MP3)
 	find_package(mpg123 REQUIRED)
 	include_directories(${MPG123_INCLUDE_DIRS})
