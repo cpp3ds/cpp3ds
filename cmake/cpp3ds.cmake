@@ -218,7 +218,7 @@ endmacro()
 
 function(__add_smdh target APP_TITLE APP_DESCRIPTION APP_AUTHOR APP_ICON)
     if(BANNERTOOL AND NOT FORCE_SMDHTOOL)
-        set(__SMDH_COMMAND ${BANNERTOOL} makesmdh -s ${APP_TITLE} -l ${APP_DESCRIPTION}  -p ${APP_AUTHOR} -i ${APP_ICON} -o ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target})
+        set(__SMDH_COMMAND ${BANNERTOOL} makesmdh -s ${APP_TITLE} -l ${APP_DESCRIPTION}  -p ${APP_AUTHOR} -i ${APP_ICON} -o ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target} ${ICON_FLAGS})
     else()
         set(__SMDH_COMMAND ${SMDHTOOL} --create ${APP_TITLE} ${APP_DESCRIPTION} ${APP_AUTHOR} ${APP_ICON} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target})
     endif()
