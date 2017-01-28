@@ -28,6 +28,7 @@
 #include <cpp3ds/Audio/Music.hpp>
 #include <cpp3ds/System/Lock.hpp>
 #include <cpp3ds/System/Err.hpp>
+#include <cpp3ds/System/Service.hpp>
 #include <fstream>
 
 
@@ -53,6 +54,9 @@ Music::~Music()
 ////////////////////////////////////////////////////////////
 bool Music::openFromFile(const std::string& filename)
 {
+    if (!Service::isEnabled(Audio))
+        return false;
+
     // First stop the music if it was already running
     stop();
 
@@ -70,6 +74,9 @@ bool Music::openFromFile(const std::string& filename)
 ////////////////////////////////////////////////////////////
 bool Music::openFromMemory(const void* data, std::size_t sizeInBytes)
 {
+    if (!Service::isEnabled(Audio))
+        return false;
+
     // First stop the music if it was already running
     stop();
 
@@ -87,6 +94,9 @@ bool Music::openFromMemory(const void* data, std::size_t sizeInBytes)
 ////////////////////////////////////////////////////////////
 bool Music::openFromStream(InputStream& stream)
 {
+    if (!Service::isEnabled(Audio))
+        return false;
+
     // First stop the music if it was already running
     stop();
 

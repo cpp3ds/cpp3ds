@@ -31,6 +31,7 @@
 #include <string.h>
 #include <cpp3ds/System/Err.hpp>
 #include <cpp3ds/System/Lock.hpp>
+#include <cpp3ds/System/Service.hpp>
 
 namespace cpp3ds
 {
@@ -79,6 +80,8 @@ Sound::~Sound()
 ////////////////////////////////////////////////////////////
 void Sound::play()
 {
+	if (!Service::isEnabled(Audio))
+		return;
 	if (!m_buffer || m_buffer->getSampleCount() == 0)
 		return;
 	if (getStatus() == Playing)
