@@ -76,11 +76,17 @@ void Transform::apply3dsFix()
 
 
 ////////////////////////////////////////////////////////////
+#ifdef EMULATION
 const float* Transform::getMatrix() const
 {
-    return m_matrix.m;
+    return m_matrix;
 }
-
+#else
+const C3D_Mtx* Transform::getMatrix() const
+{
+  return &m_matrix;
+}
+#endif
 
 ////////////////////////////////////////////////////////////
 Transform Transform::getInverse() const

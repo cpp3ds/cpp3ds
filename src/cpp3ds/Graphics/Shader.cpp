@@ -235,7 +235,7 @@ void Shader::setParameter(const std::string& name, const cpp3ds::Transform& tran
         int location = getParamLocation(name);
         if (location != -1)
         {
-            C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, location, reinterpret_cast<const C3D_Mtx*>(transform.getMatrix()));
+            C3D_FVUnifMtx4x4(GPU_VERTEX_SHADER, location, (C3D_Mtx*)transform.getMatrix());
         }
     }
 }
